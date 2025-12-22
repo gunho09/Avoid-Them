@@ -1,4 +1,3 @@
-// RoomController.cs
 using UnityEngine;
 
 public class RoomController : MonoBehaviour

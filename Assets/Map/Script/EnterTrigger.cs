@@ -31,5 +31,6 @@ public class EnterTrigger : MonoBehaviour
         // 다시 들어와도 안 울리게
         gameObject.SetActive(false);
 
+       
     }
 }
