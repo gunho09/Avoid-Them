@@ -1,21 +1,22 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class EnterTrigger : MonoBehaviour
 {
-    private RoomController room;
+    private RoomControl room;
 
-    void Awake()
+    private void Awake()
     {
-        room = GetComponentInParent<RoomController>();
-
-        if (room == null)
-            Debug.LogError("RoomController ¸ø Ã£À½");
+        room = GetComponentInParent<RoomControl>();
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (!other.CompareTag("Player")) return;
-
-        room.OnRoomEntered();
+        if (collision.CompareTag("Player"))
+        {
+            if (room != null)
+            {
+                room.OnRoomEntered();
+            }
+        }
     }
 }
