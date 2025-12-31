@@ -4,20 +4,20 @@ public class RoomControl : MonoBehaviour
 {
     [Header("Room Settings")]
     public Transform[] enemySpawnPoints; // 적들이 생성될 위치
-    public GameObject[] enemyPrefabs;    // 생성할 적 프리팹 목록 (원거리, 근거리, 탱커 등)
+    public GameObject[] enemyPrefabs;    // 생성할 적 프리팹 목록 
     
-    public GameObject rewardChest;  // 클리어 보상 상자
-    public GameObject returnDoor;   // 돌아가는 문
+    public GameObject rewardChest;  
+    public GameObject returnDoor;   
     
-    private int livingEnemyCount = 0; // 살아있는 적 수
+    private int livingEnemyCount = 0; 
     private bool isCleared = false;
 
     void Start()
     {
-        // 1. 문 비활성화 (보이게 두되, 기능만 끔)
+        
         if (returnDoor != null)
         {
-            // GameObject는 켜두고 Door 스크립트의 isOpen만 false로 설정
+           
             returnDoor.SetActive(true); 
             Door doorScript = returnDoor.GetComponent<Door>();
             if (doorScript != null)
@@ -26,11 +26,60 @@ public class RoomControl : MonoBehaviour
             }
         }
 
-        // 2. 적 생성 (랜덤)
+        
         SpawnEnemies();
     }
 
-    // ... (SpawnEnemies and OnEnemyKilled remain same)
+    void SpawnEnemies()
+    {
+       
+        if (enemyPrefabs == null || enemyPrefabs.Length == 0 || enemySpawnPoints == null)
+        {
+            if (livingEnemyCount == 0) RoomClear();
+            return;
+        }
+
+        foreach (Transform spawnPoint in enemySpawnPoints)
+        {
+            if (spawnPoint != null)
+            {
+               
+                int randomIndex = Random.Range(0, enemyPrefabs.Length);
+                GameObject selectedPrefab = enemyPrefabs[randomIndex];
+
+                if (selectedPrefab != null)
+                {
+                    
+                    GameObject enemy = Instantiate(selectedPrefab, spawnPoint.position, Quaternion.identity);
+                    
+                    // 생성한 적을 방의 자식으로 설정
+                    enemy.transform.SetParent(this.transform); 
+                    
+                    // 몹 수 증가
+                    livingEnemyCount++;
+                }
+            }
+        }
+
+        
+        if (livingEnemyCount == 0)
+        {
+            RoomClear();
+        }
+    }
+
+    
+    public void OnEnemyKilled()
+    {
+        if (isCleared) return;
+
+        livingEnemyCount--;
+
+        if (livingEnemyCount <= 0)
+        {
+            RoomClear();
+        }
+    }
 
     void RoomClear()
     {
@@ -42,7 +91,7 @@ public class RoomControl : MonoBehaviour
 
         if (returnDoor != null)
         {
-            // 문 기능 활성화
+            
             Door doorScript = returnDoor.GetComponent<Door>();
             if (doorScript != null)
             {
@@ -50,7 +99,7 @@ public class RoomControl : MonoBehaviour
             }
         }
 
-        // 매니저에 알림
+        
         if (MapManager.Instance != null)
             MapManager.Instance.OnRoomCleared();
     }
@@ -58,6 +107,6 @@ public class RoomControl : MonoBehaviour
     public void OnRoomEntered()
     {
         Debug.Log("Player entered the room");
-        // 필요한 경우 여기에 진입 시 로직 추가 (예: 문 닫기, 적 생성 시작 등)
+        // 필요한 경우 여기에 진입 시 로직 추가
     }
 }

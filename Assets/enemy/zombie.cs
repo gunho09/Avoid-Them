@@ -87,6 +87,14 @@ public class zombie : MonoBehaviour
     void Die()
     {
         currentState = State.Dead;
+        
+       
+        RoomControl room = GetComponentInParent<RoomControl>();
+        if (room != null)
+        {
+            room.OnEnemyKilled();
+        }
+
         Destroy(gameObject, 2f); 
     }
 }
