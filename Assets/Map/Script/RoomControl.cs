@@ -1,93 +1,97 @@
 using UnityEngine;
 
-public class RoomController : MonoBehaviour
+public class RoomControl : MonoBehaviour
 {
-    [Header("Room Type")]
-    public bool isBossRoom = false;
-
-    [Header("Spawn Points")]
-    public Transform[] enemySpawnPoints;   // ÀÏ¹İ ¸÷ ½ºÆù À§Ä¡ (4°³)
-    public Transform bossSpawnPoint;        // º¸½º ½ºÆù À§Ä¡ (º¸½º·ë Àü¿ë)
-
-    [Header("Door")]
-    public Door[] doors;
-
-    [Header("Enemy")]
-    [SerializeField] private int enemyCount = 4; // °íÁ¤ ¸÷ ¼ö
-
-    [Header("Chest")]
-    public GameObject chestPrefab;
-    public Transform chestSpawnPoint;       // ¹æ Áß¾Ó
-
-    private bool isEntered = false;
+    [Header("Room Settings")]
+    public Transform[] enemySpawnPoints; // ì ë“¤ì´ ìƒì„±ë  ìœ„ì¹˜
+    public GameObject[] enemyPrefabs;    // ìƒì„±í•  ì  í”„ë¦¬íŒ¹ ëª©ë¡ (ì›ê±°ë¦¬, ê·¼ê±°ë¦¬, íƒ±ì»¤ ë“±)
+    
+    public GameObject rewardChest;  // í´ë¦¬ì–´ ë³´ìƒ ìƒì
+    public GameObject returnDoor;   // ëŒì•„ê°€ëŠ” ë¬¸
+    
+    private int livingEnemyCount = 0; // ì‚´ì•„ìˆëŠ” ì  ìˆ˜
     private bool isCleared = false;
 
-    // =========================
-    // ¹æ ÁøÀÔ
-    // =========================
-    public void OnRoomEntered()
+    void Start()
     {
-        if (isEntered) return;
-        isEntered = true;
+        // 1. ë¬¸ ë‹«ê¸°
+        if (returnDoor != null)
+            returnDoor.SetActive(false);
 
-        Debug.Log(isBossRoom ? "º¸½º·ë ÁøÀÔ" : "ÀÏ¹İ ¹æ ÁøÀÔ");
-
-        // ¹® ´İ±â
-        foreach (var door in doors)
-            door.Close();
-
-        // ¿©±â¼­ ¸÷ °³¹ßÀÚ°¡ ½ºÆù ½ÃÀÛÇÏ¸é µÊ
-        if (isBossRoom)
-            Debug.Log("º¸½º ½ºÆù ½ÃÀÛ À§Ä¡: " + bossSpawnPoint.position);
-        else
-            Debug.Log("ÀÏ¹İ ¸÷ ½ºÆù ½ÃÀÛ");
+        // 2. ì  ìƒì„± (ëœë¤)
+        SpawnEnemies();
     }
 
-    // =========================
-    // ¸÷ »ç¸Á º¸°í (¸÷ °³¹ßÀÚ°¡ È£Ãâ)
-    // =========================
+    void SpawnEnemies()
+    {
+        // ìŠ¤í° í¬ì¸íŠ¸ë‚˜ í”„ë¦¬íŒ¹ ëª©ë¡ì´ ë¹„ì–´ìˆìœ¼ë©´ ë°”ë¡œ í´ë¦¬ì–´ ì²˜ë¦¬
+        if (enemyPrefabs == null || enemyPrefabs.Length == 0 || enemySpawnPoints == null)
+        {
+            if (livingEnemyCount == 0) RoomClear();
+            return;
+        }
+
+        foreach (Transform spawnPoint in enemySpawnPoints)
+        {
+            if (spawnPoint != null)
+            {
+                // ëœë¤ìœ¼ë¡œ ì  ì¢…ë¥˜ ì„ íƒ (0 ~ ë°°ì—´í¬ê¸°-1)
+                int randomIndex = Random.Range(0, enemyPrefabs.Length);
+                GameObject selectedPrefab = enemyPrefabs[randomIndex];
+
+                if (selectedPrefab != null)
+                {
+                    // ì  ìƒì„±
+                    GameObject enemy = Instantiate(selectedPrefab, spawnPoint.position, Quaternion.identity);
+                    
+                    // ìƒì„±í•œ ì ì„ ë°©ì˜ ìì‹ìœ¼ë¡œ ì„¤ì •
+                    enemy.transform.SetParent(this.transform); 
+                    
+                    // ëª¹ ìˆ˜ ì¦ê°€
+                    livingEnemyCount++;
+                }
+            }
+        }
+
+        // ë§Œì•½ ìƒì„±ëœ ì ì´ í•˜ë‚˜ë„ ì—†ë‹¤ë©´ ë°”ë¡œ í´ë¦¬ì–´
+        if (livingEnemyCount == 0)
+        {
+            RoomClear();
+        }
+    }
+
+    // ëª¹ì´ ì£½ì„ ë•Œ í˜¸ì¶œë˜ëŠ” í•¨ìˆ˜
     public void OnEnemyKilled()
     {
         if (isCleared) return;
 
-        enemyCount--;
-        Debug.Log("³²Àº ¸÷ ¼ö: " + enemyCount);
+        livingEnemyCount--;
 
-        if (enemyCount <= 0)
-            OnRoomCleared();
-    }
-
-    // =========================
-    // ¹æ Å¬¸®¾î
-    // =========================
-    void OnRoomCleared()
-    {
-        if (isCleared) return;
-        isCleared = true;
-
-        Debug.Log("¹æ Å¬¸®¾î!");
-
-        // ÀÏ¹İ¹æ¸¸ »óÀÚ »ı¼º
-        if (!isBossRoom)
-            SpawnChest();
-
-        // ¹® ¿­±â
-        foreach (var door in doors)
-            door.Open();
-    }
-
-    // =========================
-    // »óÀÚ »ı¼º
-    // =========================
-    void SpawnChest()
-    {
-        if (chestPrefab == null || chestSpawnPoint == null)
+        if (livingEnemyCount <= 0)
         {
-            Debug.LogWarning("ChestPrefab ¶Ç´Â ChestSpawnPoint ¾øÀ½");
-            return;
+            RoomClear();
         }
+    }
 
-        Instantiate(chestPrefab, chestSpawnPoint.position, Quaternion.identity);
-        Debug.Log("»óÀÚ »ı¼º");
+    void RoomClear()
+    {
+        isCleared = true;
+        Debug.Log("ë°© í´ë¦¬ì–´! ë³´ìƒ ìƒì„± & ë¬¸ ì—´ë¦¼");
+
+        if (rewardChest != null)
+            rewardChest.SetActive(true);
+
+        if (returnDoor != null)
+            returnDoor.SetActive(true);
+
+        // ë§¤ë‹ˆì €ì— ì•Œë¦¼
+        if (MapManager.Instance != null)
+            MapManager.Instance.OnRoomCleared();
+    }
+
+    public void OnRoomEntered()
+    {
+        Debug.Log("Player entered the room");
+        // í•„ìš”í•œ ê²½ìš° ì—¬ê¸°ì— ì§„ì… ì‹œ ë¡œì§ ì¶”ê°€ (ì˜ˆ: ë¬¸ ë‹«ê¸°, ì  ìƒì„± ì‹œì‘ ë“±)
     }
 }
