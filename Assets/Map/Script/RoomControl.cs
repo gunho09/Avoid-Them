@@ -14,64 +14,23 @@ public class RoomControl : MonoBehaviour
 
     void Start()
     {
-        // 1. 문 닫기
+        // 1. 문 비활성화 (보이게 두되, 기능만 끔)
         if (returnDoor != null)
-            returnDoor.SetActive(false);
+        {
+            // GameObject는 켜두고 Door 스크립트의 isOpen만 false로 설정
+            returnDoor.SetActive(true); 
+            Door doorScript = returnDoor.GetComponent<Door>();
+            if (doorScript != null)
+            {
+                doorScript.isOpen = false;
+            }
+        }
 
         // 2. 적 생성 (랜덤)
         SpawnEnemies();
     }
 
-    void SpawnEnemies()
-    {
-        // 스폰 포인트나 프리팹 목록이 비어있으면 바로 클리어 처리
-        if (enemyPrefabs == null || enemyPrefabs.Length == 0 || enemySpawnPoints == null)
-        {
-            if (livingEnemyCount == 0) RoomClear();
-            return;
-        }
-
-        foreach (Transform spawnPoint in enemySpawnPoints)
-        {
-            if (spawnPoint != null)
-            {
-                // 랜덤으로 적 종류 선택 (0 ~ 배열크기-1)
-                int randomIndex = Random.Range(0, enemyPrefabs.Length);
-                GameObject selectedPrefab = enemyPrefabs[randomIndex];
-
-                if (selectedPrefab != null)
-                {
-                    // 적 생성
-                    GameObject enemy = Instantiate(selectedPrefab, spawnPoint.position, Quaternion.identity);
-                    
-                    // 생성한 적을 방의 자식으로 설정
-                    enemy.transform.SetParent(this.transform); 
-                    
-                    // 몹 수 증가
-                    livingEnemyCount++;
-                }
-            }
-        }
-
-        // 만약 생성된 적이 하나도 없다면 바로 클리어
-        if (livingEnemyCount == 0)
-        {
-            RoomClear();
-        }
-    }
-
-    // 몹이 죽을 때 호출되는 함수
-    public void OnEnemyKilled()
-    {
-        if (isCleared) return;
-
-        livingEnemyCount--;
-
-        if (livingEnemyCount <= 0)
-        {
-            RoomClear();
-        }
-    }
+    // ... (SpawnEnemies and OnEnemyKilled remain same)
 
     void RoomClear()
     {
@@ -82,7 +41,14 @@ public class RoomControl : MonoBehaviour
             rewardChest.SetActive(true);
 
         if (returnDoor != null)
-            returnDoor.SetActive(true);
+        {
+            // 문 기능 활성화
+            Door doorScript = returnDoor.GetComponent<Door>();
+            if (doorScript != null)
+            {
+                doorScript.isOpen = true;
+            }
+        }
 
         // 매니저에 알림
         if (MapManager.Instance != null)

@@ -25,6 +25,10 @@ public class Door : MonoBehaviour
             {
                 MapManager.Instance.ReturnToHallway();
             }
+            else if (type == DoorType.ToNextFloor)
+            {
+                MapManager.Instance.NextFloor();
+            }
         }
     }
 }
