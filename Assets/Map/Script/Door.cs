@@ -54,8 +54,7 @@ public class Door : MonoBehaviour
             }
             else 
             {
-                // [수정] 열린 그림이 없으면 그냥 닫힌 그림을 유지합니다.
-                // (투명해지면 뒤에 벽이 보여서 이상하니까요)
+               
                 if (closedSprite != null) spriteRenderer.sprite = closedSprite;
             }
         }
@@ -65,10 +64,13 @@ public class Door : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (other.CompareTag("Player") && isOpen)
+        Debug.Log($"Door Triggered by: {collision.gameObject.name}, Tag: {collision.tag}");
+
+        if (collision.CompareTag("Player"))
         {
+            Debug.Log("Player tag detected! Attempting to enter room...");
             if (type == DoorType.ToRoom)
             {
                 // 문 위치 + 오프셋을 계산해서 전달 (바로 다시 들어가지 않게 함)
@@ -77,8 +79,6 @@ public class Door : MonoBehaviour
             }
             else if (type == DoorType.ToHallway)
             {
-                // 방에서 나갈 때도 문(ToHallway)이 있다면 사용하겠지만, 
-                // 보통은 MapManager가 알아서 복귀 위치로 보내주므로 여기선 호출만 함
                 MapManager.Instance.ReturnToHallway();
             }
             else if (type == DoorType.ToNextFloor)

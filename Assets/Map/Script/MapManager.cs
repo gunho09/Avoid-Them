@@ -67,9 +67,19 @@ public class MapManager : MonoBehaviour
             Destroy(currentRoomInstance);
 
         currentRoomInstance = Instantiate(prefabToSpawn, roomSpawnPoint.position, Quaternion.identity);
+        Debug.Log($"방 생성 완료! 위치: {roomSpawnPoint.position}");
 
         // 2. 플레이어 순간이동 (방 생성 위치로)
-        player.transform.position = roomSpawnPoint.position; 
+        if (player != null)
+        {
+            Debug.Log($"플레이어 이동 전 위치: {player.transform.position}");
+            player.transform.position = roomSpawnPoint.position;
+            Debug.Log($"플레이어 이동 후 위치: {player.transform.position}");
+        }
+        else
+        {
+            Debug.LogError("Player가 null입니다!");
+        }
     }
 
     // 방 클리어 시 호출

@@ -16,19 +16,27 @@ public class CameraFollow : MonoBehaviour
             if (playerObj != null) 
             {
                 target = playerObj.transform;
-                // 현재 카메라 위치와 플레이어 위치 차이를 오프셋으로 초기화 (원하면 직접 설정 가능)
-                // offset = transform.position - target.position; 
-                // 보통은 그냥 0,0,-10 정도로 둡니다.
+                Debug.Log("CameraFollow: 플레이어를 찾았습니다!");
+            }
+            else
+            {
+                Debug.LogWarning("CameraFollow: Player 태그를 가진 오브젝트를 찾을 수 없습니다!");
             }
             return;
         }
 
         // 목표 위치 계산 (플레이어 위치 + 오프셋)
-        // 카메라의 Z값은 유지 (-10)
-        Vector3 desiredPosition = new Vector3(target.position.x + offset.x, target.position.y + offset.y, transform.position.z);
+        // 카메라의 Z값은 항상 -10으로 유지 (2D에서 필수!)
+        Vector3 desiredPosition = new Vector3(
+            target.position.x + offset.x, 
+            target.position.y + offset.y, 
+            -10f  // 강제로 -10 고정
+        );
         
         // 부드럽게 이동 (Lerp)
         Vector3 smoothedPosition = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed * Time.deltaTime);
         transform.position = smoothedPosition;
+        
+        Debug.Log($"Camera Position: {transform.position}, Player Position: {target.position}");
     }
 }
