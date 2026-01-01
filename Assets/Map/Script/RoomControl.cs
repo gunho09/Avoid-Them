@@ -22,7 +22,10 @@ public class RoomControl : MonoBehaviour
             Door doorScript = returnDoor.GetComponent<Door>();
             if (doorScript != null)
             {
-                doorScript.isOpen = false;
+            if (doorScript != null)
+            {
+                doorScript.SetStatus(false);
+            }
             }
         }
 
@@ -95,7 +98,10 @@ public class RoomControl : MonoBehaviour
             Door doorScript = returnDoor.GetComponent<Door>();
             if (doorScript != null)
             {
-                doorScript.isOpen = true;
+            if (doorScript != null)
+            {
+                doorScript.SetStatus(true);
+            }
             }
         }
 
