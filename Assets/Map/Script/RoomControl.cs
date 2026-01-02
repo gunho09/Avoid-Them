@@ -4,6 +4,7 @@ public class RoomControl : MonoBehaviour
 {
     [Header("Room Settings")]
     public Transform[] enemySpawnPoints; // 적들이 생성될 위치
+    public Transform playerSpawnPoint;   // 플레이어가 방에 입장할 때 생성될 위치 (없으면 문 앞)
     public GameObject[] enemyPrefabs;    // 생성할 적 프리팹 목록 
     
     public GameObject rewardChest;  
