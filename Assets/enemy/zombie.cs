@@ -2,14 +2,15 @@ using UnityEngine;
 
 public class zombie : MonoBehaviour
 {
-    [SerializeField]private int health;
-    [SerializeField]private int attackDamage;
-    [SerializeField]private float speed;
-    [SerializeField]private float atackSpeed;
-    [SerializeField]private float dodgeChance;
-    [SerializeField]private int expDrop;
-    [SerializeField]private float range;
-    [SerializeField]private float attackRange;
+    public PlayerControler playerControler;
+    public int health;
+    public int attackDamage;
+    public float speed;
+    public float atackSpeed;
+    public float dodgeChance;
+    public int expDrop;
+    public float range;
+    public float attackRange;
 
     private float currentHealth;
     private float lastAttackTime;
@@ -66,7 +67,7 @@ public class zombie : MonoBehaviour
     {
         if (Time.time - lastAttackTime >= atackSpeed)
         {
-            //플레이어 때찌
+            // playerControler.TakeDamage(attackDamage);
             lastAttackTime = Time.time;
         }
     }
