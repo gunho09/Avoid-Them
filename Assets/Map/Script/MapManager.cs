@@ -12,152 +12,103 @@ public class MapManager : MonoBehaviour
 
     [Header("Single Scene Settings")]
     public GameObject player;              // 플레이어 오브젝트 (Inspector에서 할당)
-    public Transform roomSpawnPoint;       // 방이 생성될 위치 (복도와 멀리 떨어진 좌표)
-    public Vector2 roomCameraOffset;       // 방 카메라 위치 보정값 (중앙 맞추기용)
-    public GameObject[] roomPrefabs;       // 방 프리팹 목록 (랜덤 선택)
+    public GameObject hallwayRoot;         // [NEW] 복도 맵 전체를 담고 있는 부모 오브젝트 (교체용)
+    // public Transform roomSpawnPoint;    // (더 이상 사용 안 함: 제자리 교체)
+    
+    [Tooltip("방이 화면 정중앙에 안 올 때, 이 값을 조절해서 방 위치를 맞추세요.")]
+    public Vector3 roomPositionCorrection; // 방 생성 위치 보정값 (카메라가 아닌 방을 이동시킴)
+    
+    public GameObject[] roomPrefabs;       // 방 프리팹 목록
     public GameObject bossRoomPrefab;      // 보스방 프리팹
-    public CameraFollow mainCamera;        // 메인 카메라 (Inspector 할당 or 자동 찾기)
+    public CameraFollow mainCamera;        // 메인 카메라
 
-    private GameObject currentRoomInstance; // 현재 생성된 방 인스턴스
-    private Vector3 lastDoorPosition;       // 들어왔던 문 위치 기억
+    private GameObject currentRoomInstance; 
+    private Vector3 lastDoorPosition;       
 
-    private Vector3 initialCameraPosition; // 게임 시작 시 카메라 위치 (복도)
+    // private Vector3 initialCameraPosition; // (카메라 이동 없음)
 
     private void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
 
-        // 카메라 자동 할당 시도
+        // 카메라 자동 할당
         if (mainCamera == null)
         {
             mainCamera = FindFirstObjectByType<CameraFollow>();
             if (mainCamera == null)
             {
-                // 백업: 태그로 찾아서 컴포넌트 가져오기
                 GameObject camObj = GameObject.FindGameObjectWithTag("MainCamera");
-                if (camObj != null)
-                    mainCamera = camObj.GetComponent<CameraFollow>();
+                if (camObj != null) mainCamera = camObj.GetComponent<CameraFollow>();
             }
-        }
-
-        // 시작 시점의 카메라 위치 저장 (복도 위치로 가정)
-        if (mainCamera != null)
-        {
-            initialCameraPosition = mainCamera.transform.position;
         }
     }
 
-    // 복도 -> 방 (또는 보스방) 이동
-    // doorPos: 플레이어가 들어간 문의 위치 (나올 때 돌아오기 위함)
     public void EnterRoom(Vector3 doorPos)
     {
-        // 들어간 문 위치 저장
         lastDoorPosition = doorPos;
 
-        if (clearedRooms < totalRoomsPerFloor)
+        // [Fix] 플레이어가 HallwayRoot의 자식으로 되어있다면, 같이 비활성화되므로 부모 해제
+        if (player != null && hallwayRoot != null && player.transform.IsChildOf(hallwayRoot.transform))
         {
-            Debug.Log($"일반 방 입장 ({clearedRooms + 1}번째 방)");
-            SpawnRoom(false);
+            player.transform.SetParent(null);
+        }
+
+        // 1. 복도 숨기기
+        if (hallwayRoot != null)
+        {
+            hallwayRoot.SetActive(false);
         }
         else
         {
-            Debug.Log("보스 방 입장!");
-            SpawnRoom(true);
+            Debug.LogError("MapManager: Hallway Root가 할당되지 않았습니다!");
         }
+
+        if (clearedRooms < totalRoomsPerFloor) SpawnRoom(false);
+        else SpawnRoom(true);
     }
 
-    // 방 생성 & 플레이어 이동
     private void SpawnRoom(bool isBoss)
     {
-        // 1. 방 프리팹 생성
+        // 2. 제자리(복도 위치)에 방 생성
         GameObject prefabToSpawn = isBoss ? bossRoomPrefab : roomPrefabs[Random.Range(0, roomPrefabs.Length)];
         
-        if (prefabToSpawn == null)
-        {
-            Debug.LogError("방 프리팹이 설정되지 않았습니다!");
-            return;
-        }
+        // 생성 위치는 복도 위치(또는 0,0,0) + 보정값
+        Vector3 spawnPos = (hallwayRoot != null) ? hallwayRoot.transform.position : Vector3.zero;
+        spawnPos += roomPositionCorrection; // 사용자가 설정한 보정값 적용
 
-        // 기존 방이 있다면 제거
-        if (currentRoomInstance != null)
-            Destroy(currentRoomInstance);
+        if (currentRoomInstance != null) Destroy(currentRoomInstance);
+        
+        currentRoomInstance = Instantiate(prefabToSpawn, spawnPos, Quaternion.identity);
+        Debug.Log($"방 생성 (제자리 교체) 완료");
 
-        currentRoomInstance = Instantiate(prefabToSpawn, roomSpawnPoint.position, Quaternion.identity);
-        Debug.Log($"방 생성 완료! 위치: {roomSpawnPoint.position}");
-
-        // 2. 플레이어 순간이동 (문의 위치로)
+        // 3. 플레이어 위치 설정 (방 내부 스폰 포인트)
         if (player != null)
         {
-            Vector3 spawnPos = roomSpawnPoint.position; // 기본값 (실패 시)
+            Vector3 playerTargetPos = spawnPos; // 기본값
 
-            // 방 설정(RoomControl) 확인
             RoomControl roomCtrl = currentRoomInstance.GetComponent<RoomControl>();
-            if (roomCtrl == null)
-            {
-                // 루트에 없으면 자식에서 찾기 시도
-                roomCtrl = currentRoomInstance.GetComponentInChildren<RoomControl>();
-            }
+            if (roomCtrl == null) roomCtrl = currentRoomInstance.GetComponentInChildren<RoomControl>();
 
-            if (roomCtrl != null)
+            if (roomCtrl != null && roomCtrl.playerSpawnPoint != null)
             {
-                Debug.Log("MapManager: RoomControl 찾음.");
-                
-                // 1순위: 지정된 플레이어 스폰 포인트가 있는지 확인
-                if (roomCtrl.playerSpawnPoint != null)
-                {
-                    spawnPos = roomCtrl.playerSpawnPoint.position;
-                    Debug.Log($"MapManager: Player Spawn Point 발견! 위치: {spawnPos}, 이름: {roomCtrl.playerSpawnPoint.name}");
-                }
-                // 2순위: 스폰 포인트가 없으면 문(Door) 위치 확인
-                else if (roomCtrl.returnDoor != null)
-                {
-                    Debug.Log("MapManager: Player Spawn Point 없음. Return Door 위치 사용 시도.");
-                    Door doorScript = roomCtrl.returnDoor.GetComponent<Door>();
-                    if (doorScript != null)
-                    {
-                        spawnPos = roomCtrl.returnDoor.transform.position + doorScript.returnOffset;
-                    }
-                    else
-                    {
-                        spawnPos = roomCtrl.returnDoor.transform.position + new Vector3(0, -1.5f, 0);
-                    }
-                }
-                else
-                {
-                    Debug.LogWarning("MapManager: RoomControl에 SpawnPoint도 없고 ReturnDoor도 연결되지 않았습니다!");
-                }
+                playerTargetPos = roomCtrl.playerSpawnPoint.position;
             }
             else
             {
-                Debug.LogError("MapManager: 생성된 방에 RoomControl 컴포넌트가 없습니다!");
+                // 스폰 포인트 없으면 그냥 중앙 근처 혹은 기존 로직
+                playerTargetPos = spawnPos + new Vector3(0, -2f, 0); 
             }
 
-            Debug.Log($"플레이어 최종 이동 위치: {spawnPos}");
-            player.transform.position = spawnPos;
+            // [Z-Order Fix] 플레이어가 바닥 뒤에 가려지지 않도록 Z값을 앞으로 당김 (-1f)
+            player.transform.position = new Vector3(playerTargetPos.x, playerTargetPos.y, -1f);
+            
+            // [Safety] 플레이어가 꺼져있을 수 있으므로 켜줌
+            player.SetActive(true);
+        }
 
-            // 3. 카메라 이동 (방 위치로 - 방 생성 포인트 기준 + 보정)
-            if (mainCamera != null)
-            {
-                // 방 생성 위치 + 보정값(Offset)으로 카메라 이동
-                Vector3 camPos = roomSpawnPoint.position + (Vector3)roomCameraOffset;
-                mainCamera.MoveCamera(camPos);
-            }
-            else
-            {
-                Debug.LogWarning("MapManager: MainCamera가 연결되지 않았습니다!");
-            }
-        }
-        else
-        {
-            Debug.LogError("Player가 null입니다!");
-        }
+        // 4. 카메라 이동 안 함 (복도 뷰 유지)
+        // 만약 방 크기가 복도랑 완전히 같다면 카메라는 가만히 있어도 완벽하게 보입니다.
     }
 
     // 방 클리어 시 호출
@@ -176,14 +127,20 @@ public class MapManager : MonoBehaviour
             Destroy(currentRoomInstance);
         }
 
-        // 2. 플레이어를 아까 들어왔던 문 위치로 복귀
-        player.transform.position = lastDoorPosition; 
-
-        // 3. 카메라 복귀 (저장해둔 복도 위치로)
-        if (mainCamera != null)
+        // 2. 복도 다시 보이기
+        if (hallwayRoot != null)
         {
-            mainCamera.MoveCamera(initialCameraPosition);
+            hallwayRoot.SetActive(true);
         }
+
+        // 3. 플레이어를 아까 들어왔던 문 위치로 복귀
+        if (player != null)
+        {
+             // [Z-Order Fix] 복도에서도 플레이어가 잘 보이게 Z값 -1 고정
+            player.transform.position = new Vector3(lastDoorPosition.x, lastDoorPosition.y, -1f);
+        }
+
+        // 4. 카메라 이동 없음 (복도 위치 그대로)
     }
 
     // 보스 처치 후 다음 층 이동
