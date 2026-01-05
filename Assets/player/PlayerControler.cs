@@ -26,9 +26,10 @@ public class PlayerControler : MonoBehaviour, IDamageable
     private bool Guarding = false;
 
     // 대쉬
-    public float dashCooldown = 1f;    // 쿨타임 설정값
-    public float dashSpeed = 20f;
-    public float dashDuration = 0.2f;  // 대쉬 지속 시간 설정값
+    public float dashCooldown = 1f;    
+    public float dashSpeed = 30f;
+    public float dashDuration = 1f;
+
 
     private bool isDashing = false;
     private float dashTimer = 0f;
@@ -64,14 +65,12 @@ public class PlayerControler : MonoBehaviour, IDamageable
         // 대쉬 중일 때
         if (isDashing)
         {
-            // 이동 로직은 FixedUpdate로 위임
             dashTimer -= Time.deltaTime;
 
             if (dashTimer <= 0)
             {
                 isDashing = false;
             }
-            // 대쉬 중에는 다른 입력 처리 막음
             return;
         }
 
@@ -145,10 +144,10 @@ public class PlayerControler : MonoBehaviour, IDamageable
         if (direction == Vector3.zero) return;
 
         isDashing = true;
-        dashTimer = dashDuration;      // 지속 시간 설정
-        cooldownTimer = dashCooldown;  // 쿨타임 시작
-        dashDirection = direction.normalized;  // 오타 수정!
-
+        dashTimer = dashDuration; 
+        cooldownTimer = dashCooldown;
+        dashDirection = direction.normalized;
+                                                                                                                                           
         UnityEngine.Debug.Log("대쉬!");
     }
 
@@ -160,6 +159,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
     public void TakeDamage(float damage)
     {
         PlayerCurrentHp -= damage / Guard();
+        UnityEngine.Debug.Log("플레이어 공격 받음!");
 
         if (PlayerCurrentHp <= 0)
         {
@@ -170,6 +170,14 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     void Die()
     {
-        UnityEngine.Debug.Log("플레이어 사망!");
+
+        //deathUI.SetActive(true);
+
+        //Time.timeScale = 0f;
+
+        //gameObject.SetActive(false);
+
+        UnityEngine.Debug.Log("플레이어 죽었다~!");
+
     }
 }

@@ -11,14 +11,4 @@ public class PlayerAttack : MonoBehaviour
         PlayerControler = GetComponent<PlayerControler>();
 
     }
-
-    void Update()
-    {
-        if (Input.GetMouseButtonDown(0))
-        {
-            PlayerControler.Attack();
-        }
-    }
-
-
 }
