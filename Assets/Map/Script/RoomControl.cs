@@ -3,10 +3,11 @@ using UnityEngine;
 public class RoomControl : MonoBehaviour
 {
     [Header("Room Settings")]
-    public Transform[] enemySpawnPoints; // 적들이 생성될 위치
     public Transform playerSpawnPoint;   // 플레이어가 방에 입장할 때 생성될 위치 (없으면 문 앞)
     public Transform cameraPoint;        // [NEW] 이 방에 들어왔을 때 카메라가 비출 중심 위치 (없으면 방 생성 위치 기준)
-    public GameObject[] enemyPrefabs;    // 생성할 적 프리팹 목록 
+    
+    // public Transform[] enemySpawnPoints; // 더 이상 사용 안 함 (수동 배치)
+    // public GameObject[] enemyPrefabs;    // 더 이상 사용 안 함
     
     public GameObject rewardChest;  
     public GameObject returnDoor;   
@@ -16,10 +17,8 @@ public class RoomControl : MonoBehaviour
 
     void Start()
     {
-        
         if (returnDoor != null)
         {
-           
             returnDoor.SetActive(true); 
             Door doorScript = returnDoor.GetComponent<Door>();
             if (doorScript != null)
@@ -28,47 +27,20 @@ public class RoomControl : MonoBehaviour
             }
         }
 
-        
-        SpawnEnemies();
-    }
+        // 배치된 적 세기
+        // (zombie 스크립트가 붙은 모든 자식 오브젝트를 찾습니다)
+        var enemies = GetComponentsInChildren<zombie>();
+        livingEnemyCount = enemies.Length;
 
-    void SpawnEnemies()
-    {
-       
-        if (enemyPrefabs == null || enemyPrefabs.Length == 0 || enemySpawnPoints == null)
-        {
-            if (livingEnemyCount == 0) RoomClear();
-            return;
-        }
+        Debug.Log($"방 진입: 배치된 적 {livingEnemyCount}마리 감지됨");
 
-        foreach (Transform spawnPoint in enemySpawnPoints)
-        {
-            if (spawnPoint != null)
-            {
-               
-                int randomIndex = Random.Range(0, enemyPrefabs.Length);
-                GameObject selectedPrefab = enemyPrefabs[randomIndex];
-
-                if (selectedPrefab != null)
-                {
-                    
-                    GameObject enemy = Instantiate(selectedPrefab, spawnPoint.position, Quaternion.identity);
-                    
-                    // 생성한 적을 방의 자식으로 설정
-                    enemy.transform.SetParent(this.transform); 
-                    
-                    // 몹 수 증가
-                    livingEnemyCount++;
-                }
-            }
-        }
-
-        
         if (livingEnemyCount == 0)
         {
             RoomClear();
         }
     }
+
+    // void SpawnEnemies() 제거됨
 
     
     public void OnEnemyKilled()

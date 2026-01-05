@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using UnityEngine;
 
-public class PlayerControler : MonoBehaviour
+public class PlayerControler : MonoBehaviour, IDamageable
 {
-    // ±âº» ½ºÅÈ
+    // ê¸°ë³¸ ìŠ¤íƒ¯
     public float playerSpeed = 5f;
     public float playerLevel = 1f;
     public float plusHp = 1f;
@@ -17,59 +17,70 @@ public class PlayerControler : MonoBehaviour
     public float attackDamage = 10f;
     public LayerMask enemy;
 
-    // °è»êµÈ ½ºÅÈ
+    // ê³„ì‚°ëœ ìŠ¤íƒ¯
     public float PlayerMaxHp;
     public float PlayerDamage;
     public float PlayerCurrentHp;
 
-    // °¡µå
+    // ê°€ë“œ
     private bool Guarding = false;
 
-    // ´ë½¬
-    public float dashCooldown = 1f;    // ÄğÅ¸ÀÓ ¼³Á¤°ª
+    // ëŒ€ì‰¬
+    public float dashCooldown = 1f;    // ì¿¨íƒ€ì„ ì„¤ì •ê°’
     public float dashSpeed = 20f;
-    public float dashDuration = 0.2f;  // ´ë½¬ Áö¼Ó ½Ã°£ ¼³Á¤°ª
+    public float dashDuration = 0.2f;  // ëŒ€ì‰¬ ì§€ì† ì‹œê°„ ì„¤ì •ê°’
 
     private bool isDashing = false;
     private float dashTimer = 0f;
     private float cooldownTimer = 0f;
     private Vector3 dashDirection;
 
+    // ë¬¼ë¦¬ ì´ë™ì„ ìœ„í•œ ì»´í¬ë„ŒíŠ¸ ì¶”ê°€
+    private Rigidbody2D rb;
+    private Vector2 inputMovement;
+
     void Start()
     {
         PlayerMaxHp = plusHp + numHp + playerStartHp;
         PlayerDamage = plusPW + numPW + playerStartPw;
         PlayerCurrentHp = PlayerMaxHp;
+
+        rb = GetComponent<Rigidbody2D>();
+        
+        if (rb != null)
+        {
+            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+        }
     }
 
     void Update()
     {
-        // ÄğÅ¸ÀÓ °¨¼Ò
+        // ì¿¨íƒ€ì„ ê°ì†Œ
         if (cooldownTimer > 0)
         {
             cooldownTimer -= Time.deltaTime;
         }
 
-        // ´ë½¬ ÁßÀÏ ¶§
+        // ëŒ€ì‰¬ ì¤‘ì¼ ë•Œ
         if (isDashing)
         {
-            transform.Translate(dashDirection * dashSpeed * Time.deltaTime);
+            // ì´ë™ ë¡œì§ì€ FixedUpdateë¡œ ìœ„ì„
             dashTimer -= Time.deltaTime;
 
             if (dashTimer <= 0)
             {
                 isDashing = false;
             }
+            // ëŒ€ì‰¬ ì¤‘ì—ëŠ” ë‹¤ë¥¸ ì…ë ¥ ì²˜ë¦¬ ë§‰ìŒ
             return;
         }
 
-        // ÀÏ¹İ ÀÌµ¿
+        // ì¼ë°˜ ì´ë™ ì…ë ¥ ì½ê¸°
         float moveX = Input.GetAxis("Horizontal");
         float moveY = Input.GetAxis("Vertical");
-        Vector3 movement = new Vector3(moveX, moveY, 0f);
-        transform.Translate(movement * playerSpeed * Time.deltaTime);
+        inputMovement = new Vector2(moveX, moveY);
 
-        // ÀÔ·Â Ã³¸®
+        // ì…ë ¥ ì²˜ë¦¬
         if (Input.GetMouseButtonDown(0)) Attack();
 
         if (Input.GetMouseButtonDown(1))
@@ -85,10 +96,25 @@ public class PlayerControler : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.LeftShift) && cooldownTimer <= 0)
         {
-            Dash(movement);
+            // Dash í˜¸ì¶œ ì‹œ inputMovement ì‚¬ìš© (movement ëŒ€ì‹ )
+            Dash(new Vector3(moveX, moveY, 0));
         }
 
         if (Input.GetKeyDown(KeyCode.Q)) Boost();
+    }
+
+    void FixedUpdate()
+    {
+        if (rb == null) return;
+
+        if (isDashing)
+        {
+            rb.linearVelocity = dashDirection * dashSpeed;
+        }
+        else
+        {
+            rb.linearVelocity = inputMovement * playerSpeed;
+        }
     }
 
     public void Attack()
@@ -119,16 +145,16 @@ public class PlayerControler : MonoBehaviour
         if (direction == Vector3.zero) return;
 
         isDashing = true;
-        dashTimer = dashDuration;      // Áö¼Ó ½Ã°£ ¼³Á¤
-        cooldownTimer = dashCooldown;  // ÄğÅ¸ÀÓ ½ÃÀÛ
-        dashDirection = direction.normalized;  // ¿ÀÅ¸ ¼öÁ¤!
+        dashTimer = dashDuration;      // ì§€ì† ì‹œê°„ ì„¤ì •
+        cooldownTimer = dashCooldown;  // ì¿¨íƒ€ì„ ì‹œì‘
+        dashDirection = direction.normalized;  // ì˜¤íƒ€ ìˆ˜ì •!
 
-        UnityEngine.Debug.Log("´ë½¬!");
+        UnityEngine.Debug.Log("ëŒ€ì‰¬!");
     }
 
     public void Boost()
     {
-        // ³ªÁß¿¡ ±¸Çö
+        // ë‚˜ì¤‘ì— êµ¬í˜„
     }
 
     public void TakeDamage(float damage)
@@ -144,6 +170,6 @@ public class PlayerControler : MonoBehaviour
 
     void Die()
     {
-        UnityEngine.Debug.Log("ÇÃ·¹ÀÌ¾î »ç¸Á!");
+        UnityEngine.Debug.Log("í”Œë ˆì´ì–´ ì‚¬ë§!");
     }
 }

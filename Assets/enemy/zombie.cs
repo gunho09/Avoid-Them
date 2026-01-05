@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class zombie : MonoBehaviour
+public class zombie : MonoBehaviour, IDamageable
 {
     public PlayerControler playerControler;
     public int health;
@@ -31,6 +31,11 @@ public class zombie : MonoBehaviour
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
         if (distanceToPlayer <= attackRange)
+        {
+            currentState = State.Attack;
+        }
+        
+        else if (currentState == State.Attack && distanceToPlayer <= attackRange + 0.2f)
         {
             currentState = State.Attack;
         }
@@ -68,11 +73,12 @@ public class zombie : MonoBehaviour
         if (Time.time - lastAttackTime >= atackSpeed)
         {
             // playerControler.TakeDamage(attackDamage);
+            player.GetComponent<IDamageable>()?.TakeDamage(attackDamage);
             lastAttackTime = Time.time;
         }
     }
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(float damage)
     {
         if (Random.value < dodgeChance)
         {
