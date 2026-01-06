@@ -6,7 +6,7 @@ public class Door : MonoBehaviour
     {
         ToRoom,     // 복도 -> 방
         ToHallway,  // 방 -> 복도
-        ToNextFloor // 보스 대면 후 다음 층 (필요 시)
+        ToBossRoom  // 복도 -> 보스방
     }
 
     public DoorType type;
@@ -46,6 +46,16 @@ public class Door : MonoBehaviour
     {
         if (spriteRenderer == null) return;
 
+        // 보스방 문이면 빨간색으로 표시
+        if (type == DoorType.ToBossRoom)
+        {
+            spriteRenderer.color = Color.red;
+        }
+        else
+        {
+            spriteRenderer.color = Color.white;
+        }
+
         if (isOpen)
         {
             if (openSprite != null) 
@@ -71,7 +81,7 @@ public class Door : MonoBehaviour
         if (collision.CompareTag("Player"))
         {
             Debug.Log("Player tag detected! Attempting to enter room...");
-            if (type == DoorType.ToRoom)
+            if (type == DoorType.ToRoom || type == DoorType.ToBossRoom)
             {
                 // 문 위치 + 오프셋을 계산해서 전달 (바로 다시 들어가지 않게 함)
                 Vector3 safeReturnPos = this.transform.position + returnOffset;
@@ -80,10 +90,6 @@ public class Door : MonoBehaviour
             else if (type == DoorType.ToHallway)
             {
                 MapManager.Instance.ReturnToHallway();
-            }
-            else if (type == DoorType.ToNextFloor)
-            {
-                MapManager.Instance.NextFloor();
             }
         }
     }
