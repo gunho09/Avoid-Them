@@ -30,13 +30,16 @@ public class PlayerControler : MonoBehaviour, IDamageable
     public float dashSpeed = 30f;
     public float dashDuration = 1f;
 
+    
+    public bool boost = false;
+
+    public GameObject deathUI;
 
     private bool isDashing = false;
     private float dashTimer = 0f;
     private float cooldownTimer = 0f;
     private Vector3 dashDirection;
 
-    // 물리 이동을 위한 컴포넌트 추가
     private Rigidbody2D rb;
     private Vector2 inputMovement;
 
@@ -74,12 +77,10 @@ public class PlayerControler : MonoBehaviour, IDamageable
             return;
         }
 
-        // 일반 이동 입력 읽기
         float moveX = Input.GetAxis("Horizontal");
         float moveY = Input.GetAxis("Vertical");
         inputMovement = new Vector2(moveX, moveY);
 
-        // 입력 처리
         if (Input.GetMouseButtonDown(0)) Attack();
 
         if (Input.GetMouseButtonDown(1))
@@ -95,7 +96,6 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
         if (Input.GetKeyDown(KeyCode.LeftShift) && cooldownTimer <= 0)
         {
-            // Dash 호출 시 inputMovement 사용 (movement 대신)
             Dash(new Vector3(moveX, moveY, 0));
         }
 
@@ -151,9 +151,11 @@ public class PlayerControler : MonoBehaviour, IDamageable
         UnityEngine.Debug.Log("대쉬!");
     }
 
-    public void Boost()
+    public int Boost()
     {
-        // 나중에 구현
+
+        return 1;
+
     }
 
     public void TakeDamage(float damage)
@@ -171,11 +173,9 @@ public class PlayerControler : MonoBehaviour, IDamageable
     void Die()
     {
 
-        //deathUI.SetActive(true);
+        deathUI.SetActive(true);
 
-        //Time.timeScale = 0f;
-
-        //gameObject.SetActive(false);
+        Time.timeScale = 0f;
 
         UnityEngine.Debug.Log("플레이어 죽었다~!");
 

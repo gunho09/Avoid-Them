@@ -163,17 +163,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2109044085730608521}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1873116844502125872}
-  m_Father: {fileID: 2299825471048836653}
+  m_Father: {fileID: 9057302117148786447}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 160.29408, y: 278.94864}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
 --- !u!223 &4053611529980622969
@@ -487,7 +487,8 @@ Transform:
   m_LocalPosition: {x: -441, y: -747, z: 0}
   m_LocalScale: {x: 2.7511933, y: 2.6779122, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1292540952897730993}
   m_Father: {fileID: 2299825471048836653}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &2883028955694731297
@@ -581,6 +582,8 @@ MonoBehaviour:
   dashCooldown: 1
   dashSpeed: 15
   dashDuration: 0.2
+  boost: 0
+  deathUI: {fileID: 2109044085730608521}
 --- !u!114 &6254198517122689622
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -817,7 +820,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 9057302117148786447}
-  - {fileID: 1292540952897730993}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7599897978048900930
