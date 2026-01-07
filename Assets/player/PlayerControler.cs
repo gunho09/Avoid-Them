@@ -54,7 +54,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     public float boostCooldown = 30f;
     private float boostTimer, cooldownTimerBoost;
-    public float boostDuration = 5f;
+    public float boostDuration = 6f;
 
     public float hookCooldown = 5f;
     public float attackRange = 1.5f; // 훅 범위
@@ -95,8 +95,19 @@ public class PlayerControler : MonoBehaviour, IDamageable
         if (Input.GetMouseButtonDown(0)) Attack1();
         if (Input.GetKeyDown(KeyCode.E)) LeftHook(); // E: 레프트훅
 
-        if (Input.GetMouseButtonDown(1)) Guarding = true;
-        if (Input.GetMouseButtonUp(1)) Guarding = false;
+        if (Input.GetMouseButtonDown(1))
+        {
+            
+            Guarding = true;
+            playerSpeed = 2f;
+            
+        }
+        if (Input.GetMouseButtonUp(1))
+        {
+            
+            Guarding = false;
+            
+        }
 
         if (Input.GetKeyDown(KeyCode.LeftShift) && cooldownTimerDashDash <= 0)
         {
@@ -166,7 +177,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, attackRange, enemy);
         foreach (Collider2D hit in hits)
         {
-            hit.GetComponent<IDamageable>()?.TakeDamage(attackDamage * 2f);
+            hit.GetComponent<IDamageable>()?.TakeDamage(attackDamage * 2f * (isBoost ? 2 : 1));
         }
 
         isHook = true;
@@ -254,7 +265,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
             currentExp -= MaxExp;
             PlayerCurrentHp += PlayerMaxHp * 0.2f;
-            PlayerDamage *= 0.05f;
+            PlayerDamage += 0.05f * PlayerDamage;
             Lvl++;
             if (ExpSlider != null) ExpSlider.value = currentExp;
             if (LvlText != null) LvlText.text = $"{Lvl}";
