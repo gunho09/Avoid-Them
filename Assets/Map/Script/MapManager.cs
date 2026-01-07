@@ -70,19 +70,19 @@ public class MapManager : MonoBehaviour
 
     private void SpawnRoom(bool isBoss)
     {
-        // 2. 제자리(복도 위치)에 방 생성
+        
         GameObject prefabToSpawn = isBoss ? bossRoomPrefab : roomPrefabs[Random.Range(0, roomPrefabs.Length)];
         
-        // 생성 위치는 복도 위치(또는 0,0,0) + 보정값
+        
         Vector3 spawnPos = (hallwayRoot != null) ? hallwayRoot.transform.position : Vector3.zero;
-        spawnPos += roomPositionCorrection; // 사용자가 설정한 보정값 적용
+        spawnPos += roomPositionCorrection;
 
         if (currentRoomInstance != null) Destroy(currentRoomInstance);
         
         currentRoomInstance = Instantiate(prefabToSpawn, spawnPos, Quaternion.identity);
         Debug.Log($"방 생성 (제자리 교체) 완료");
 
-        // 3. 플레이어 위치 설정 (방 내부 스폰 포인트)
+        
         if (player != null)
         {
             Vector3 playerTargetPos = spawnPos; // 기본값
@@ -96,54 +96,51 @@ public class MapManager : MonoBehaviour
             }
             else
             {
-                // 스폰 포인트 없으면 그냥 중앙 근처 혹은 기존 로직
+               
                 playerTargetPos = spawnPos + new Vector3(0, -2f, 0); 
             }
 
-            // [Z-Order Fix] 플레이어가 바닥 뒤에 가려지지 않도록 Z값을 앞으로 당김 (-1f)
+           
             player.transform.position = new Vector3(playerTargetPos.x, playerTargetPos.y, -1f);
             
-            // [Safety] 플레이어가 꺼져있을 수 있으므로 켜줌
+          
             player.SetActive(true);
         }
 
-        // 4. 카메라 이동 안 함 (복도 뷰 유지)
-        // 만약 방 크기가 복도랑 완전히 같다면 카메라는 가만히 있어도 완벽하게 보입니다.
+      
     }
 
-    // 방 클리어 시 호출
     public void OnRoomCleared()
     {
         clearedRooms++;
         Debug.Log($"방 클리어! 현재 층 완료한 방: {clearedRooms}/{totalRoomsPerFloor}");
     }
 
-    // 방/보스방 -> 복도 이동
+   
     public void ReturnToHallway()
     {
-        // 1. 방 제거
+     
         if (currentRoomInstance != null)
         {
             Destroy(currentRoomInstance);
         }
 
-        // 2. 복도 다시 보이기
+       
         if (hallwayRoot != null)
         {
             hallwayRoot.SetActive(true);
         }
 
-        // 3. 플레이어를 아까 들어왔던 문 위치로 복귀
         if (player != null)
         {
-             // [Z-Order Fix] 복도에서도 플레이어가 잘 보이게 Z값 -1 고정
+            
             player.transform.position = new Vector3(lastDoorPosition.x, lastDoorPosition.y, -1f);
         }
 
-        // 4. 카메라 이동 없음 (복도 위치 그대로)
+      
     }
 
-    // 보스 처치 후 다음 층 이동
+   
     public void NextFloor()
     {
         if (currentFloor < maxFloors)
@@ -155,7 +152,7 @@ public class MapManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("게임 클리어! 모든 층을 정복했습니다.");
+            Debug.Log("게임 클리어!");
         }
     }
 }
