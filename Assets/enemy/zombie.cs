@@ -91,7 +91,7 @@ public class zombie : MonoBehaviour, IDamageable
                 targetIndex++;
             }
         }
-        else if (path == null)
+        else
         {
             Vector3 direction = (player.position - transform.position).normalized;
             transform.position += direction * (speed * 0.5f) * Time.deltaTime;
@@ -110,6 +110,7 @@ public class zombie : MonoBehaviour, IDamageable
 
     public void TakeDamage(float damage)
     {
+        Debug.Log(damage);
         if (Random.value < dodgeChance)
         {
             return;

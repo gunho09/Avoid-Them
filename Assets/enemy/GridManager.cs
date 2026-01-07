@@ -29,7 +29,7 @@ public class GridManager : MonoBehaviour
             for (int y = 0; y < gridSizeY; y++)
             {
                 Vector3 worldPoint = worldBottomLeft + Vector3.right * (x * nodeDiameter + nodeRadius) + Vector3.up * (y * nodeDiameter + nodeRadius);
-                bool walkable = !(Physics2D.OverlapCircle(worldPoint, nodeRadius * 0.8f, wallLayer));
+                bool walkable = !(Physics2D.OverlapCircle(worldPoint, nodeRadius * 0.4f, wallLayer));
                 grid[x, y] = new Node(walkable, worldPoint, x, y);
             }
         }
