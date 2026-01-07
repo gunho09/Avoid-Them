@@ -48,7 +48,7 @@ GameObject:
   - component: {fileID: 493966880609655901}
   - component: {fileID: 4322555801002072616}
   - component: {fileID: 3594174349421533650}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: roomleaderZombie
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -235,7 +235,7 @@ GameObject:
   - component: {fileID: 566499879089481867}
   - component: {fileID: 5482492784575090925}
   - component: {fileID: 4604708849235422026}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -636,6 +636,7 @@ Transform:
   - {fileID: 2394558622406708004}
   - {fileID: 7447624141269814998}
   - {fileID: 8727651831150136466}
+  - {fileID: 5914731694803815465}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3282212272480554032
@@ -651,7 +652,7 @@ GameObject:
   - component: {fileID: 509293841930096133}
   - component: {fileID: 6722833721232746643}
   - component: {fileID: 8216111999696121782}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: basicZombie
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1280,6 +1281,7 @@ GameObject:
   - component: {fileID: 7150102421088370514}
   - component: {fileID: 3014536555458771269}
   - component: {fileID: 4009846013859067773}
+  - component: {fileID: 6434924686367529708}
   m_Layer: 0
   m_Name: Door
   m_TagString: Untagged
@@ -1373,12 +1375,58 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d4c3508a1e3cb2489aa04892101c724, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Door
-  type: 0
+  type: 1
   spriteRenderer: {fileID: 3014536555458771269}
   openSprite: {fileID: 0}
   closedSprite: {fileID: 2306424487704905126, guid: 5fa69022468a8a842a6413a82cc09b89, type: 3}
   isOpen: 1
   returnOffset: {x: 0, y: -1.5, z: 0}
+--- !u!61 &6434924686367529708
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6188802767896269818}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 0.98, y: 1.64}
+    newSize: {x: 0.98, y: 1.64}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 0.98, y: 1.64}
+  m_EdgeRadius: 0
 --- !u!1 &6561630308820210869
 GameObject:
   m_ObjectHideFlags: 0
@@ -1471,7 +1519,7 @@ GameObject:
   - component: {fileID: 191431934257157319}
   - component: {fileID: 4477312069393476642}
   - component: {fileID: 3962237847312825888}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: basicZombie (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1723,6 +1771,68 @@ Grid:
   m_CellGap: {x: 0, y: 0, z: 0}
   m_CellLayout: 0
   m_CellSwizzle: 0
+--- !u!1 &9151505546998088895
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5914731694803815465}
+  - component: {fileID: 8075568115380760491}
+  - component: {fileID: 6095964449280101920}
+  m_Layer: 0
+  m_Name: GridManger
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5914731694803815465
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9151505546998088895}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -9.40367, y: 2.1109, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6851368703178923204}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8075568115380760491
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9151505546998088895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90f7dec741cd73044a1197d095d38aed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GridManager
+  gridWorldSize: {x: 17.7, y: 10}
+  nodeRadius: 0.3
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 256
+--- !u!114 &6095964449280101920
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9151505546998088895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61b7403f15f8aca4db82989a395d780b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Pathfinding
 --- !u!1001 &9033714509397580408
 PrefabInstance:
   m_ObjectHideFlags: 0

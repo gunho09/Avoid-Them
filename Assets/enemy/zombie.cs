@@ -27,9 +27,21 @@ public class zombie : MonoBehaviour, IDamageable
     void Start()
     {
         currentHealth = health;
-        player = GameObject.FindGameObjectWithTag("Player").transform;
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null) 
+        {
+            player = playerObj.transform;
+        }
+        else
+        {
+           Debug.LogError("Zombie Error: Player 태그를 가진 오브젝트를 찾을 수 없습니다.");
+        }
 
         pathfinding = FindFirstObjectByType<Pathfinding>();
+        if (pathfinding == null)
+        {
+             Debug.LogError("Zombie Error: Scene에 'Pathfinding' 컴포넌트가 없습니다. GridManager 오브젝트에 Pathfinding 스크립트를 추가했는지 확인해주세요.");
+        }
     }
 
     void Update()
@@ -76,8 +88,11 @@ public class zombie : MonoBehaviour, IDamageable
         if (pathUpdateTimer >= pathupdateInterval)
         {
             pathUpdateTimer = 0f;
-            path = pathfinding.FindPath(transform.position, player.position);
-            targetIndex = 0;
+            if (pathfinding != null && player != null)
+            {
+                path = pathfinding.FindPath(transform.position, player.position);
+                targetIndex = 0;
+            }
         }
 
         if (path != null && targetIndex < path.Count)

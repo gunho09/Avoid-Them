@@ -26,17 +26,41 @@ public class RoomControl : MonoBehaviour
             }
         }
 
-        // 배치된 적 세기
-      
-        var enemies = GetComponentsInChildren<zombie>();
-        livingEnemyCount = enemies.Length;
+        // 초기 적 카운트 (참고용)
+        CountEnemies();
+        Debug.Log($"방 진입: 배치된 적 {livingEnemyCount}마리 감지됨 (Layer 기준)");
 
-        Debug.Log($"방 진입: 배치된 적 {livingEnemyCount}마리 감지됨");
+        // 1초마다 남은 적 확인 (Layer 기반, 가장 확실한 방법)
+        InvokeRepeating(nameof(CheckEnemiesAlive), 1f, 1f);
+    }
 
-        if (livingEnemyCount == 0)
+    void CheckEnemiesAlive()
+    {
+        if (isCleared) return;
+
+        CountEnemies();
+
+        if (livingEnemyCount <= 0)
         {
             RoomClear();
+            CancelInvoke(nameof(CheckEnemiesAlive));
         }
+    }
+
+    void CountEnemies()
+    {
+        int count = 0;
+        // 내 자식들 중 "enemy" 레이어(Layer 7 presumed, or by name)인 활성화된 오브젝트 찾기
+        // Transform을 순회하는게 가장 정확함
+        foreach (Transform child in GetComponentsInChildren<Transform>())
+        {
+            // Layer 이름이 "enemy"인 것만 카운트 (본인 제외)
+            if (child != transform && child.gameObject.activeInHierarchy && LayerMask.LayerToName(child.gameObject.layer) == "enemy")
+            {
+                count++;
+            }
+        }
+        livingEnemyCount = count;
     }
 
 

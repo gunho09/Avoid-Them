@@ -23,6 +23,8 @@ public class Door : MonoBehaviour
 
     private void Start()
     {
+        Debug.Log($"Door Script Init: {gameObject.name}, Type: {type}");
+
         // [자동 수정] 문 위치가 Z축과 어긋나 있으면 강제로 0으로 맞춤 (충돌 문제 해결)
         if (Mathf.Abs(transform.position.z) > 0.1f)
         {
@@ -72,7 +74,6 @@ public class Door : MonoBehaviour
             }
             else 
             {
-               
                 if (closedSprite != null) spriteRenderer.sprite = closedSprite;
             }
         }
@@ -93,11 +94,33 @@ public class Door : MonoBehaviour
         EnterIfPlayer(collision.gameObject);
     }
 
+    // [추가] 고속 이동 시 Enter가 씹히거나, 판정 내부에 있을 때를 대비해 Stay도 체크
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        EnterIfPlayer(collision.gameObject);
+    }
+
+    // [추가] 물리 충돌 상태에서도 비비면 넘어가지도록 Stay 추가
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        EnterIfPlayer(collision.gameObject);
+    }
+
     private void EnterIfPlayer(GameObject target)
     {
+        // 디버깅 로그는 유지
+        // Debug.Log($"Door Hit: {target.name}, Tag: {target.tag}");
+
         if (target.CompareTag("Player"))
         {
-            // Debug.Log("Player detected! Entering...");
+            if (!isOpen)
+            {
+                Debug.Log($"문이 잠겨있습니다! (Mobs remaining or Start_Panel not updated?) Type: {type}");
+                return;
+            }
+
+            Debug.Log($"문 작동! Player 감지됨. 이동 시도 -> Type: {type}");
+            
             if (type == DoorType.ToRoom || type == DoorType.ToBossRoom)
             {
                 Vector3 safeReturnPos = this.transform.position + returnOffset;
@@ -105,6 +128,7 @@ public class Door : MonoBehaviour
             }
             else if (type == DoorType.ToHallway)
             {
+                Debug.Log("복도로 돌아갑니다.");
                 MapManager.Instance.ReturnToHallway();
             }
         }

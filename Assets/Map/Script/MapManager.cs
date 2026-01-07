@@ -74,7 +74,7 @@ public class MapManager : MonoBehaviour
         
         GameObject prefabToSpawn = isBoss ? bossRoomPrefab : roomPrefabs[Random.Range(0, roomPrefabs.Length)];
         
-        
+        // [수정] 복도 위치 그대로 사용 (카메라 이동 X)
         Vector3 spawnPos = (hallwayRoot != null) ? hallwayRoot.transform.position : Vector3.zero;
         spawnPos += roomPositionCorrection;
 
@@ -83,7 +83,8 @@ public class MapManager : MonoBehaviour
         currentRoomInstance = Instantiate(prefabToSpawn, spawnPos, Quaternion.identity);
         Debug.Log($"방 생성 (제자리 교체) 완료");
 
-        
+        // [제거됨] 카메라 이동 코드 삭제 (사용자 요청)
+
         if (player != null)
         {
             Vector3 playerTargetPos = spawnPos; // 기본값
@@ -97,18 +98,13 @@ public class MapManager : MonoBehaviour
             }
             else
             {
-               
                 playerTargetPos = spawnPos + new Vector3(0, -2f, 0); 
             }
 
-           
+            // 플레이어 Z축 -1로 고정하여 맵 위에 보이게 함
             player.transform.position = new Vector3(playerTargetPos.x, playerTargetPos.y, -1f);
-            
-          
             player.SetActive(true);
         }
-
-      
     }
 
     public void OnRoomCleared()
@@ -117,16 +113,13 @@ public class MapManager : MonoBehaviour
         Debug.Log($"방 클리어! 현재 층 완료한 방: {clearedRooms}/{totalRoomsPerFloor}");
     }
 
-   
     public void ReturnToHallway()
     {
-     
         if (currentRoomInstance != null)
         {
             Destroy(currentRoomInstance);
         }
 
-       
         if (hallwayRoot != null)
         {
             hallwayRoot.SetActive(true);
@@ -134,11 +127,11 @@ public class MapManager : MonoBehaviour
 
         if (player != null)
         {
-            
+            // 플레이어를 문 앞으로 이동
             player.transform.position = new Vector3(lastDoorPosition.x, lastDoorPosition.y, -1f);
+            
+            // [제거됨] 카메라 이동 코드 삭제
         }
-
-      
     }
 
    
