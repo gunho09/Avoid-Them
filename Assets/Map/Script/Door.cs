@@ -23,6 +23,14 @@ public class Door : MonoBehaviour
 
     private void Start()
     {
+        // [자동 수정] 문 위치가 Z축과 어긋나 있으면 강제로 0으로 맞춤 (충돌 문제 해결)
+        if (Mathf.Abs(transform.position.z) > 0.1f)
+        {
+            Vector3 pos = transform.position;
+            transform.position = new Vector3(pos.x, pos.y, 0f);
+            Debug.LogWarning($"{gameObject.name}의 Z축이 0이 아니어서 강제로 수정했습니다.");
+        }
+
         if (spriteRenderer == null)
             spriteRenderer = GetComponent<SpriteRenderer>();
 
@@ -76,16 +84,24 @@ public class Door : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Debug.Log($"Door Triggered by: {collision.gameObject.name}, Tag: {collision.tag}");
+        EnterIfPlayer(collision.gameObject);
+    }
 
-        if (collision.CompareTag("Player"))
+    // [추가] 혹시 Is Trigger 체크 안 했을 경우를 대비해 충돌(Collision)로도 작동하게 함
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        EnterIfPlayer(collision.gameObject);
+    }
+
+    private void EnterIfPlayer(GameObject target)
+    {
+        if (target.CompareTag("Player"))
         {
-            Debug.Log("Player tag detected! Attempting to enter room...");
+            // Debug.Log("Player detected! Entering...");
             if (type == DoorType.ToRoom || type == DoorType.ToBossRoom)
             {
-                // 문 위치 + 오프셋을 계산해서 전달 (바로 다시 들어가지 않게 함)
                 Vector3 safeReturnPos = this.transform.position + returnOffset;
-                MapManager.Instance.EnterRoom(safeReturnPos);
+                MapManager.Instance.EnterRoom(safeReturnPos, type == DoorType.ToBossRoom);
             }
             else if (type == DoorType.ToHallway)
             {

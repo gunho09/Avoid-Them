@@ -44,7 +44,7 @@ public class MapManager : MonoBehaviour
         }
     }
 
-    public void EnterRoom(Vector3 doorPos)
+    public void EnterRoom(Vector3 doorPos, bool forceBoss = false)
     {
         lastDoorPosition = doorPos;
 
@@ -64,8 +64,9 @@ public class MapManager : MonoBehaviour
             Debug.LogError("MapManager: Hallway Root가 할당되지 않았습니다!");
         }
 
-        if (clearedRooms < totalRoomsPerFloor) SpawnRoom(false);
-        else SpawnRoom(true);
+        // 보스방 강제 진입이거나, 방을 다 깼으면 보스방 스폰
+        if (forceBoss || clearedRooms >= totalRoomsPerFloor) SpawnRoom(true);
+        else SpawnRoom(false);
     }
 
     private void SpawnRoom(bool isBoss)
