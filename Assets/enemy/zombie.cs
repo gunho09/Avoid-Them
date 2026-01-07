@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class zombie : MonoBehaviour, IDamageable
 {
@@ -17,11 +18,18 @@ public class zombie : MonoBehaviour, IDamageable
     private Transform player;
     private enum State { Idle, Chase, Attack, Dead }
     private State currentState = State.Idle;
+    private Pathfinding pathfinding;
+    private List<Node> path;
+    private int targetIndex;
+    private float pathUpdateTimer;
+    private const float pathupdateInterval = 0.3f;
 
     void Start()
     {
         currentHealth = health;
         player = GameObject.FindGameObjectWithTag("Player").transform;
+
+        pathfinding = FindFirstObjectByType<Pathfinding>();
     }
 
     void Update()
@@ -64,8 +72,30 @@ public class zombie : MonoBehaviour, IDamageable
 
     void ChasePlayer()
     {
-        Vector3 direction = (player.position - transform.position).normalized;
-        transform.position += direction * speed * Time.deltaTime;
+        pathUpdateTimer += Time.deltaTime;
+        if (pathUpdateTimer >= pathupdateInterval)
+        {
+            pathUpdateTimer = 0f;
+            path = pathfinding.FindPath(transform.position, player.position);
+            targetIndex = 0;
+        }
+
+        if (path != null && targetIndex < path.Count)
+        {
+            Vector3 targetPosition = path[targetIndex].worldPosition;
+            targetPosition.z = transform.position.z;
+            Vector3 dir = (targetPosition - transform.position).normalized;
+            transform.position += dir * speed * Time.deltaTime;
+            if (Vector3.Distance(transform.position, targetPosition) < 0.4f)
+            {
+                targetIndex++;
+            }
+        }
+        else if (path == null)
+        {
+            Vector3 direction = (player.position - transform.position).normalized;
+            transform.position += direction * (speed * 0.5f) * Time.deltaTime;
+        }
     }
 
     void AttackPlayer()
