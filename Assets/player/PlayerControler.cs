@@ -15,7 +15,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
     public float attackDistance = 2.0f; // 쨉 거리
     public float attackWidth = 0.8f;    // 쨉 너비
     public float attackDamage = 10f;
-    public int attackNum = 0;
+    public int attackNum = 2;
     public LayerMask enemy;             // 적 레이어 설정 필수
 
     [Header("계산된 스탯")]
@@ -92,8 +92,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
 
         // 입력 처리
-        if (Input.GetMouseButtonDown(0) && isNum(attackNum)) Attack1();
-        if (Input.GetMouseButtonDown(0) && isNum(attackNum)) Attack2();
+        if (Input.GetMouseButtonDown(0)) Attack1();
         if (Input.GetKeyDown(KeyCode.E)) LeftHook(); // E: 레프트훅
 
         if (Input.GetMouseButtonDown(1)) Guarding = true;
@@ -128,12 +127,13 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     public bool isNum(int num)
     {
-        return (num & 1) ? false : true; 
+        return (num & 1) == 0;
     }
   
 
     public void Attack1() //원
     {
+        attackNum++;
         // 1. 마우스 방향 계산
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPos.z = 0f;
@@ -149,7 +149,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
         foreach (Collider2D hit in hits)
         {
             hit.GetComponent<IDamageable>()?.TakeDamage(PlayerDamage);
-            Debug.Log($"적이 공격 받음! 남은 체력 확인 필요");
+            Debug.Log($"원");
         }
 
         // 4. 공격 시각화 (네모 상자 그리기)
@@ -159,34 +159,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
         Debug.DrawLine((Vector2)transform.position - rightEdge, (Vector2)transform.position + attackDir * attackDistance - rightEdge, Color.cyan, 0.2f);
         Debug.DrawLine((Vector2)transform.position + attackDir * attackDistance + rightEdge, (Vector2)transform.position + attackDir * attackDistance - rightEdge, Color.cyan, 0.2f);
     }
-    public void Attack2() // 투
-    {
-        // 1. 마우스 방향 계산
-        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mouseWorldPos.z = 0f;
-        Vector2 attackDir = ((Vector2)mouseWorldPos - (Vector2)transform.position).normalized;
-
-        // 2. 공격 박스 설정 (쨉)
-        Vector2 boxCenter = (Vector2)transform.position + attackDir * (attackDistance / 2f);
-        Vector2 boxSize = new Vector2(attackWidth, attackDistance);
-        float angle = Mathf.Atan2(attackDir.y, attackDir.x) * Mathf.Rad2Deg - 90f;
-
-        // 3. 판정 및 데미지
-        Collider2D[] hits = Physics2D.OverlapBoxAll(boxCenter, boxSize, angle, enemy);
-        foreach (Collider2D hit in hits)
-        {
-            hit.GetComponent<IDamageable>()?.TakeDamage(PlayerDamage);
-            Debug.Log($"적이 공격 받음! 남은 체력 확인 필요");
-        }
-
-        // 4. 공격 시각화 (네모 상자 그리기)
-        Vector2 rightEdge = new Vector2(-attackDir.y, attackDir.x) * (attackWidth / 2f);
-        Debug.DrawLine((Vector2)transform.position + rightEdge, (Vector2)transform.position - rightEdge, Color.cyan, 0.2f);
-        Debug.DrawLine((Vector2)transform.position + rightEdge, (Vector2)transform.position + attackDir * attackDistance + rightEdge, Color.cyan, 0.2f);
-        Debug.DrawLine((Vector2)transform.position - rightEdge, (Vector2)transform.position + attackDir * attackDistance - rightEdge, Color.cyan, 0.2f);
-        Debug.DrawLine((Vector2)transform.position + attackDir * attackDistance + rightEdge, (Vector2)transform.position + attackDir * attackDistance - rightEdge, Color.cyan, 0.2f);
-    }
-
+   
     public void LeftHook()
     {
         // 레프트훅은 전방위 혹은 넓은 부채꼴 (여기선 전방위 원형 예시)
