@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class PlayerControler : MonoBehaviour, IDamageable
 {
@@ -24,6 +25,12 @@ public class PlayerControler : MonoBehaviour, IDamageable
     [Header("UI 연결")]
     public Slider hpSlider;
     public GameObject deathUI;
+    public Slider ExpSlider;
+    public TextMeshProUGUI LvlText;
+    public TextMeshProUGUI hpText;   
+    public TextMeshProUGUI expText;
+
+
 
     [Header("기술/상태 변수")]
     private bool Guarding = false;
@@ -32,11 +39,12 @@ public class PlayerControler : MonoBehaviour, IDamageable
     private bool isHook = false;
 
     [Header("레벨관리")]
-    public float exp = 0;
+    public float exp;
+    public float currentExp = 0;
     public float Lvl = 1;
     public float MaxExp = 20;
 
-    // 쿨타임 및 타이머
+    [Header("쿨타임")]
     public float dashCooldown = 2f;
     public float dashSpeed = 30f;
     public float dashDuration = 0.2f;
@@ -196,7 +204,8 @@ public class PlayerControler : MonoBehaviour, IDamageable
         Debug.Log($"플레이어 데미지 입음: {finalDamage}, 남은 체력: {PlayerCurrentHp}");
 
         if (hpSlider != null) hpSlider.value = PlayerCurrentHp;
-
+        if (hpText != null) hpText.text = $"{PlayerCurrentHp} / {PlayerMaxHp}";
+        
         if (PlayerCurrentHp <= 0)
         {
             PlayerCurrentHp = 0;
@@ -214,16 +223,38 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     public void TakeExp(float exp)
     {
-        
+        if (ExpSlider != null) ExpSlider.value = currentExp;
+        if (expText != null) expText.text = $"{currentExp} / {MaxExp}";
+        currentExp += exp;
+        if(MaxExp < currentExp)
+        {
+            LevelUp();
+        }
+
     }
 
-    void CurrentPlayer()
+    void CurrentPlayer(float damage, float hp, float speed)
     {
+        if (ExpSlider != null) ExpSlider.value = currentExp;
+        PlayerMaxHp += hp;
+        PlayerDamage += damage;
+        playerSpeed += speed;
 
     }
 
     void LevelUp()
     {
+
+        while (currentExp < 20) { 
+
+            currentExp -= MaxExp;
+            PlayerCurrentHp += PlayerMaxHp * 0.2f;
+            PlayerDamage *= 0.05f;
+            Lvl++;
+            if (ExpSlider != null) ExpSlider.value = currentExp;
+            if (LvlText != null) LvlText.text = $"{Lvl}";
+
+        }
 
     }
 
