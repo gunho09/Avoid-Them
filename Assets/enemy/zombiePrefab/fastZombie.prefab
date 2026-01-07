@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 81474721681697249}
   - component: {fileID: 5857134803932099198}
   - component: {fileID: 6304567786299520016}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: fastZombie
   m_TagString: Untagged
   m_Icon: {fileID: 0}

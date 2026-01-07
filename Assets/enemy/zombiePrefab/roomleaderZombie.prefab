@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6609269165526006611}
   - component: {fileID: 6215378650872304060}
   - component: {fileID: 5248337146137290937}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: roomleaderZombie
   m_TagString: Untagged
   m_Icon: {fileID: 0}

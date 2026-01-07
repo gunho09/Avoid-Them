@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 1014706599789285417}
   - component: {fileID: 4942847382462675136}
   - component: {fileID: 2533073671687007040}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: miniZombie
   m_TagString: Untagged
   m_Icon: {fileID: 0}
