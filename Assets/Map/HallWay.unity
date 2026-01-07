@@ -172,6 +172,9 @@ MonoBehaviour:
   roomPositionCorrection: {x: 8.63, y: -2.4, z: 0}
   roomPrefabs:
   - {fileID: 5176333257237480760, guid: 9ee1847c5f57abb40bc470ace2c0e70a, type: 3}
+  - {fileID: 8625271667559472264, guid: ec39c487134839143a2797cf8a7f11a7, type: 3}
+  - {fileID: 2079059723218737967, guid: 2c32fd5c6b907964eb84b7f5a35240e0, type: 3}
+  - {fileID: 5253605838947361107, guid: 6e2b421f60d6d4b4ba7be64323f3db61, type: 3}
   bossRoomPrefab: {fileID: 0}
   mainCamera: {fileID: 508587670}
 --- !u!1 &80745246
