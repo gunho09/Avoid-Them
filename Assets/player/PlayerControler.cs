@@ -15,6 +15,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
     public float attackDistance = 2.0f; // 쨉 거리
     public float attackWidth = 0.8f;    // 쨉 너비
     public float attackDamage = 10f;
+    public int attackNum = 0;
     public LayerMask enemy;             // 적 레이어 설정 필수
 
     [Header("계산된 스탯")]
@@ -65,10 +66,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     void Start()
     {
-        // 스탯 초기화
-        PlayerMaxHp = plusHp + numHp + playerStartHp;
-        PlayerDamage = plusPW + numPW + playerStartPw;
-        PlayerCurrentHp = PlayerMaxHp;
+        CurrentPlayer();
 
         rb = GetComponent<Rigidbody2D>();
         if (rb != null)
@@ -94,7 +92,8 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
 
         // 입력 처리
-        if (Input.GetMouseButtonDown(0)) Attack(); // 마우스 왼쪽: 쨉
+        if (Input.GetMouseButtonDown(0) && isNum(attackNum)) Attack1();
+        if (Input.GetMouseButtonDown(0) && isNum(attackNum)) Attack2();
         if (Input.GetKeyDown(KeyCode.E)) LeftHook(); // E: 레프트훅
 
         if (Input.GetMouseButtonDown(1)) Guarding = true;
@@ -103,7 +102,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
         if (Input.GetKeyDown(KeyCode.LeftShift) && cooldownTimerDashDash <= 0)
         {
             Dash(new Vector3(moveX, moveY, 0));
-        }
+        }   
 
         if (Input.GetKeyDown(KeyCode.Q) && cooldownTimerBoost <= 0) Boost();
 
@@ -127,9 +126,13 @@ public class PlayerControler : MonoBehaviour, IDamageable
         }
     }
 
+    public bool isNum(int num)
+    {
+        return (num & 1) ? false : true; 
+    }
   
 
-    public void Attack()
+    public void Attack1() //원
     {
         // 1. 마우스 방향 계산
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -145,7 +148,34 @@ public class PlayerControler : MonoBehaviour, IDamageable
         Collider2D[] hits = Physics2D.OverlapBoxAll(boxCenter, boxSize, angle, enemy);
         foreach (Collider2D hit in hits)
         {
-            hit.GetComponent<IDamageable>()?.TakeDamage(attackDamage);
+            hit.GetComponent<IDamageable>()?.TakeDamage(PlayerDamage);
+            Debug.Log($"적이 공격 받음! 남은 체력 확인 필요");
+        }
+
+        // 4. 공격 시각화 (네모 상자 그리기)
+        Vector2 rightEdge = new Vector2(-attackDir.y, attackDir.x) * (attackWidth / 2f);
+        Debug.DrawLine((Vector2)transform.position + rightEdge, (Vector2)transform.position - rightEdge, Color.cyan, 0.2f);
+        Debug.DrawLine((Vector2)transform.position + rightEdge, (Vector2)transform.position + attackDir * attackDistance + rightEdge, Color.cyan, 0.2f);
+        Debug.DrawLine((Vector2)transform.position - rightEdge, (Vector2)transform.position + attackDir * attackDistance - rightEdge, Color.cyan, 0.2f);
+        Debug.DrawLine((Vector2)transform.position + attackDir * attackDistance + rightEdge, (Vector2)transform.position + attackDir * attackDistance - rightEdge, Color.cyan, 0.2f);
+    }
+    public void Attack2() // 투
+    {
+        // 1. 마우스 방향 계산
+        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mouseWorldPos.z = 0f;
+        Vector2 attackDir = ((Vector2)mouseWorldPos - (Vector2)transform.position).normalized;
+
+        // 2. 공격 박스 설정 (쨉)
+        Vector2 boxCenter = (Vector2)transform.position + attackDir * (attackDistance / 2f);
+        Vector2 boxSize = new Vector2(attackWidth, attackDistance);
+        float angle = Mathf.Atan2(attackDir.y, attackDir.x) * Mathf.Rad2Deg - 90f;
+
+        // 3. 판정 및 데미지
+        Collider2D[] hits = Physics2D.OverlapBoxAll(boxCenter, boxSize, angle, enemy);
+        foreach (Collider2D hit in hits)
+        {
+            hit.GetComponent<IDamageable>()?.TakeDamage(PlayerDamage);
             Debug.Log($"적이 공격 받음! 남은 체력 확인 필요");
         }
 
@@ -173,7 +203,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     public void Dash(Vector3 direction)
     {
-        if (direction == Vector3.zero) direction = transform.up; // 입력 없으면 정면으로
+        if (direction == Vector3.zero) direction = transform.right; // 입력 없으면 정면으로
 
         isDashing = true;
         dashTimer = dashDuration;
@@ -204,17 +234,19 @@ public class PlayerControler : MonoBehaviour, IDamageable
         Debug.Log($"플레이어 데미지 입음: {finalDamage}, 남은 체력: {PlayerCurrentHp}");
 
         if (hpSlider != null) hpSlider.value = PlayerCurrentHp;
-        if (hpText != null) hpText.text = $"{PlayerCurrentHp} / {PlayerMaxHp}";
+      
         
         if (PlayerCurrentHp <= 0)
         {
             PlayerCurrentHp = 0;
             Die();
         }
+        if (hpText != null) hpText.text = $"{PlayerCurrentHp} / {PlayerMaxHp}";
     }
 
     void Die()
     {
+        PlayerCurrentHp = 0; if (hpText != null) hpText.text = $"{PlayerCurrentHp} / {PlayerMaxHp}";
         if (deathUI != null) deathUI.SetActive(true);
         Time.timeScale = 0f;
         Debug.Log("플레이어 사망");
@@ -233,12 +265,12 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     }
 
-    void CurrentPlayer(float damage, float hp, float speed)
+    void CurrentPlayer()
     {
         if (ExpSlider != null) ExpSlider.value = currentExp;
-        PlayerMaxHp += hp;
-        PlayerDamage += damage;
-        playerSpeed += speed;
+        PlayerMaxHp = plusHp + numHp + playerStartHp;
+        PlayerDamage = plusPW + numPW + playerStartPw;
+        PlayerCurrentHp = PlayerMaxHp;
 
     }
 
