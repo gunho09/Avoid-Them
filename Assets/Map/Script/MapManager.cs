@@ -8,24 +8,23 @@ public class MapManager : MonoBehaviour
     public int currentFloor = 1;         // 현재 층 (1 ~ 4)
     public int maxFloors = 4;            // 최대 층
     public int clearedRooms = 0;         // 현재 층에서 깬 방 개수
-    public int totalRoomsPerFloor = 6;   // 층당 방 개수 (보스방 제외)
+    public int totalRoomsPerFloor = 6;   // 층당 방 개수
 
     [Header("Single Scene Settings")]
-    public GameObject player;              // 플레이어 오브젝트 (Inspector에서 할당)
-    public GameObject hallwayRoot;         // [NEW] 복도 맵 전체를 담고 있는 부모 오브젝트 (교체용)
-    // public Transform roomSpawnPoint;    // (더 이상 사용 안 함: 제자리 교체)
+    public GameObject player;              
+    public GameObject hallwayPrefab;       
     
     [Tooltip("방이 화면 정중앙에 안 올 때, 이 값을 조절해서 방 위치를 맞추세요.")]
-    public Vector3 roomPositionCorrection; // 방 생성 위치 보정값 (카메라가 아닌 방을 이동시킴)
+    public Vector3 roomPositionCorrection; 
+    public Vector3 hallwaySpawnPosition;   
     
-    public GameObject[] roomPrefabs;       // 방 프리팹 목록
-    public GameObject bossRoomPrefab;      // 보스방 프리팹
-    public CameraFollow mainCamera;        // 메인 카메라
+    public GameObject[] roomPrefabs;     
+    public GameObject bossRoomPrefab;      
+    public CameraFollow mainCamera;        
 
     private GameObject currentRoomInstance; 
-    private Vector3 lastDoorPosition;       
-
-    // private Vector3 initialCameraPosition; // (카메라 이동 없음)
+    private GameObject currentHallwayInstance; 
+    private Vector3 lastDoorPosition;
 
     private void Awake()
     {
@@ -44,50 +43,71 @@ public class MapManager : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+      
+        SpawnHallway();
+    }
+
+    private void SpawnHallway()
+    {
+        if (hallwayPrefab != null)
+        {
+            
+            if (currentHallwayInstance != null) Destroy(currentHallwayInstance);
+            
+           
+            GameObject existingHallway = GameObject.Find("CurrentHallway");
+            if (existingHallway != null) Destroy(existingHallway);
+
+            currentHallwayInstance = Instantiate(hallwayPrefab, hallwaySpawnPosition, Quaternion.identity);
+            currentHallwayInstance.name = "CurrentHallway";
+            Debug.Log("복도 생성 완료 (게임 시작)");
+        }
+        else
+        {
+            Debug.LogError("MapManager Error: HallwayPrefab이 할당되지 않았습니다!");
+        }
+    }
+
     public void EnterRoom(Vector3 doorPos, bool forceBoss = false)
     {
         lastDoorPosition = doorPos;
 
-        // [Fix] 플레이어가 HallwayRoot의 자식으로 되어있다면, 같이 비활성화되므로 부모 해제
-        if (player != null && hallwayRoot != null && player.transform.IsChildOf(hallwayRoot.transform))
+        
+        if (currentHallwayInstance != null)
         {
-            player.transform.SetParent(null);
+            Destroy(currentHallwayInstance);
+            currentHallwayInstance = null;
         }
 
-        // 1. 복도 숨기기
-        if (hallwayRoot != null)
+        GameObject leftoverHallway = GameObject.Find("CurrentHallway");
+        if (leftoverHallway != null)
         {
-            hallwayRoot.SetActive(false);
-        }
-        else
-        {
-            Debug.LogError("MapManager: Hallway Root가 할당되지 않았습니다!");
+             Destroy(leftoverHallway);
+             Debug.Log("이름으로 찾아낸 잔여 복도 삭제됨");
         }
 
-        // 보스방 강제 진입이거나, 방을 다 깼으면 보스방 스폰
         if (forceBoss || clearedRooms >= totalRoomsPerFloor) SpawnRoom(true);
         else SpawnRoom(false);
     }
 
     private void SpawnRoom(bool isBoss)
     {
-        
         GameObject prefabToSpawn = isBoss ? bossRoomPrefab : roomPrefabs[Random.Range(0, roomPrefabs.Length)];
-        
-        // [수정] 복도 위치 그대로 사용 (카메라 이동 X)
-        Vector3 spawnPos = (hallwayRoot != null) ? hallwayRoot.transform.position : Vector3.zero;
-        spawnPos += roomPositionCorrection;
+       
+        Vector3 spawnPos = hallwaySpawnPosition + roomPositionCorrection;
 
-        if (currentRoomInstance != null) Destroy(currentRoomInstance);
+        if (currentRoomInstance != null) DestroyImmediate(currentRoomInstance);
         
         currentRoomInstance = Instantiate(prefabToSpawn, spawnPos, Quaternion.identity);
-        Debug.Log($"방 생성 (제자리 교체) 완료");
+        Debug.Log($"방 생성 완료 (위치: {spawnPos})");
 
-        // [제거됨] 카메라 이동 코드 삭제 (사용자 요청)
+       
 
         if (player != null)
         {
-            Vector3 playerTargetPos = spawnPos; // 기본값
+            Vector3 playerTargetPos = spawnPos; 
 
             RoomControl roomCtrl = currentRoomInstance.GetComponent<RoomControl>();
             if (roomCtrl == null) roomCtrl = currentRoomInstance.GetComponentInChildren<RoomControl>();
@@ -101,7 +121,7 @@ public class MapManager : MonoBehaviour
                 playerTargetPos = spawnPos + new Vector3(0, -2f, 0); 
             }
 
-            // 플레이어 Z축 -1로 고정하여 맵 위에 보이게 함
+            
             player.transform.position = new Vector3(playerTargetPos.x, playerTargetPos.y, -1f);
             player.SetActive(true);
         }
@@ -115,22 +135,45 @@ public class MapManager : MonoBehaviour
 
     public void ReturnToHallway()
     {
+        Debug.Log($"[MapManager] ReturnToHallway called. Target Pos: {lastDoorPosition}");
+
+        
         if (currentRoomInstance != null)
         {
             Destroy(currentRoomInstance);
+            currentRoomInstance = null;
         }
 
-        if (hallwayRoot != null)
+        
+        if (hallwayPrefab != null)
         {
-            hallwayRoot.SetActive(true);
+            currentHallwayInstance = Instantiate(hallwayPrefab, hallwaySpawnPosition, Quaternion.identity);
+            Debug.Log("복도 생성 완료했다 ㅆ벌");
+        }
+        else
+        {
+            Debug.LogError("MapManager Error: HallwayPrefab이 할당되지 않았습니다!");
         }
 
         if (player != null)
         {
-            // 플레이어를 문 앞으로 이동
+           
             player.transform.position = new Vector3(lastDoorPosition.x, lastDoorPosition.y, -1f);
+            player.SetActive(true);
             
-            // [제거됨] 카메라 이동 코드 삭제
+            Debug.Log($"Player returned to {player.transform.position}");
+
+            // 혹시 대시 중이면 멈추게 가속도 초기화
+            Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector2.zero;
+                rb.angularVelocity = 0f;
+            }
+        }
+        else
+        {
+            Debug.LogError("MapManager Error: Player is missing!");
         }
     }
 

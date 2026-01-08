@@ -142,6 +142,9 @@ public class zombie : MonoBehaviour, IDamageable
         currentState = State.Dead;
         
        
+        // [Fix] 죽는 즉시 레이어를 Default(0)로 변경하여 RoomControl집계에서 제외
+        gameObject.layer = 0; 
+
         RoomControl room = GetComponentInParent<RoomControl>();
         if (room != null)
         {

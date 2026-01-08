@@ -50,17 +50,25 @@ public class RoomControl : MonoBehaviour
     void CountEnemies()
     {
         int count = 0;
-        // 내 자식들 중 "enemy" 레이어(Layer 7 presumed, or by name)인 활성화된 오브젝트 찾기
-        // Transform을 순회하는게 가장 정확함
-        foreach (Transform child in GetComponentsInChildren<Transform>())
+        
+        // [수정] 내 자식뿐만 아니라 내 부모(Room 전체)의 자식들도 다 뒤져야 함
+        // (RoomControl 스크립트가 Room 루트가 아니라 자식 오브젝트에 붙어있는 경우 대비)
+        Transform root = transform;
+        if (transform.parent != null) root = transform.parent;
+
+        foreach (Transform child in root.GetComponentsInChildren<Transform>())
         {
-            // Layer 이름이 "enemy"인 것만 카운트 (본인 제외)
-            if (child != transform && child.gameObject.activeInHierarchy && LayerMask.LayerToName(child.gameObject.layer) == "enemy")
+            // Layer 이름이 "enemy"인 것만 카운트 (대소문자 무시, 본인 제외)
+            string layerName = LayerMask.LayerToName(child.gameObject.layer);
+            
+            // 자기 자신이나 루트는 제외
+            if (child != transform && child != root && child.gameObject.activeInHierarchy && layerName.ToLower() == "enemy")
             {
                 count++;
             }
         }
         livingEnemyCount = count;
+        // Debug.Log($"[RoomControl] 현재 적 수: {count}");
     }
 
 

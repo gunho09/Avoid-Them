@@ -13,19 +13,23 @@ public class Door : MonoBehaviour
 
     [Header("Visual Settings")]
     public SpriteRenderer spriteRenderer;
-    public Sprite openSprite;   // 열려있을 때 (투명 혹은 열린 이미지)
-    public Sprite closedSprite; // 닫혀있을 때 (닫힌 이미지)
+    public Sprite openSprite;  
+    public Sprite closedSprite; 
 
     public bool isOpen = true;
 
     [Header("Return Settings")]
-    public Vector3 returnOffset = new Vector3(0, -1.5f, 0); // 복귀 시 문 앞 어디로 올지 (기본: 아래쪽)
+    public Vector3 returnOffset = new Vector3(0, -1.5f, 0); 
+
+    
+    private static float lastDoorUseTime = 0f;
+    private const float doorCooldown = 1.5f; 
 
     private void Start()
     {
         Debug.Log($"Door Script Init: {gameObject.name}, Type: {type}");
 
-        // [자동 수정] 문 위치가 Z축과 어긋나 있으면 강제로 0으로 맞춤 (충돌 문제 해결)
+        
         if (Mathf.Abs(transform.position.z) > 0.1f)
         {
             Vector3 pos = transform.position;
@@ -36,7 +40,6 @@ public class Door : MonoBehaviour
         if (spriteRenderer == null)
             spriteRenderer = GetComponent<SpriteRenderer>();
 
-        // [중요] 벽 위에 겹쳐도 잘 보이도록 순서를 앞으로 당깁니다.
         if (spriteRenderer != null)
         {
             spriteRenderer.sortingOrder = 5; 
@@ -45,7 +48,63 @@ public class Door : MonoBehaviour
         UpdateVisuals();
     }
 
-    // 외부에서 문 상태를 변경할 때 이 함수를 사용하세요
+  
+    private void Update()
+    {
+        if (!isOpen) return;
+        
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null)
+        {
+            
+            player = GameObject.Find("MainChar");
+        }
+        
+        if (player != null)
+        {
+            float distance = Vector2.Distance(transform.position, player.transform.position);
+            if (distance < 1.5f) 
+            {
+                Debug.Log($"[Door] 거리 체크로 플레이어 감지! 거리: {distance}");
+                TriggerDoor();
+            }
+        }
+    }
+
+    private void TriggerDoor()
+    {
+        
+        if (Time.time - lastDoorUseTime < doorCooldown)
+        {
+            Debug.Log($"[Door] 쿨다운 중! 남은 시간: {doorCooldown - (Time.time - lastDoorUseTime):F2}초");
+            return; 
+        }
+        
+        Debug.Log($"[Door] TriggerDoor 호출됨! Type: {type}");
+        
+        if (MapManager.Instance == null)
+        {
+            Debug.LogError("[Door] MapManager.Instance가 null입니다! 씬에 MapManager가 있는지 확인하세요.");
+            return;
+        }
+        
+       
+        lastDoorUseTime = Time.time;
+        
+        if (type == DoorType.ToRoom || type == DoorType.ToBossRoom)
+        {
+            Vector3 safeReturnPos = this.transform.position + returnOffset;
+            Debug.Log($"[Door] EnterRoom 호출 시도...");
+            MapManager.Instance.EnterRoom(safeReturnPos, type == DoorType.ToBossRoom);
+        }
+        else if (type == DoorType.ToHallway)
+        {
+            Debug.Log("[Door] ReturnToHallway 호출 시도...");
+            MapManager.Instance.ReturnToHallway();
+        }
+    }
+
+    //외부사용
     public void SetStatus(bool _isOpen)
     {
         isOpen = _isOpen;
@@ -56,7 +115,7 @@ public class Door : MonoBehaviour
     {
         if (spriteRenderer == null) return;
 
-        // 보스방 문이면 빨간색으로 표시
+        //보스 그 빨강표시함
         if (type == DoorType.ToBossRoom)
         {
             spriteRenderer.color = Color.red;
@@ -88,19 +147,19 @@ public class Door : MonoBehaviour
         EnterIfPlayer(collision.gameObject);
     }
 
-    // [추가] 혹시 Is Trigger 체크 안 했을 경우를 대비해 충돌(Collision)로도 작동하게 함
+  
     private void OnCollisionEnter2D(Collision2D collision)
     {
         EnterIfPlayer(collision.gameObject);
     }
 
-    // [추가] 고속 이동 시 Enter가 씹히거나, 판정 내부에 있을 때를 대비해 Stay도 체크
+    /
     private void OnTriggerStay2D(Collider2D collision)
     {
         EnterIfPlayer(collision.gameObject);
     }
 
-    // [추가] 물리 충돌 상태에서도 비비면 넘어가지도록 Stay 추가
+   
     private void OnCollisionStay2D(Collision2D collision)
     {
         EnterIfPlayer(collision.gameObject);
@@ -108,29 +167,29 @@ public class Door : MonoBehaviour
 
     private void EnterIfPlayer(GameObject target)
     {
-        // 디버깅 로그는 유지
-        // Debug.Log($"Door Hit: {target.name}, Tag: {target.tag}");
+       
+        Debug.Log($"Door Hit Check: {target.name}");
 
-        if (target.CompareTag("Player"))
+        
+        Debug.Log($"[Door] Object detected. Open: {isOpen}, Type: {type}");
+
+        if (!isOpen)
         {
-            if (!isOpen)
-            {
-                Debug.Log($"문이 잠겨있습니다! (Mobs remaining or Start_Panel not updated?) Type: {type}");
-                return;
-            }
+            Debug.Log($"문이 잠겨있습니다! (Mobs remaining?) Type: {type}");
+            return;
+        }
 
-            Debug.Log($"문 작동! Player 감지됨. 이동 시도 -> Type: {type}");
-            
-            if (type == DoorType.ToRoom || type == DoorType.ToBossRoom)
-            {
-                Vector3 safeReturnPos = this.transform.position + returnOffset;
-                MapManager.Instance.EnterRoom(safeReturnPos, type == DoorType.ToBossRoom);
-            }
-            else if (type == DoorType.ToHallway)
-            {
-                Debug.Log("복도로 돌아갑니다.");
-                MapManager.Instance.ReturnToHallway();
-            }
+        Debug.Log($"문 작동! 이동 시도 -> Type: {type}");
+        
+        if (type == DoorType.ToRoom || type == DoorType.ToBossRoom)
+        {
+            Vector3 safeReturnPos = this.transform.position + returnOffset;
+            MapManager.Instance.EnterRoom(safeReturnPos, type == DoorType.ToBossRoom);
+        }
+        else if (type == DoorType.ToHallway)
+        {
+            Debug.Log("복도로 돌아갑니다.");
+            MapManager.Instance.ReturnToHallway();
         }
     }
 }
