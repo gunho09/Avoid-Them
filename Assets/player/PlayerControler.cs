@@ -31,6 +31,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
     public TextMeshProUGUI hpText;   
     public TextMeshProUGUI expText;
 
+    [Header("인벤토리")]
 
 
     [Header("기술/상태 변수")]
@@ -42,7 +43,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
     [Header("레벨관리")]
     public float exp;
     public float currentExp = 0;
-    public float Lvl = 1;
+    public float PlayerLvl = 1;
     public float MaxExp = 20;
 
     [Header("쿨타임")]
@@ -180,6 +181,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
             hit.GetComponent<IDamageable>()?.TakeDamage(attackDamage * 2f * (isBoost ? 2 : 1));
         }
 
+        Debug.Log("훅훅");
         isHook = true;
         hookTimer = hookDuration;
         cooldownTimerHook = hookCooldown;
@@ -266,12 +268,17 @@ public class PlayerControler : MonoBehaviour, IDamageable
             currentExp -= MaxExp;
             PlayerCurrentHp += PlayerMaxHp * 0.2f;
             PlayerDamage += 0.05f * PlayerDamage;
-            Lvl++;
+            PlayerLvl++;
             if (ExpSlider != null) ExpSlider.value = currentExp;
-            if (LvlText != null) LvlText.text = $"{Lvl}";
+            if (LvlText != null) LvlText.text = $"{PlayerLvl}";
 
         }
 
+    }
+
+    void inventoryMananger()
+    {
+       // 나중에 아이템 아이디로 반복 돌림 
     }
 
     private void CoolDownMananger()
