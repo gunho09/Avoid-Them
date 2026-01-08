@@ -76,6 +76,13 @@ public class zombie : MonoBehaviour
 
     void ChasePlayer()
     {
+        float fistanceToPlayer = Vector3.Distance(transform.position, player.position);
+
+        if (fistanceToPlayer <= attackRange)
+        {
+            currentState = State.Attack;
+            return;
+        }
         pathUpdateTimer += Time.deltaTime;
         if (pathUpdateTimer >= pathupdateInterval)
         {
@@ -109,7 +116,7 @@ public class zombie : MonoBehaviour
     {
         if (Time.time - lastAttackTime >= atackSpeed)
         {
-            playerControler.TakeDamage(attackDamage);
+            //playerControler.TakeDamage(attackDamage);
             lastAttackTime = Time.time;
         }
     }

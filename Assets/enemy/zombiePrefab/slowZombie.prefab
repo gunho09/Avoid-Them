@@ -182,9 +182,9 @@ MonoBehaviour:
   playerControler: {fileID: 0}
   health: 170
   attackDamage: 65
-  speed: 1
+  speed: 2
   atackSpeed: 1
   dodgeChance: 0
   expDrop: 6
   range: 100
-  attackRange: 1
+  attackRange: 2

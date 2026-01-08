@@ -187,4 +187,4 @@ MonoBehaviour:
   dodgeChance: 0
   expDrop: 10
   range: 100
-  attackRange: 1
+  attackRange: 2
