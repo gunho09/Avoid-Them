@@ -100,7 +100,7 @@ public class zombie : MonoBehaviour
             targetPosition.z = transform.position.z;
             Vector3 dir = (targetPosition - transform.position).normalized;
             transform.position += dir * speed * Time.deltaTime;
-            if (Vector3.Distance(transform.position, targetPosition) < 0.4f)
+            if (Vector3.Distance(transform.position, targetPosition) < 0.2f)
             {
                 targetIndex++;
             }
@@ -116,10 +116,7 @@ public class zombie : MonoBehaviour
     {
         if (Time.time - lastAttackTime >= atackSpeed)
         {
-            if (playerControler != null)
-            {
-                playerControler.TakeDamage(attackDamage);
-            }
+            playerControler.TakeDamage(attackDamage);
             lastAttackTime = Time.time;
         }
     }
@@ -142,8 +139,6 @@ public class zombie : MonoBehaviour
     {
         currentState = State.Dead;
         
-       
-        //  죽는 즉시 레이어를 Default(0)로 변경하여 RoomControl집계에서 제외
         gameObject.layer = 0; 
 
         RoomControl room = GetComponentInParent<RoomControl>();
