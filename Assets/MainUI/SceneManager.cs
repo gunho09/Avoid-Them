@@ -28,4 +28,11 @@ public class SceneManager : MonoBehaviour
         Application.Quit();
     }
 
+    public void PracticeRoom()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene("practiceRoom");
+    }
+
+
+
 }
