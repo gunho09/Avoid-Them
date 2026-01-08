@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 public class PlayerControler : MonoBehaviour, IDamageable
@@ -31,6 +32,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
     public TextMeshProUGUI hpText;   
     public TextMeshProUGUI expText;
 
+    [Header("인벤토리")]
 
 
     [Header("기술/상태 변수")]
@@ -42,7 +44,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
     [Header("레벨관리")]
     public float exp;
     public float currentExp = 0;
-    public float Lvl = 1;
+    public float PlayerLvl = 1;
     public float MaxExp = 20;
 
     [Header("쿨타임")]
@@ -170,19 +172,92 @@ public class PlayerControler : MonoBehaviour, IDamageable
         Debug.DrawLine((Vector2)transform.position - rightEdge, (Vector2)transform.position + attackDir * attackDistance - rightEdge, Color.cyan, 0.2f);
         Debug.DrawLine((Vector2)transform.position + attackDir * attackDistance + rightEdge, (Vector2)transform.position + attackDir * attackDistance - rightEdge, Color.cyan, 0.2f);
     }
-   
+
     public void LeftHook()
     {
-        // 레프트훅은 전방위 혹은 넓은 부채꼴 (여기선 전방위 원형 예시)
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, attackRange, enemy);
-        foreach (Collider2D hit in hits)
+        // 1. 마우스 방향 계산
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mousePos.z = 0;
+        Vector2 attackDir = (mousePos - transform.position).normalized;
+
+        // --- [시각화: Debug.DrawLine] ---
+        float angleRange = 60f; // 중심에서 좌우 60도 (총 120도)
+        int segments = 10;
+        float duration = 0.2f;
+
+        Vector3 leftRay = Quaternion.Euler(0, 0, angleRange) * attackDir;
+        Vector3 rightRay = Quaternion.Euler(0, 0, -angleRange) * attackDir;
+
+        Debug.DrawLine(transform.position, transform.position + leftRay * attackRange, Color.cyan, duration);
+        Debug.DrawLine(transform.position, transform.position + rightRay * attackRange, Color.cyan, duration);
+
+        Vector3 previousPoint = transform.position + leftRay * attackRange;
+        for (int i = 1; i <= segments; i++)
         {
-            hit.GetComponent<IDamageable>()?.TakeDamage(attackDamage * 2f * (isBoost ? 2 : 1));
+            float currentAngle = Mathf.Lerp(angleRange, -angleRange, (float)i / segments);
+            Vector3 nextDir = Quaternion.Euler(0, 0, currentAngle) * attackDir;
+            Vector3 nextPoint = transform.position + nextDir * attackRange;
+            Debug.DrawLine(previousPoint, nextPoint, Color.cyan, duration);
+            previousPoint = nextPoint;
         }
 
+        // --- [공격 판정: Physics2D] ---
+        // 1. 먼저 내 주변 원형 범위의 적을 다 찾습니다.
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, attackRange, enemy);
+
+        foreach (Collider2D hit in hits)
+        {
+            // 2. 적이 내 앞에 있는지(각도 체크) 확인합니다.
+            Vector2 dirToEnemy = (hit.transform.position - transform.position).normalized;
+            float angle = Vector2.Angle(attackDir, dirToEnemy);
+
+            if (angle <= angleRange) // 부채꼴 범위 안에 들어와 있다면
+            {
+                hit.GetComponent<IDamageable>()?.TakeDamage(attackDamage * 2f * (isBoost ? 2 : 1));
+            }
+        }
+
+        // 상태 업데이트
+        Debug.Log("훅훅!");
         isHook = true;
         hookTimer = hookDuration;
         cooldownTimerHook = hookCooldown;
+    }
+
+    private void OnDrawGizmos()
+    {
+        // 1. 마우스 방향 벡터 계산 (공격 로직과 동일하게)
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mousePos.z = 0;
+        Vector2 attackDir = (mousePos - transform.position).normalized;
+
+        // 2. Gizmos 색상 설정
+        Gizmos.color = Color.red;
+
+        // 3. 중심선 그리기
+        Gizmos.DrawRay(transform.position, attackDir * attackRange);
+
+        // 4. 부채꼴의 양 끝선 계산 (60도씩 회전)
+        Vector3 leftBoundary = Quaternion.Euler(0, 0, 60f) * attackDir;
+        Vector3 rightBoundary = Quaternion.Euler(0, 0, -60f) * attackDir;
+
+        // 5. 양 끝 경계선 그리기
+        Gizmos.DrawRay(transform.position, leftBoundary * attackRange);
+        Gizmos.DrawRay(transform.position, rightBoundary * attackRange);
+
+        // 6. [심화] 끝부분을 곡선으로 연결 (원 모양처럼 보이게)
+        int segments = 10; // 선을 10개로 쪼개서 곡선 만들기
+        Vector3 previousPoint = leftBoundary;
+        for (int i = 1; i <= segments; i++)
+        {
+            // 60도에서 -60도까지 순차적으로 회전하며 점 찍기
+            float angle = Mathf.Lerp(60f, -60f, (float)i / segments);
+            Vector3 nextPoint = Quaternion.Euler(0, 0, angle) * attackDir;
+
+            Gizmos.DrawLine(transform.position + previousPoint * attackRange,
+                            transform.position + nextPoint * attackRange);
+            previousPoint = nextPoint;
+        }
     }
 
     public void Dash(Vector3 direction)
@@ -266,12 +341,18 @@ public class PlayerControler : MonoBehaviour, IDamageable
             currentExp -= MaxExp;
             PlayerCurrentHp += PlayerMaxHp * 0.2f;
             PlayerDamage += 0.05f * PlayerDamage;
-            Lvl++;
+            PlayerLvl++;
             if (ExpSlider != null) ExpSlider.value = currentExp;
-            if (LvlText != null) LvlText.text = $"{Lvl}";
+            LvlText.text = $"{PlayerLvl}";
+            
 
         }
 
+    }
+
+    void inventoryMananger()
+    {
+       // 나중에 아이템 아이디로 반복 돌림 
     }
 
     private void CoolDownMananger()
@@ -287,4 +368,15 @@ public class PlayerControler : MonoBehaviour, IDamageable
         if (cooldownTimerHook > 0) cooldownTimerHook -= dt;
         if (isHook) { hookTimer -= dt; if (hookTimer <= 0) isHook = false; }
     }
+
+    public void GoMain()
+        {
+            if (deathUI != null) deathUI.SetActive(false);
+            UnityEngine.SceneManagement.SceneManager.LoadScene("MainUI");
+        }
+
+        public void Quit()
+        {
+            Application.Quit();
+        }
 }

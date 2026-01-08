@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class zombie : MonoBehaviour, IDamageable
+public class zombie : MonoBehaviour
 {
     public PlayerControler playerControler;
     public int health;
@@ -28,20 +28,12 @@ public class zombie : MonoBehaviour, IDamageable
     {
         currentHealth = health;
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-        if (playerObj != null) 
+        if (playerObj != null)
         {
             player = playerObj.transform;
+            playerControler = playerObj.GetComponent<PlayerControler>();
         }
-        else
-        {
-           Debug.LogError("Zombie Error: Player 태그를 가진 오브젝트를 찾을 수 없습니다.");
-        }
-
         pathfinding = FindFirstObjectByType<Pathfinding>();
-        if (pathfinding == null)
-        {
-             Debug.LogError("Zombie Error: Scene에 'Pathfinding' 컴포넌트가 없습니다. GridManager 오브젝트에 Pathfinding 스크립트를 추가했는지 확인해주세요.");
-        }
     }
 
     void Update()
@@ -84,6 +76,13 @@ public class zombie : MonoBehaviour, IDamageable
 
     void ChasePlayer()
     {
+        float fistanceToPlayer = Vector3.Distance(transform.position, player.position);
+
+        if (fistanceToPlayer <= attackRange)
+        {
+            currentState = State.Attack;
+            return;
+        }
         pathUpdateTimer += Time.deltaTime;
         if (pathUpdateTimer >= pathupdateInterval)
         {
@@ -117,8 +116,7 @@ public class zombie : MonoBehaviour, IDamageable
     {
         if (Time.time - lastAttackTime >= atackSpeed)
         {
-            // playerControler.TakeDamage(attackDamage);
-            player.GetComponent<IDamageable>()?.TakeDamage(attackDamage);
+            //playerControler.TakeDamage(attackDamage);
             lastAttackTime = Time.time;
         }
     }
@@ -152,5 +150,7 @@ public class zombie : MonoBehaviour, IDamageable
         }
 
         Destroy(gameObject, 2f); 
+
+        playerControler.TakeExp(expDrop);
     }
 }
