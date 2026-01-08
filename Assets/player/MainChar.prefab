@@ -293,7 +293,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1292540952897730993
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1393,7 +1393,7 @@ MonoBehaviour:
   expText: {fileID: 1311001958176327581}
   exp: 0
   currentExp: 0
-  Lvl: 1
+  PlayerLvl: 1
   MaxExp: 20
   dashCooldown: 1
   dashSpeed: 15
