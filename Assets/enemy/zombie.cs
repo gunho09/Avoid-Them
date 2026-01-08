@@ -23,9 +23,11 @@ public class zombie : MonoBehaviour
     private int targetIndex;
     private float pathUpdateTimer;
     private const float pathupdateInterval = 0.3f;
+    private Rigidbody2D rb;
 
     void Start()
     {
+        rb = GetComponent<Rigidbody2D>();
         currentHealth = health;
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         if (playerObj != null)
@@ -63,12 +65,13 @@ public class zombie : MonoBehaviour
         switch (currentState)
         {
             case State.Idle:
-                //애니메이션
+                rb.linearVelocity = Vector2.zero;
                 break;
             case State.Chase:
                 ChasePlayer();
                 break;
             case State.Attack:
+                rb.linearVelocity = Vector2.zero;
                 AttackPlayer();
                 break;
         }
@@ -99,16 +102,16 @@ public class zombie : MonoBehaviour
             Vector3 targetPosition = path[targetIndex].worldPosition;
             targetPosition.z = transform.position.z;
             Vector3 dir = (targetPosition - transform.position).normalized;
-            transform.position += dir * speed * Time.deltaTime;
+            rb.linearVelocity = dir * speed;
             if (Vector3.Distance(transform.position, targetPosition) < 0.2f)
             {
                 targetIndex++;
             }
         }
-        else
+        else if (player != null)
         {
-            Vector3 direction = (player.position - transform.position).normalized;
-            transform.position += direction * (speed * 0.5f) * Time.deltaTime;
+            Vector2 direction = (player.position - transform.position).normalized;
+            rb.linearVelocity = direction * (speed * 0.5f);
         }
     }
 
@@ -116,7 +119,7 @@ public class zombie : MonoBehaviour
     {
         if (Time.time - lastAttackTime >= atackSpeed)
         {
-            playerControler.TakeDamage(attackDamage);
+            //playerControler.TakeDamage(attackDamage);
             lastAttackTime = Time.time;
         }
     }
@@ -138,9 +141,7 @@ public class zombie : MonoBehaviour
     void Die()
     {
         currentState = State.Dead;
-        
-        gameObject.layer = 0; 
-
+        rb.linearVelocity = Vector2.zero;
         RoomControl room = GetComponentInParent<RoomControl>();
         if (room != null)
         {

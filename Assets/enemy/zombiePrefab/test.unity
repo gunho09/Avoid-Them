@@ -223,7 +223,7 @@ GameObject:
   - component: {fileID: 1221850601}
   - component: {fileID: 1221850604}
   - component: {fileID: 1221850603}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Square
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -330,7 +330,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!61 &1221850604
 BoxCollider2D:
   m_ObjectHideFlags: 0
