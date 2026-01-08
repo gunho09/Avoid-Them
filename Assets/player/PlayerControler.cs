@@ -101,14 +101,16 @@ public class PlayerControler : MonoBehaviour, IDamageable
         {
             
             Guarding = true;
-            playerSpeed = 2f;
+            playerSpeed = 1f;
             
         }
         if (Input.GetMouseButtonUp(1))
         {
             
             Guarding = false;
-            
+            playerSpeed = 5f;
+
+
         }
 
         if (Input.GetKeyDown(KeyCode.LeftShift) && cooldownTimerDashDash <= 0)
@@ -146,6 +148,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     public void Attack1() //원
     {
+        playerSpeed = 0f;
         attackNum++;
         // 1. 마우스 방향 계산
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -171,10 +174,13 @@ public class PlayerControler : MonoBehaviour, IDamageable
         Debug.DrawLine((Vector2)transform.position + rightEdge, (Vector2)transform.position + attackDir * attackDistance + rightEdge, Color.cyan, 0.2f);
         Debug.DrawLine((Vector2)transform.position - rightEdge, (Vector2)transform.position + attackDir * attackDistance - rightEdge, Color.cyan, 0.2f);
         Debug.DrawLine((Vector2)transform.position + attackDir * attackDistance + rightEdge, (Vector2)transform.position + attackDir * attackDistance - rightEdge, Color.cyan, 0.2f);
+        playerSpeed = 5f;
     }
 
     public void LeftHook()
     {
+        playerSpeed = 0f;
+
         // 1. 마우스 방향 계산
         Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mousePos.z = 0;
@@ -222,6 +228,8 @@ public class PlayerControler : MonoBehaviour, IDamageable
         isHook = true;
         hookTimer = hookDuration;
         cooldownTimerHook = hookCooldown;
+        playerSpeed = 5f;
+
     }
 
     private void OnDrawGizmos()
