@@ -149,5 +149,7 @@ public class zombie : MonoBehaviour, IDamageable
         }
 
         Destroy(gameObject, 2f); 
+
+        playerControler.TakeExp(expDrop);
     }
 }
