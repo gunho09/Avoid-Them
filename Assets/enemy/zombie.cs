@@ -76,9 +76,9 @@ public class zombie : MonoBehaviour
 
     void ChasePlayer()
     {
-        float fistanceToPlayer = Vector3.Distance(transform.position, player.position);
+        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
-        if (fistanceToPlayer <= attackRange)
+        if (distanceToPlayer <= attackRange)
         {
             currentState = State.Attack;
             return;
@@ -116,7 +116,10 @@ public class zombie : MonoBehaviour
     {
         if (Time.time - lastAttackTime >= atackSpeed)
         {
-            //playerControler.TakeDamage(attackDamage);
+            if (playerControler != null)
+            {
+                playerControler.TakeDamage(attackDamage);
+            }
             lastAttackTime = Time.time;
         }
     }
@@ -140,7 +143,7 @@ public class zombie : MonoBehaviour
         currentState = State.Dead;
         
        
-        // [Fix] 죽는 즉시 레이어를 Default(0)로 변경하여 RoomControl집계에서 제외
+        //  죽는 즉시 레이어를 Default(0)로 변경하여 RoomControl집계에서 제외
         gameObject.layer = 0; 
 
         RoomControl room = GetComponentInParent<RoomControl>();

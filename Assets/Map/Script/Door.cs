@@ -53,11 +53,17 @@ public class Door : MonoBehaviour
     {
         if (!isOpen) return;
         
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player == null)
+        // [최적화] 매 프레임 Find 하는 대신 MapManager의 플레이어 참조 사용
+        GameObject player = null;
+        if (MapManager.Instance != null && MapManager.Instance.player != null)
         {
-            
-            player = GameObject.Find("MainChar");
+            player = MapManager.Instance.player;
+        }
+        else
+        {
+            // 비상용 (MapManager가 없을 때만 Find)
+            player = GameObject.FindGameObjectWithTag("Player");
+            if (player == null) player = GameObject.Find("MainChar");
         }
         
         if (player != null)
@@ -65,7 +71,8 @@ public class Door : MonoBehaviour
             float distance = Vector2.Distance(transform.position, player.transform.position);
             if (distance < 1.5f) 
             {
-                Debug.Log($"[Door] 거리 체크로 플레이어 감지! 거리: {distance}");
+                // [로그 최적화] 너무 자주 뜨지 않게 주석 처리하거나 빈도 줄이는 게 좋음
+                // Debug.Log($"[Door] 거리 체크로 플레이어 감지! 거리: {distance}");
                 TriggerDoor();
             }
         }
@@ -153,7 +160,7 @@ public class Door : MonoBehaviour
         EnterIfPlayer(collision.gameObject);
     }
 
-    /
+    // Stay 체크
     private void OnTriggerStay2D(Collider2D collision)
     {
         EnterIfPlayer(collision.gameObject);

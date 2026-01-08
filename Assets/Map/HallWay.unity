@@ -177,7 +177,7 @@ MonoBehaviour:
   - {fileID: 2079059723218737967, guid: 2c32fd5c6b907964eb84b7f5a35240e0, type: 3}
   - {fileID: 5253605838947361107, guid: 6e2b421f60d6d4b4ba7be64323f3db61, type: 3}
   bossRoomPrefab: {fileID: 0}
-  mainCamera: {fileID: 0}
+  mainCamera: {fileID: 1495767127}
 --- !u!1 &110500584 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5218158965369317558, guid: f5168eed14bfd714bb0dff12e973b699, type: 3}
