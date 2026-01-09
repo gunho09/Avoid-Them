@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
+using System.Collections;
 
 public class PlayerControler : MonoBehaviour, IDamageable
 {
@@ -18,6 +19,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
     public float attackDamage = 10f;
     public int attackNum = 2;
     public LayerMask enemy;             // 적 레이어 설정 필수
+    private bool isAttacking = false;
 
     [Header("계산된 스탯")]
     public float PlayerMaxHp;
@@ -31,6 +33,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
     public TextMeshProUGUI LvlText;
     public TextMeshProUGUI hpText;   
     public TextMeshProUGUI expText;
+    public Image bloodOverlay;
 
     [Header("인벤토리")]
 
@@ -44,7 +47,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
     [Header("레벨관리")]
     public float exp;
     public float currentExp = 0;
-    public float PlayerLvl = 1;
+    public float PlayerLvl = 0;
     public float MaxExp = 20;
 
     [Header("쿨타임")]
@@ -69,6 +72,11 @@ public class PlayerControler : MonoBehaviour, IDamageable
     void Start()
     {
         CurrentPlayer();
+        
+        
+        LvlText.text = $"{PlayerLvl}";
+        if (expText != null) expText.text = $"{currentExp} / {MaxExp}";
+        if (hpText != null) hpText.text = $"{PlayerCurrentHp} / {PlayerMaxHp}";
 
         rb = GetComponent<Rigidbody2D>();
         if (rb != null)
@@ -85,17 +93,16 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     void Update()
     {
-        CoolDownMananger();
 
         // 이동 입력
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveY = Input.GetAxisRaw("Vertical");
         inputMovement = new Vector2(moveX, moveY);
 
+        CoolDownMananger();
 
         // 입력 처리
-        if (Input.GetMouseButtonDown(0)) Attack1();
-        if (Input.GetKeyDown(KeyCode.E)) LeftHook(); // E: 레프트훅
+        
 
         if (Input.GetMouseButtonDown(1))
         {
@@ -113,12 +120,19 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
         }
 
-        if (Input.GetKeyDown(KeyCode.LeftShift) && cooldownTimerDashDash <= 0)
-        {
-            Dash(new Vector3(moveX, moveY, 0));
-        }   
+        if (Input.GetMouseButtonDown(0)) Attack1();
 
+        // 2. 훅 기술에 쿨타임 조건 추가 (기존에는 조건이 없었음)
+        if (Input.GetKeyDown(KeyCode.E) && cooldownTimerHook <= 0)
+        {
+            LeftHook();
+        }
+
+        // 대쉬와 부스트는 이미 조건문이 잘 들어가 있습니다.
+        if (Input.GetKeyDown(KeyCode.LeftShift) && cooldownTimerDashDash <= 0) Dash(inputMovement);
         if (Input.GetKeyDown(KeyCode.Q) && cooldownTimerBoost <= 0) Boost();
+
+        CoolDownMananger(); // 이 함수가 돌아가면서 수치를 깎음
 
         // 시각화 디버깅 (항상 마우스 방향으로 빨간 선 표시)
         Vector3 mPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -134,10 +148,47 @@ public class PlayerControler : MonoBehaviour, IDamageable
         {
             rb.linearVelocity = dashDirection * dashSpeed;
         }
+
+        else if (isAttacking)
+        {
+            rb.linearVelocity = Vector2.zero;
+        }
+
         else
         {
             rb.linearVelocity = inputMovement.normalized * playerSpeed;
         }
+    }
+
+    IEnumerator AttackStopRoutine()
+    {
+        isAttacking = true;
+
+        rb.linearVelocity = Vector2.zero;
+
+        // 2. 여기에 애니메이션 실행 코드 작성 (예: anim.SetTrigger("Attack"))
+
+        yield return new WaitForSeconds(0.2f); // 0.2초간 멈춤
+
+        isAttacking = false;
+    }
+
+    IEnumerator ScreenFlash()
+    {
+        float duration = 0.3f;
+        float maxAlpha = 0.6f;
+
+        bloodOverlay.color = new Color(0.4f, 0, 0, maxAlpha);
+
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = Mathf.Lerp(maxAlpha, 0, elapsed / duration);
+            bloodOverlay.color = new Color(0.4f, 0, 0, alpha);
+            yield return null;
+        }
+        bloodOverlay.color = new Color(0, 0, 0, 0);
     }
 
     public bool isNum(int num)
@@ -159,12 +210,14 @@ public class PlayerControler : MonoBehaviour, IDamageable
         Vector2 boxCenter = (Vector2)transform.position + attackDir * (attackDistance / 2f);
         Vector2 boxSize = new Vector2(attackWidth, attackDistance);
         float angle = Mathf.Atan2(attackDir.y, attackDir.x) * Mathf.Rad2Deg - 90f;
-
+        
+       
+        StartCoroutine(AttackStopRoutine());
         // 3. 판정 및 데미지
         Collider2D[] hits = Physics2D.OverlapBoxAll(boxCenter, boxSize, angle, enemy);
         foreach (Collider2D hit in hits)
         {
-            hit.GetComponent<IDamageable>()?.TakeDamage(PlayerDamage);
+            hit.GetComponent<IDamageable>()?.TakeDamage(attackDamage * (isBoost ? 2 : 1));
             Debug.Log($"원");
         }
 
@@ -179,7 +232,6 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     public void LeftHook()
     {
-        playerSpeed = 0f;
 
         // 1. 마우스 방향 계산
         Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -206,6 +258,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
             Debug.DrawLine(previousPoint, nextPoint, Color.cyan, duration);
             previousPoint = nextPoint;
         }
+        StartCoroutine(AttackStopRoutine());
 
         // --- [공격 판정: Physics2D] ---
         // 1. 먼저 내 주변 원형 범위의 적을 다 찾습니다.
@@ -228,7 +281,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
         isHook = true;
         hookTimer = hookDuration;
         cooldownTimerHook = hookCooldown;
-        playerSpeed = 5f;
+
 
     }
 
@@ -298,6 +351,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
     {
         float finalDamage = damage * Guard();
         PlayerCurrentHp -= finalDamage;
+        
         Debug.Log($"플레이어 데미지 입음: {finalDamage}, 남은 체력: {PlayerCurrentHp}");
 
         if (hpSlider != null) hpSlider.value = PlayerCurrentHp;
@@ -321,10 +375,11 @@ public class PlayerControler : MonoBehaviour, IDamageable
     }
 
     public void TakeExp(float exp)
-    {
+    {      
+        currentExp += exp;
         if (ExpSlider != null) ExpSlider.value = currentExp;
         if (expText != null) expText.text = $"{currentExp} / {MaxExp}";
-        currentExp += exp;
+
         if(MaxExp < currentExp)
         {
             LevelUp();
@@ -351,6 +406,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
             PlayerDamage += 0.05f * PlayerDamage;
             PlayerLvl++;
             if (ExpSlider != null) ExpSlider.value = currentExp;
+            if (expText != null) expText.text = $"{currentExp} / {MaxExp}";
             LvlText.text = $"{PlayerLvl}";
             
 

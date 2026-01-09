@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class zombie : MonoBehaviour, IDamageable
 {
@@ -103,6 +104,9 @@ public class zombie : MonoBehaviour, IDamageable
         if (Random.value < dodgeChance) return;
 
         currentHealth -= damage;
+
+        StartCoroutine(HitFlashRoutine());
+
         if (currentHealth <= 0 && currentState != State.Dead)
         {
             Die();
@@ -136,5 +140,18 @@ public class zombie : MonoBehaviour, IDamageable
         Gizmos.DrawWireSphere(transform.position, range);
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, attackRange);
+    }
+    IEnumerator HitFlashRoutine()
+    {
+        SpriteRenderer sprite = GetComponentInChildren<SpriteRenderer>();
+        if (sprite != null)
+        {
+            Color originalColor = sprite.color;
+            sprite.color = new Color(0.3f, 0.3f, 0.3f, 1f);
+
+            yield return new WaitForSeconds(0.1f);
+
+            sprite.color = originalColor;
+        }
     }
 }

@@ -1390,6 +1390,7 @@ MonoBehaviour:
   LvlText: {fileID: 4395164932420523591}
   hpText: {fileID: 1022659715813087062}
   expText: {fileID: 1311001958176327581}
+  damageOverlay: {fileID: 0}
   exp: 0
   currentExp: 0
   PlayerLvl: 1
