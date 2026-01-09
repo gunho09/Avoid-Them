@@ -179,12 +179,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b053b2ed5a69eb94387952ac6ccb61cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::zombie
-  playerControler: {fileID: 0}
+  PlayerControler: {fileID: 0}
   health: 300
   attackDamage: 80
-  speed: 3
+  speed: 1.5
   atackSpeed: 3
   dodgeChance: 0
   expDrop: 10
   range: 100
-  attackRange: 2
+  attackRange: 1

@@ -1,59 +1,62 @@
 using UnityEngine;
-using System.Collections.Generic;
 
-public class zombie : MonoBehaviour
+public class zombie : MonoBehaviour, IDamageable
 {
-    public PlayerControler playerControler;
-    public int health;
-    public int attackDamage;
-    public float speed;
-    public float atackSpeed;
-    public float dodgeChance;
-    public int expDrop;
-    public float range;
-    public float attackRange;
+    [Header("Stats")]
+    public int health;          // 인스펙터에서 설정
+    public int attackDamage;    // 인스펙터에서 설정
+    public float speed;         // 인스펙터에서 설정
+    public float atackSpeed;    // 인스펙터에서 설정
+    public float dodgeChance;   // 인스펙터에서 설정
+    public int expDrop;         // 인스펙터에서 설정
+
+    [Header("Detection")]
+    public float range;         // 인스펙터에서 설정 (예: 10)
+    public float attackRange;   // 인스펙터에서 설정 (예: 1.5)
+
+    [Header("References")]
+    public PlayerControler PlayerControler;
 
     private float currentHealth;
     private float lastAttackTime;
-    private Transform player;
+    private Transform targetCharacter;
     private enum State { Idle, Chase, Attack, Dead }
     private State currentState = State.Idle;
-    private Pathfinding pathfinding;
-    private List<Node> path;
-    private int targetIndex;
-    private float pathUpdateTimer;
-    private const float pathupdateInterval = 0.3f;
     private Rigidbody2D rb;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        currentHealth = health;
-        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-        if (playerObj != null)
+        currentHealth = health; // 인스펙터에서 넣은 health 값이 적용됨
+
+        // "Player" 태그를 가진 부모 오브젝트를 찾습니다.
+        GameObject playerParent = GameObject.FindGameObjectWithTag("Player");
+        if (playerParent != null)
         {
-            player = playerObj.transform;
-            playerControler = playerObj.GetComponent<PlayerControler>();
+            PlayerControler = playerParent.GetComponentInChildren<PlayerControler>();
+
+            if (PlayerControler != null)
+            {
+                targetCharacter = PlayerControler.transform;
+            }
+            else
+            {
+                targetCharacter = playerParent.transform;
+            }
         }
-        pathfinding = FindFirstObjectByType<Pathfinding>();
     }
 
     void Update()
     {
-        if (currentState == State.Dead)
-            return;
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+        if (currentState == State.Dead || targetCharacter == null) return;
 
-        if (distanceToPlayer <= attackRange)
+        float distToPlayer = Vector2.Distance(transform.position, targetCharacter.position);
+
+        if (distToPlayer <= attackRange)
         {
             currentState = State.Attack;
         }
-        
-        else if (currentState == State.Attack && distanceToPlayer <= attackRange + 0.2f)
-        {
-            currentState = State.Attack;
-        }
-        else if (distanceToPlayer <= range)
+        else if (distToPlayer <= range)
         {
             currentState = State.Chase;
         }
@@ -67,72 +70,40 @@ public class zombie : MonoBehaviour
             case State.Idle:
                 rb.linearVelocity = Vector2.zero;
                 break;
-            case State.Chase:
-                ChasePlayer();
-                break;
             case State.Attack:
                 rb.linearVelocity = Vector2.zero;
                 AttackPlayer();
                 break;
+            case State.Chase:
+                MoveToPlayer();
+                break;
         }
     }
 
-    void ChasePlayer()
+    void MoveToPlayer()
     {
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-
-        if (distanceToPlayer <= attackRange)
-        {
-            currentState = State.Attack;
-            return;
-        }
-        pathUpdateTimer += Time.deltaTime;
-        if (pathUpdateTimer >= pathupdateInterval)
-        {
-            pathUpdateTimer = 0f;
-            if (pathfinding != null && player != null)
-            {
-                path = pathfinding.FindPath(transform.position, player.position);
-                targetIndex = 0;
-            }
-        }
-
-        if (path != null && targetIndex < path.Count)
-        {
-            Vector3 targetPosition = path[targetIndex].worldPosition;
-            targetPosition.z = transform.position.z;
-            Vector3 dir = (targetPosition - transform.position).normalized;
-            rb.linearVelocity = dir * speed;
-            if (Vector3.Distance(transform.position, targetPosition) < 0.2f)
-            {
-                targetIndex++;
-            }
-        }
-        else if (player != null)
-        {
-            Vector2 direction = (player.position - transform.position).normalized;
-            rb.linearVelocity = direction * (speed * 0.5f);
-        }
+        Vector2 direction = ((Vector2)targetCharacter.position - (Vector2)transform.position).normalized;
+        rb.linearVelocity = direction * speed;
     }
 
     void AttackPlayer()
     {
         if (Time.time - lastAttackTime >= atackSpeed)
         {
-            //playerControler.TakeDamage(attackDamage);
-            lastAttackTime = Time.time;
+            if (PlayerControler != null)
+            {
+                PlayerControler.TakeDamage(attackDamage);
+                lastAttackTime = Time.time;
+            }
         }
     }
 
     public void TakeDamage(float damage)
     {
-        Debug.Log(damage);
-        if (Random.value < dodgeChance)
-        {
-            return;
-        }
+        if (Random.value < dodgeChance) return;
+
         currentHealth -= damage;
-        if (currentHealth <= 0)
+        if (currentHealth <= 0 && currentState != State.Dead)
         {
             Die();
         }
@@ -140,16 +111,30 @@ public class zombie : MonoBehaviour
 
     void Die()
     {
+        if (currentState == State.Dead) return;
         currentState = State.Dead;
+
         rb.linearVelocity = Vector2.zero;
+
         RoomControl room = GetComponentInParent<RoomControl>();
         if (room != null)
         {
             room.OnEnemyKilled();
         }
 
-        Destroy(gameObject, 2f); 
+        if (PlayerControler != null)
+        {
+            PlayerControler.TakeExp(expDrop);
+        }
 
-        playerControler.TakeExp(expDrop);
+        Destroy(gameObject, 1f);
+    }
+
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, range);
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 }

@@ -270,7 +270,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     public void Dash(Vector3 direction)
     {
-        if (direction == Vector3.zero) direction = transform.right; // 입력 없으면 정면으로
+        if (direction == Vector3.zero) direction = transform.right;
 
         isDashing = true;
         dashTimer = dashDuration;
@@ -289,9 +289,9 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     public float Guard()
     {
-        if (Guarding && isBoost) return 0.1f; // 90% 감소
-        if (Guarding) return 0.2f;            // 80% 감소
-        return 1f;                            // 그대로 받음
+        if (Guarding && isBoost) return 0.1f;
+        if (Guarding) return 0.2f;           
+        return 1f;                           
     }
 
     public void TakeDamage(float damage)
@@ -344,7 +344,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
     void LevelUp()
     {
 
-        while (currentExp < 20) { 
+        while (currentExp >= 20) { 
 
             currentExp -= MaxExp;
             PlayerCurrentHp += PlayerMaxHp * 0.2f;
