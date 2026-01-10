@@ -4,16 +4,16 @@ using System.Collections;
 public class zombie : MonoBehaviour, IDamageable
 {
     [Header("Stats")]
-    public int health;          // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
-    public int attackDamage;    // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
-    public float speed;         // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
-    public float atackSpeed;    // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
-    public float dodgeChance;   // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
-    public int expDrop;         // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
+    public int health;          // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •
+    public int attackDamage;    // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •
+    public float speed;         // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •
+    public float atackSpeed;    // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •
+    public float dodgeChance;   // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •
+    public int expDrop;         // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •
 
     [Header("Detection")]
-    public float range;         // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤ (¿¹: 10)
-    public float attackRange;   // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤ (¿¹: 1.5)
+    public float range;         // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì • (ì˜ˆ: 10)
+    public float attackRange;   // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì • (ì˜ˆ: 1.5)
 
     [Header("References")]
     public PlayerControler PlayerControler;
@@ -25,12 +25,14 @@ public class zombie : MonoBehaviour, IDamageable
     private State currentState = State.Idle;
     private Rigidbody2D rb;
 
+    private bool canAct = false; // 0.5ì´ˆ ê²½ì§ í”Œë˜ê·¸
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        currentHealth = health; // ÀÎ½ºÆåÅÍ¿¡¼­ ³ÖÀº health °ªÀÌ Àû¿ëµÊ
+        currentHealth = health; // ì¸ìŠ¤í™í„°ì—ì„œ ë„£ì€ health ê°’ì´ ì ìš©ë¨
 
-        // "Player" ÅÂ±×¸¦ °¡Áø ºÎ¸ğ ¿ÀºêÁ§Æ®¸¦ Ã£½À´Ï´Ù.
+        // "Player" íƒœê·¸ë¥¼ ê°€ì§„ ë¶€ëª¨ ì˜¤ë¸Œì íŠ¸ë¥¼ ì°¾ìŠµë‹ˆë‹¤.
         GameObject playerParent = GameObject.FindGameObjectWithTag("Player");
         if (playerParent != null)
         {
@@ -45,11 +47,19 @@ public class zombie : MonoBehaviour, IDamageable
                 targetCharacter = playerParent.transform;
             }
         }
+
+        StartCoroutine(SpawnDelay());
+    }
+
+    IEnumerator SpawnDelay()
+    {
+        yield return new WaitForSeconds(0.5f);
+        canAct = true;
     }
 
     void Update()
     {
-        if (currentState == State.Dead || targetCharacter == null) return;
+        if (currentState == State.Dead || targetCharacter == null || !canAct) return;
 
         float distToPlayer = Vector2.Distance(transform.position, targetCharacter.position);
 

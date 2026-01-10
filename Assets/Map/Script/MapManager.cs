@@ -19,7 +19,7 @@ public class MapManager : MonoBehaviour
     public Vector3 hallwaySpawnPosition;   
     
     public GameObject[] roomPrefabs;     
-    public GameObject bossRoomPrefab;      
+    public GameObject[] bossRoomPrefabs;      
     public CameraFollow mainCamera;        
 
     private GameObject currentRoomInstance; 
@@ -94,7 +94,17 @@ public class MapManager : MonoBehaviour
 
     private void SpawnRoom(bool isBoss)
     {
-        GameObject prefabToSpawn = isBoss ? bossRoomPrefab : roomPrefabs[Random.Range(0, roomPrefabs.Length)];
+        GameObject prefabToSpawn;
+        
+        if (isBoss) 
+        {
+            int index = Mathf.Clamp(currentFloor - 1, 0, bossRoomPrefabs.Length - 1);
+            prefabToSpawn = bossRoomPrefabs[index];
+        }
+        else 
+        {
+            prefabToSpawn = roomPrefabs[Random.Range(0, roomPrefabs.Length)];
+        }
        
         Vector3 spawnPos = hallwaySpawnPosition + roomPositionCorrection;
 

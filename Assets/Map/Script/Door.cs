@@ -29,6 +29,19 @@ public class Door : MonoBehaviour
     {
         Debug.Log($"Door Script Init: {gameObject.name}, Type: {type}");
 
+        if (type == DoorType.ToBossRoom && MapManager.Instance != null)
+        {
+            if (MapManager.Instance.clearedRooms < MapManager.Instance.totalRoomsPerFloor)
+            {
+                isOpen = false;
+                Debug.Log("보스방 진입 불가: 아직 방을 다 클리어하지 않았습니다.");
+            }
+            else
+            {
+                isOpen = true;
+            }
+        }
+
         
         if (Mathf.Abs(transform.position.z) > 0.1f)
         {
