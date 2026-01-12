@@ -35,14 +35,17 @@ public class PlayerControler : MonoBehaviour, IDamageable
     public TextMeshProUGUI expText;
     public Image bloodOverlay;
 
-    [Header("인벤토리")]
-
+    [Header("애니메이션 연결")]
+    private Animator anim;
+    private SpriteRenderer sr;
 
     [Header("기술/상태 변수")]
     private bool Guarding = false;
     private bool isDashing = false;
     private bool isBoost = false;
     private bool isHook = false;
+    private bool isAttack = false;
+
 
     [Header("레벨관리")]
     public float exp;
@@ -61,6 +64,11 @@ public class PlayerControler : MonoBehaviour, IDamageable
     private float boostTimer, cooldownTimerBoost;
     public float boostDuration = 6f;
 
+    public float AttackCooldown = 0.5f;
+    private float AttackTimer, cooldownTimerAttack;
+    public float AttackDuration = 0.2f;
+
+
     public float hookCooldown = 5f;
     public float attackRange = 1.5f; // 훅 범위
     private float hookTimer, cooldownTimerHook;
@@ -68,6 +76,9 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     private Rigidbody2D rb;
     private Vector2 inputMovement;
+
+    SpriteRenderer spriter;
+
 
     void Start()
     {
@@ -79,6 +90,10 @@ public class PlayerControler : MonoBehaviour, IDamageable
         if (hpText != null) hpText.text = $"{PlayerCurrentHp} / {PlayerMaxHp}";
 
         rb = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
+        sr = GetComponent<SpriteRenderer>();
+
+
         if (rb != null)
         {
             rb.constraints = RigidbodyConstraints2D.FreezeRotation;
@@ -98,6 +113,21 @@ public class PlayerControler : MonoBehaviour, IDamageable
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveY = Input.GetAxisRaw("Vertical");
         inputMovement = new Vector2(moveX, moveY);
+        
+
+        if (anim != null)
+        {
+            float speed = inputMovement.normalized.sqrMagnitude; // 0 또는 1
+            anim.SetFloat("Speed", speed);
+        }
+
+        if (sr != null)
+        {
+            if (moveX > 0) sr.flipX = false;
+            else if (moveX < 0) sr.flipX = true;
+        }
+
+
 
         CoolDownMananger();
 
@@ -160,6 +190,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
         }
     }
 
+   
     IEnumerator AttackStopRoutine()
     {
         isAttacking = true;
@@ -191,11 +222,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
         bloodOverlay.color = new Color(0, 0, 0, 0);
     }
 
-    public bool isNum(int num)
-    {
-        return (num & 1) == 0;
-    }
-  
+   
 
     public void Attack1() //원
     {
@@ -228,6 +255,10 @@ public class PlayerControler : MonoBehaviour, IDamageable
         Debug.DrawLine((Vector2)transform.position - rightEdge, (Vector2)transform.position + attackDir * attackDistance - rightEdge, Color.cyan, 0.2f);
         Debug.DrawLine((Vector2)transform.position + attackDir * attackDistance + rightEdge, (Vector2)transform.position + attackDir * attackDistance - rightEdge, Color.cyan, 0.2f);
         playerSpeed = 5f;
+
+        isAttack = true;
+        AttackTimer = AttackDuration;
+        cooldownTimerAttack = AttackCooldown;
     }
 
     public void LeftHook()
@@ -380,7 +411,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
         if (ExpSlider != null) ExpSlider.value = currentExp;
         if (expText != null) expText.text = $"{currentExp} / {MaxExp}";
 
-        if(MaxExp < currentExp)
+        if(MaxExp <= currentExp)
         {
             LevelUp();
         }
@@ -431,6 +462,9 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
         if (cooldownTimerHook > 0) cooldownTimerHook -= dt;
         if (isHook) { hookTimer -= dt; if (hookTimer <= 0) isHook = false; }
+
+        if (cooldownTimerAttack > 0) cooldownTimerAttack -= dt;
+        if (isAttack) { AttackTimer -= dt; if (AttackTimer <= 0) isAttack = false; }
     }
 
     public void GoMain()

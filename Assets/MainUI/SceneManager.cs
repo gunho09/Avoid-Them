@@ -20,7 +20,7 @@ public class SceneManager : MonoBehaviour
 
     public void GameStart()
     {
-        UnityEngine.SceneManagement.SceneManager.LoadScene("HallWay");
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
     }
     
     public void GameExit()
