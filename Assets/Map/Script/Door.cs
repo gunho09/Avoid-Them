@@ -29,17 +29,11 @@ public class Door : MonoBehaviour
     {
         Debug.Log($"Door Script Init: {gameObject.name}, Type: {type}");
 
-        if (type == DoorType.ToBossRoom && MapManager.Instance != null)
+        if (type == DoorType.ToBossRoom)
         {
-            if (MapManager.Instance.clearedRooms < MapManager.Instance.totalRoomsPerFloor)
-            {
-                isOpen = false;
-                Debug.Log("보스방 진입 불가: 아직 방을 다 클리어하지 않았습니다.");
-            }
-            else
-            {
-                isOpen = true;
-            }
+            // 기존 Start 시점 체크 로직 제거
+            // 이제 EnterIfPlayer에서 동적으로 체크합니다.
+            isOpen = true; // 기본적으로 열어두고, 진입 시 조건을 검사합니다.
         }
 
         
@@ -187,19 +181,39 @@ public class Door : MonoBehaviour
 
     private void EnterIfPlayer(GameObject target)
     {
-       
-        Debug.Log($"Door Hit Check: {target.name}");
+        if (Time.time - lastDoorUseTime < doorCooldown) return;
 
-        
-        Debug.Log($"[Door] Object detected. Open: {isOpen}, Type: {type}");
+        // 1. 보스 방 진입 조건 체크 (동적)
+        if (type == DoorType.ToBossRoom)
+        {
+            if (MapManager.Instance != null && MapManager.Instance.clearedRooms < MapManager.Instance.totalRoomsPerFloor)
+            {
+                // 조건 미달
+                Debug.Log("보스방 진입 불가: 방 5개 클리어 필요");
+                
+                // 경고 UI 표시
+                if (WarningUI.Instance != null)
+                {
+                    WarningUI.Instance.ShowWarning("5개의 방을 다 돌아보고 오세요");
+                }
+                else
+                {
+                    Debug.LogWarning("WarningUI Instance가 없습니다!");
+                }
+                
+                lastDoorUseTime = Time.time; // 메시지 도배 방지용 쿨타임 적용
+                return;
+            }
+        }
 
         if (!isOpen)
         {
-            Debug.Log($"문이 잠겨있습니다! (Mobs remaining?) Type: {type}");
+            // Debug.Log($"문이 잠겨있습니다! (Mobs remaining?) Type: {type}");
             return;
         }
 
-        Debug.Log($"문 작동! 이동 시도 -> Type: {type}");
+        // Debug.Log($"문 작동! 이동 시도 -> Type: {type}");
+        lastDoorUseTime = Time.time;
         
         if (type == DoorType.ToRoom || type == DoorType.ToBossRoom)
         {

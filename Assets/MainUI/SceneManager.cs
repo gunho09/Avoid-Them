@@ -20,7 +20,19 @@ public class SceneManager : MonoBehaviour
 
     public void GameStart()
     {
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
+        // 씬 전환 시 시간 정지가 유지될 수 있으므로 초기화
+        Time.timeScale = 1f;
+
+        // "Game" 씬이 Build Settings에 있는지 확인하는 것이 좋지만, 
+        // 런타임에는 이름으로 로드합니다.
+        try
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Failed to load scene 'Game': {e.Message}. Make sure it is added to Build Settings.");
+        }
     }
     
     public void GameExit()
