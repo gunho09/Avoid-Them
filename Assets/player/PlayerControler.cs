@@ -240,7 +240,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
         // --- [시각화: Debug.DrawLine] ---
         float angleRange = 60f; // 중심에서 좌우 60도 (총 120도)
-        int segments = 10;
+        int segments = 10;  
         float duration = 0.2f;
 
         Vector3 leftRay = Quaternion.Euler(0, 0, angleRange) * attackDir;
