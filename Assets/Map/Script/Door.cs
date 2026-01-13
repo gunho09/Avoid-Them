@@ -22,8 +22,11 @@ public class Door : MonoBehaviour
     public Vector3 returnOffset = new Vector3(0, -1.5f, 0); 
 
     
-    private static float lastDoorUseTime = 0f;
+    private float lastDoorUseTime = 0f;
     private const float doorCooldown = 1.5f; 
+
+    [Header("Boss Room Settings")]
+    public string warningMessage = "5개의 방을 다 돌아보고 오세요"; 
 
     private void Start()
     {
@@ -191,10 +194,10 @@ public class Door : MonoBehaviour
                 // 조건 미달
                 Debug.Log("보스방 진입 불가: 방 5개 클리어 필요");
                 
-                // 경고 UI 표시
+                // 경고 UI 표시 (메시지는 WarningUI 프리팹에 설정된 텍스트 사용)
                 if (WarningUI.Instance != null)
                 {
-                    WarningUI.Instance.ShowWarning("5개의 방을 다 돌아보고 오세요");
+                    WarningUI.Instance.ShowWarning();
                 }
                 else
                 {

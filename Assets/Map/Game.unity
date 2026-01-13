@@ -244,10 +244,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: You should Clear That 5 Door
+  m_text: "5\uAC1C\uC758 \uBB38\uC744 \uC804\uBD80 \uB3CC\uC544\uBCF4\uC2DC\uC624"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 5488daa1e495a1f4e9e8b50e5ce1b16d, type: 2}
+  m_sharedMaterial: {fileID: 6199448320380299533, guid: 5488daa1e495a1f4e9e8b50e5ce1b16d, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -572,8 +572,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 1F
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 5488daa1e495a1f4e9e8b50e5ce1b16d, type: 2}
+  m_sharedMaterial: {fileID: 6199448320380299533, guid: 5488daa1e495a1f4e9e8b50e5ce1b16d, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

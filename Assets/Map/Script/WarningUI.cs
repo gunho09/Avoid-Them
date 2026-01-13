@@ -20,11 +20,16 @@ public class WarningUI : MonoBehaviour
         if (warningText != null) warningText.alpha = 0f;
     }
 
-    public void ShowWarning(string message)
+    public void ShowWarning(string message = "")
     {
+        Debug.Log("WarningUI: ShowWarning 호출됨");
         if (warningText == null) return;
 
-        warningText.text = message;
+        // 메시지가 입력되었을 때만 텍스트 변경 (빈 값이면 기존 Inspector 텍스트 유지)
+        if (!string.IsNullOrEmpty(message))
+        {
+            warningText.text = message;
+        }
         
         if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
         fadeCoroutine = StartCoroutine(FadeRoutine());
