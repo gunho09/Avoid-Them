@@ -1,19 +1,19 @@
 using UnityEngine;
 using System.Collections;
 
-public class zombie : MonoBehaviour, IDamageable
+public class Boss4 : MonoBehaviour, IDamageable
 {
     [Header("Stats")]
-    public int health;          // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •
-    public int attackDamage;    // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •
-    public float speed;         // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •
-    public float atackSpeed;    // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •
-    public int expDrop;         // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •
+    public int health;          // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
+    public int attackDamage;    // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
+    public float speed;         // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
+    public float atackSpeed;    // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
+    public float dodgeChance;   // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
+    public int expDrop;         // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
 
     [Header("Detection")]
-    public float range;         // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì • (ì˜ˆ: 10)
-    public float attackRange1;   // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì • (ì˜ˆ: 1.5)
-    public float attackRange2;
+    public float range;         // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤ (¿¹: 10)
+    public float attackRange;   // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤ (¿¹: 1.5)
 
     [Header("References")]
     public PlayerControler PlayerControler;
@@ -25,14 +25,14 @@ public class zombie : MonoBehaviour, IDamageable
     private State currentState = State.Idle;
     private Rigidbody2D rb;
 
-    private bool canAct = false; // 0.5ì´ˆ ê²½ì§ í”Œë˜ê·¸
+    private bool canAct = false; // 0.5ÃÊ °æÁ÷ ÇÃ·¡±×
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        currentHealth = health; // ì¸ìŠ¤í™í„°ì—ì„œ ë„£ì€ health ê°’ì´ ì ìš©ë¨
+        currentHealth = health; // ÀÎ½ºÆåÅÍ¿¡¼­ ³ÖÀº health °ªÀÌ Àû¿ëµÊ
 
-        // "Player" íƒœê·¸ë¥¼ ê°€ì§„ ë¶€ëª¨ ì˜¤ë¸Œì íŠ¸ë¥¼ ì°¾ìŠµë‹ˆë‹¤.
+        // "Player" ÅÂ±×¸¦ °¡Áø ºÎ¸ğ ¿ÀºêÁ§Æ®¸¦ Ã£½À´Ï´Ù.
         GameObject playerParent = GameObject.FindGameObjectWithTag("Player");
         if (playerParent != null)
         {
@@ -59,33 +59,61 @@ public class zombie : MonoBehaviour, IDamageable
 
     void Update()
     {
+        
         if (currentState == State.Dead || targetCharacter == null || !canAct) return;
 
         float distToPlayer = Vector2.Distance(transform.position, targetCharacter.position);
 
-        if (distToPlayer <= attackRange)
+        if (distToPlayer <= attackRange2)
         {
-            currentState = State.Attack;
+            currentState = State.Attack2;
+        }
+        else if (distToPlayer <= attackRange1)
+        {
+            currentState = State.Attack1;
         }
         else if (distToPlayer <= range)
         {
-            currentState = State.Chase;
+            currentState = State.Move;
         }
+
+        else if ()
+        {
+            currentState = State.Skill1;
+        }
+
+        else if ()
+        {
+            currentState = State.Skill2;
+        }
+
+        else if ()
+        {
+            currentState = State.Skill3;
+        }
+
         else
         {
             currentState = State.Idle;
         }
+
+
 
         switch (currentState)
         {
             case State.Idle:
                 rb.linearVelocity = Vector2.zero;
                 break;
-            case State.Attack:
+            case State.Attack2:
                 rb.linearVelocity = Vector2.zero;
                 AttackPlayer();
                 break;
-            case State.Chase:
+            case State.Attack1:
+                rb.linearVelocity = Vector2.zero;
+                AttackPlayer();
+                break;
+
+            case State.Move:
                 MoveToPlayer();
                 break;
         }
@@ -144,13 +172,7 @@ public class zombie : MonoBehaviour, IDamageable
         Destroy(gameObject, 1f);
     }
 
-    void OnDrawGizmos()
-    {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, range);
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
-    }
+    
     IEnumerator HitFlashRoutine()
     {
         SpriteRenderer sprite = GetComponentInChildren<SpriteRenderer>();

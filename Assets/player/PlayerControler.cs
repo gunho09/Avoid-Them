@@ -113,7 +113,9 @@ public class PlayerControler : MonoBehaviour, IDamageable
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveY = Input.GetAxisRaw("Vertical");
         inputMovement = new Vector2(moveX, moveY);
-        
+
+        float y = Input.GetAxisRaw("Vertical");
+        anim.SetFloat("vInput", Mathf.Abs(y));
 
         if (anim != null)
         {

@@ -1,17 +1,17 @@
 using UnityEngine;
 using TMPro;
 using System.Collections;
-using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class TutorialManager : MonoBehaviour
 {
-    public TextMeshProUGUI tutorialText; // TMP 오브젝트 연결
-    public string[] tutorialSteps;       // 인스펙터에서 문장 적기
-    public float typingSpeed = 0.1f;    // 타이핑 속도
+    public TextMeshProUGUI tutorialText;
+    public string[] tutorialSteps;
+    public float typingSpeed = 0.1f;
     public GameObject zombie;
 
     private int currentIndex = 0;
-    private bool isTyping = false;       // 현재 타이핑 중인지 확인
+    private bool isTyping = false;
 
     void Start()
     {
@@ -23,23 +23,19 @@ public class TutorialManager : MonoBehaviour
 
     void Update()
     {
-        // 마우스 좌클릭을 눌렀을 때
         if (Input.GetKeyDown(KeyCode.Space))
         {
             if (isTyping)
             {
-                // 1. 타이핑 중이면? -> 한 번에 문장 다 보여주기 (스킵 기능)
                 StopAllCoroutines();
                 tutorialText.text = tutorialSteps[currentIndex];
                 isTyping = false;
             }
             else
             {
-                // 2. 타이핑이 끝난 상태면? -> 다음 문장으로 넘어가기
                 NextStep();
             }
         }
-
     }
 
     void NextStep()
@@ -53,23 +49,39 @@ public class TutorialManager : MonoBehaviour
         else
         {
             tutorialText.text = "";
-            
             zombie.SetActive(true);
-             
+
+            StartCoroutine(CheckEnemiesDead());
         }
     }
 
     IEnumerator TypeSentence(string sentence)
     {
         isTyping = true;
-        tutorialText.text = ""; // 일단 비우고
+        tutorialText.text = "";
 
         foreach (char letter in sentence.ToCharArray())
         {
-            tutorialText.text += letter; // 한 글자씩 추가
+            tutorialText.text += letter;
             yield return new WaitForSeconds(typingSpeed);
         }
 
         isTyping = false;
+    }
+
+    IEnumerator CheckEnemiesDead()
+    {
+        while (true)
+        {
+            GameObject[] enemies = GameObject.FindGameObjectsWithTag("enemy");
+
+            if (enemies.Length == 0)
+            {
+                UnityEngine.SceneManagement.SceneManager.LoadScene("MainUI");
+                yield break;
+            }
+
+            yield return new WaitForSeconds(0.5f);
+        }
     }
 }
