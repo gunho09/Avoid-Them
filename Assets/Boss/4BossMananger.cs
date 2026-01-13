@@ -13,7 +13,8 @@ public class Boss4 : MonoBehaviour, IDamageable
 
     [Header("Detection")]
     public float range;         // 인스펙터에서 설정 (예: 10)
-    public float attackRange;   // 인스펙터에서 설정 (예: 1.5)
+    public float attackRange1;   // 인스펙터에서 설정 (예: 1.5)
+    public float attackRange2;   // 인스펙터에서 설정 (예: 1.5)
 
     [Header("References")]
     public PlayerControler PlayerControler;
@@ -21,7 +22,7 @@ public class Boss4 : MonoBehaviour, IDamageable
     private float currentHealth;
     private float lastAttackTime;
     private Transform targetCharacter;
-    private enum State { Idle, Chase, Attack, Dead }
+    private enum State { Idle, Chase, Attack1, Attack2, Dead, Skill1, Skill2, Skill3, Move }
     private State currentState = State.Idle;
     private Rigidbody2D rb;
 
@@ -64,7 +65,7 @@ public class Boss4 : MonoBehaviour, IDamageable
 
         float distToPlayer = Vector2.Distance(transform.position, targetCharacter.position);
 
-        if (distToPlayer <= attackRange2)
+        if (distToPlayer <= attackRange2 && attackRange2 > attackRange1)
         {
             currentState = State.Attack2;
         }
@@ -72,29 +73,26 @@ public class Boss4 : MonoBehaviour, IDamageable
         {
             currentState = State.Attack1;
         }
-        else if (distToPlayer <= range)
-        {
-            currentState = State.Move;
-        }
+        
 
-        else if ()
+        else if (distToPlayer <= range)
         {
             currentState = State.Skill1;
         }
 
-        else if ()
+        else if (distToPlayer <= range)
         {
             currentState = State.Skill2;
         }
 
-        else if ()
+        else if (distToPlayer <= range)
         {
             currentState = State.Skill3;
         }
 
         else
         {
-            currentState = State.Idle;
+            currentState = State.Move;
         }
 
 

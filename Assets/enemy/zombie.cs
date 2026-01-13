@@ -12,8 +12,7 @@ public class zombie : MonoBehaviour, IDamageable
 
     [Header("Detection")]
     public float range;         // 인스펙터에서 설정 (예: 10)
-    public float attackRange1;   // 인스펙터에서 설정 (예: 1.5)
-    public float attackRange2;
+    public float attackRange;   // 인스펙터에서 설정 (예: 1.5)
 
     [Header("References")]
     public PlayerControler PlayerControler;
@@ -111,7 +110,6 @@ public class zombie : MonoBehaviour, IDamageable
 
     public void TakeDamage(float damage)
     {
-        if (Random.value < dodgeChance) return;
 
         currentHealth -= damage;
 
