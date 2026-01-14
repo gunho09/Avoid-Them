@@ -55,7 +55,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     [Header("쿨타임")]
     public float dashCooldown = 2f;
-    public float dashSpeed = 30f;
+    public float dashSpeed = 60f;
     public float dashDuration = 0.2f;
     private float dashTimer, cooldownTimerDashDash;
     private Vector3 dashDirection;
@@ -114,20 +114,30 @@ public class PlayerControler : MonoBehaviour, IDamageable
         float moveY = Input.GetAxisRaw("Vertical");
         inputMovement = new Vector2(moveX, moveY);
 
-        float y = Input.GetAxisRaw("Vertical");
-        anim.SetFloat("vInput", Mathf.Abs(y));
+        
+        
+        float h = Input.GetAxis("Horizontal");
+        float v = Input.GetAxis("Vertical");
 
-        if (anim != null)
+        anim.SetFloat("hInput", h);
+        anim.SetFloat("vInput", v);
+
+        if (h > 0)
         {
-            float speed = inputMovement.normalized.sqrMagnitude; // 0 또는 1
-            anim.SetFloat("Speed", speed);
+            sr.flipX = false;
+        }
+        else if (h < 0)
+        {
+            sr.flipX = true;
         }
 
-        if (sr != null)
-        {
-            if (moveX > 0) sr.flipX = false;
-            else if (moveX < 0) sr.flipX = true;
-        }
+
+
+        //if (sr != null)
+        //{
+        //    if (moveX > 0) sr.flipX = false;
+        //    else if (moveX < 0) sr.flipX = true;
+        //}
 
 
 
@@ -152,7 +162,10 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
         }
 
-        if (Input.GetMouseButtonDown(0)) Attack1();
+        if (Input.GetMouseButtonDown(0) && cooldownTimerAttack <= 0)
+        {
+            Attack1();
+        }
 
         // 2. 훅 기술에 쿨타임 조건 추가 (기존에는 조건이 없었음)
         if (Input.GetKeyDown(KeyCode.E) && cooldownTimerHook <= 0)
@@ -180,19 +193,17 @@ public class PlayerControler : MonoBehaviour, IDamageable
         {
             rb.linearVelocity = dashDirection * dashSpeed;
         }
-
-        else if (isAttacking)
+        else if (isAttacking || isAttack)
         {
             rb.linearVelocity = Vector2.zero;
         }
-
         else
         {
             rb.linearVelocity = inputMovement.normalized * playerSpeed;
         }
     }
 
-   
+
     IEnumerator AttackStopRoutine()
     {
         isAttacking = true;
@@ -234,6 +245,8 @@ public class PlayerControler : MonoBehaviour, IDamageable
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPos.z = 0f;
         Vector2 attackDir = ((Vector2)mouseWorldPos - (Vector2)transform.position).normalized;
+
+
 
         // 2. 공격 박스 설정 (쨉)
         Vector2 boxCenter = (Vector2)transform.position + attackDir * (attackDistance / 2f);

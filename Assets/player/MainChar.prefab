@@ -1321,8 +1321,8 @@ Transform:
   m_GameObject: {fileID: 5218158965369317558}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -532.8, y: -748.8, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -533.087, y: -748.672, z: 0}
+  m_LocalScale: {x: 1.3188249, y: 1.1896518, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5557983841079269071}
@@ -1428,7 +1428,7 @@ MonoBehaviour:
   PlayerLvl: 1
   MaxExp: 20
   dashCooldown: 1
-  dashSpeed: 15
+  dashSpeed: 30
   dashDuration: 0.2
   boostCooldown: 30
   boostDuration: 0
@@ -1487,7 +1487,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.83, y: 1.57}
+    oldSize: {x: 1.0375, y: 1.9625}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
