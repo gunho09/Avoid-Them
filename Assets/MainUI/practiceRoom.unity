@@ -541,6 +541,10 @@ PrefabInstance:
       propertyPath: m_ReferenceResolution.y
       value: 600
       objectReference: {fileID: 0}
+    - target: {fileID: 6477009639273144782, guid: f5168eed14bfd714bb0dff12e973b699, type: 3}
+      propertyPath: playerStartHp
+      value: 200
+      objectReference: {fileID: 0}
     - target: {fileID: 6627540450066154699, guid: f5168eed14bfd714bb0dff12e973b699, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -837,6 +841,14 @@ PrefabInstance:
     - target: {fileID: 3291343141979631510, guid: 6e2b421f60d6d4b4ba7be64323f3db61, type: 3}
       propertyPath: m_LocalPosition.y
       value: -0.192
+      objectReference: {fileID: 0}
+    - target: {fileID: 4643683341095355480, guid: 6e2b421f60d6d4b4ba7be64323f3db61, type: 3}
+      propertyPath: speed
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4643683341095355480, guid: 6e2b421f60d6d4b4ba7be64323f3db61, type: 3}
+      propertyPath: atackSpeed
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 5253605838947361107, guid: 6e2b421f60d6d4b4ba7be64323f3db61, type: 3}
       propertyPath: m_Name

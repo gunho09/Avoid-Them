@@ -635,6 +635,7 @@ MonoBehaviour:
   closedSprite: {fileID: 2306424487704905126, guid: 5fa69022468a8a842a6413a82cc09b89, type: 3}
   isOpen: 1
   returnOffset: {x: 0, y: -1.5, z: 0}
+  warningMessage: "5\uAC1C\uC758 \uBC29\uC744 \uB2E4 \uB3CC\uC544\uBCF4\uACE0 \uC624\uC138\uC694"
 --- !u!61 &5613859608771314208
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -918,15 +919,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b053b2ed5a69eb94387952ac6ccb61cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::zombie
-  playerControler: {fileID: 0}
   health: 100
   attackDamage: 40
   speed: 4
   atackSpeed: 10
-  dodgeChance: 0
   expDrop: 3
   range: 100
   attackRange: 1
+  PlayerControler: {fileID: 0}
 --- !u!50 &2871145934106867383
 Rigidbody2D:
   serializedVersion: 5
@@ -1227,15 +1227,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b053b2ed5a69eb94387952ac6ccb61cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::zombie
-  playerControler: {fileID: 0}
   health: 300
   attackDamage: 80
   speed: 3
   atackSpeed: 3
-  dodgeChance: 0
   expDrop: 10
   range: 100
   attackRange: 1
+  PlayerControler: {fileID: 0}
 --- !u!1 &7872934696049306924
 GameObject:
   m_ObjectHideFlags: 0

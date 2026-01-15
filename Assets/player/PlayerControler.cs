@@ -145,8 +145,6 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
 
 
-        CoolDownMananger();
-
         // 입력 처리
         
 
@@ -473,16 +471,52 @@ public class PlayerControler : MonoBehaviour, IDamageable
     {
         float dt = Time.deltaTime;
 
-        if (cooldownTimerBoost > 0) { cooldownTimerBoost -= dt; CoolDownText4.text = $"금광불괴 \n {cooldownTimerBoost}"; }
+        if (cooldownTimerBoost > 0) 
+        { 
+            cooldownTimerBoost -= dt; 
+            CoolDownText4.text = $"금광불괴\n{(int)cooldownTimerBoost}"; 
+        }
+        else
+        {
+            CoolDownText4.text = "금광불괴";
+        }
         if (isBoost) { boostTimer -= dt; if (boostTimer <= 0) isBoost = false; }
 
-        if (cooldownTimerDashDash > 0) { cooldownTimerDashDash -= dt; CoolDownText1.text = $"대쉬 \n {cooldownTimerDashDash}"; }
-        if (isDashing) { dashTimer -= dt; if (dashTimer <= 0) isDashing = false; }
 
-        if (cooldownTimerHook > 0) {cooldownTimerHook -= dt; CoolDownText3.text = $"훅 \n {cooldownTimerHook}"; }
+        if (cooldownTimerDashDash > 0) 
+        { 
+            cooldownTimerDashDash -= dt; 
+            CoolDownText1.text = ""; 
+        }
+        else
+        {
+            CoolDownText1.text = "";
+        }
+        if (isDashing) { dashTimer -= dt; if (dashTimer <= 0) isDashing = false; }
+        
+
+        if (cooldownTimerHook > 0) 
+        {
+            cooldownTimerHook -= dt; 
+            CoolDownText3.text = $"훅\n{(int)cooldownTimerHook}"; 
+        }
+        else
+        {
+            CoolDownText3.text = "훅";
+        }
         if (isHook) { hookTimer -= dt; if (hookTimer <= 0) isHook = false; }
 
-        if (cooldownTimerAttack > 0) { cooldownTimerAttack -= dt; CoolDownText2.text = $"원 투 \n {cooldownTimerAttack}"; }
+
+        // 원투는 쿨타임 표시 제외
+        if (cooldownTimerAttack > 0) 
+        { 
+            cooldownTimerAttack -= dt; 
+            CoolDownText2.text = ""; 
+        }
+        else
+        {
+            CoolDownText2.text = "";
+        }
         if (isAttack) { AttackTimer -= dt; if (AttackTimer <= 0) isAttack = false; }
     }
 
