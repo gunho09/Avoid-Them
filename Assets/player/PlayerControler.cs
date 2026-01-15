@@ -33,6 +33,10 @@ public class PlayerControler : MonoBehaviour, IDamageable
     public TextMeshProUGUI LvlText;
     public TextMeshProUGUI hpText;   
     public TextMeshProUGUI expText;
+    public TextMeshProUGUI CoolDownText1;
+    public TextMeshProUGUI CoolDownText2;
+    public TextMeshProUGUI CoolDownText3;
+    public TextMeshProUGUI CoolDownText4;
     public Image bloodOverlay;
 
     [Header("애니메이션 연결")]
@@ -417,7 +421,6 @@ public class PlayerControler : MonoBehaviour, IDamageable
         if (deathUI != null) deathUI.SetActive(true);
         Time.timeScale = 0f;
         Debug.Log("플레이어 사망");
-        // gameObject.SetActive(false); // 필요시 주석 해제
     }
 
     public void TakeExp(float exp)
@@ -462,23 +465,23 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     void inventoryMananger()
     {
-       // 나중에 아이템 아이디로 반복 돌림 
+       // 나중에 아이템 
     }
 
     private void CoolDownMananger()
     {
         float dt = Time.deltaTime;
 
-        if (cooldownTimerBoost > 0) cooldownTimerBoost -= dt;
+        if (cooldownTimerBoost > 0) { cooldownTimerBoost -= dt; CoolDownText4.text = $"금광불괴 \n {cooldownTimerBoost}"; }
         if (isBoost) { boostTimer -= dt; if (boostTimer <= 0) isBoost = false; }
 
-        if (cooldownTimerDashDash > 0) cooldownTimerDashDash -= dt;
+        if (cooldownTimerDashDash > 0) { cooldownTimerDashDash -= dt; CoolDownText1.text = $"대쉬 \n {cooldownTimerDashDash}"; }
         if (isDashing) { dashTimer -= dt; if (dashTimer <= 0) isDashing = false; }
 
-        if (cooldownTimerHook > 0) cooldownTimerHook -= dt;
+        if (cooldownTimerHook > 0) {cooldownTimerHook -= dt; CoolDownText3.text = $"훅 \n {cooldownTimerHook}"; }
         if (isHook) { hookTimer -= dt; if (hookTimer <= 0) isHook = false; }
 
-        if (cooldownTimerAttack > 0) cooldownTimerAttack -= dt;
+        if (cooldownTimerAttack > 0) { cooldownTimerAttack -= dt; CoolDownText2.text = $"원 투 \n {cooldownTimerAttack}"; }
         if (isAttack) { AttackTimer -= dt; if (AttackTimer <= 0) isAttack = false; }
     }
 
