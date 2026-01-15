@@ -37,11 +37,16 @@ public class SceneManager : MonoBehaviour
     
     public void GameExit()
     {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
         Application.Quit();
+#endif
     }
 
     public void PracticeRoom()
     {
+        Time.timeScale = 1f;
         UnityEngine.SceneManagement.SceneManager.LoadScene("practiceRoom");
     }
 

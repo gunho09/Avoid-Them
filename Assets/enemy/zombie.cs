@@ -139,7 +139,7 @@ public class zombie : MonoBehaviour, IDamageable
             PlayerControler.TakeExp(expDrop);
         }
 
-        Destroy(gameObject, 1f);
+        Destroy(gameObject, 0.2f);
     }
 
     void OnDrawGizmos()
