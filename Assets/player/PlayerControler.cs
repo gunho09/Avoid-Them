@@ -452,6 +452,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
             currentExp -= MaxExp;
             PlayerCurrentHp += PlayerMaxHp * 0.2f;
+            if(PlayerCurrentHp > PlayerMaxHp) PlayerCurrentHp = PlayerMaxHp;
             PlayerDamage += 0.05f * PlayerDamage;
             PlayerLvl++;
             if (ExpSlider != null) ExpSlider.value = currentExp;
