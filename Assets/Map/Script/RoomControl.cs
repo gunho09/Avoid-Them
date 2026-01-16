@@ -5,6 +5,18 @@ public class RoomControl : MonoBehaviour
     [Header("Room Settings")]
     public Transform playerSpawnPoint;   
     public Transform cameraPoint;        
+
+    [Tooltip("카메라가 비춰야 할 가로 길이 (World Unit)")]
+    public float viewWidth = 18f;
+    [Tooltip("카메라가 비춰야 할 세로 길이 (World Unit)")]
+    public float viewHeight = 10f;
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.cyan;
+        Vector3 center = (cameraPoint != null) ? cameraPoint.position : transform.position;
+        Gizmos.DrawWireCube(center, new Vector3(viewWidth, viewHeight, 1));
+    }
     
     //
     
