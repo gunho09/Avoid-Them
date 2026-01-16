@@ -271,9 +271,7 @@ public class MapManager : MonoBehaviour
         Debug.Log("!!! GAME CLEAR !!!");
         Debug.Log("축하합니다! 모든 보스를 처치했습니다.");
         
-        // 게임 정지 (필요 시 UI 띄우기)
-        Time.timeScale = 0f;
-        
-        // TODO: 게임 클리어 UI 호출 등
+        // 게임 클리어 UI 씬 호출
+        UnityEngine.SceneManagement.SceneManager.LoadScene("ClearUI");
     }
 }

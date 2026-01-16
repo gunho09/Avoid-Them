@@ -13,6 +13,7 @@ public class BuildSetup
         
         string mainUIPath = "Assets/MainUI/MainUI.unity";
         string gamePath = "Assets/Map/Game.unity";
+        string clearUIPath = "Assets/MainUI/ClearUI.unity";
         
      
         if (File.Exists(mainUIPath))
@@ -36,10 +37,31 @@ public class BuildSetup
             Debug.LogError($"Could not find Game scene at {gamePath}");
         }
 
+        if (File.Exists(clearUIPath))
+        {
+            scenes.Add(new EditorBuildSettingsScene(clearUIPath, true));
+            Debug.Log("Added ClearUI to Build Settings.");
+        }
+        else
+        {
+            Debug.LogError($"Could not find ClearUI scene at {clearUIPath}");
+        }
+
+        string practiceRoomPath = "Assets/MainUI/practiceRoom.unity";
+        if (File.Exists(practiceRoomPath))
+        {
+            scenes.Add(new EditorBuildSettingsScene(practiceRoomPath, true));
+            Debug.Log("Added practiceRoom to Build Settings.");
+        }
+        else
+        {
+            Debug.LogError($"Could not find practiceRoom scene at {practiceRoomPath}");
+        }
+
        
         foreach (var scene in EditorBuildSettings.scenes)
         {
-            if (scene.path != mainUIPath && scene.path != gamePath)
+            if (scene.path != mainUIPath && scene.path != gamePath && scene.path != clearUIPath && scene.path != practiceRoomPath)
             {
                 scenes.Add(scene);
             }
