@@ -30,6 +30,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
     public Slider hpSlider;
     public GameObject deathUI;
     public Slider ExpSlider;
+    public Slider BoostTime;
     public TextMeshProUGUI LvlText;
     public TextMeshProUGUI hpText;   
     public TextMeshProUGUI expText;
@@ -37,7 +38,10 @@ public class PlayerControler : MonoBehaviour, IDamageable
     public TextMeshProUGUI CoolDownText2;
     public TextMeshProUGUI CoolDownText3;
     public TextMeshProUGUI CoolDownText4;
+    public Image boostIconOverlay;
+    public Image hookIconOverlay;
     public Image bloodOverlay;
+    public TextMeshProUGUI AttackDamageText;
 
     [Header("애니메이션 연결")]
     private Animator anim;
@@ -87,7 +91,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
     void Start()
     {
         CurrentPlayer();
-        
+        PlayerCurrentHp = PlayerMaxHp;
         
         LvlText.text = $"{PlayerLvl}";
         if (expText != null) expText.text = $"{currentExp} / {MaxExp}";
@@ -136,6 +140,8 @@ public class PlayerControler : MonoBehaviour, IDamageable
         }
 
 
+        CurrentPlayer();
+
 
         //if (sr != null)
         //{
@@ -146,7 +152,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
 
         // 입력 처리
-        
+
 
         if (Input.GetMouseButtonDown(1))
         {
@@ -209,7 +215,6 @@ public class PlayerControler : MonoBehaviour, IDamageable
     IEnumerator AttackStopRoutine()
     {
         isAttacking = true;
-
         rb.linearVelocity = Vector2.zero;
 
         // 2. 여기에 애니메이션 실행 코드 작성 (예: anim.SetTrigger("Attack"))
@@ -241,7 +246,6 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     public void Attack1() //원
     {
-        playerSpeed = 0f;
         attackNum++;
         // 1. 마우스 방향 계산
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -261,7 +265,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
         Collider2D[] hits = Physics2D.OverlapBoxAll(boxCenter, boxSize, angle, enemy);
         foreach (Collider2D hit in hits)
         {
-            hit.GetComponent<IDamageable>()?.TakeDamage(attackDamage * (isBoost ? 2 : 1));
+            hit.GetComponent<IDamageable>()?.TakeDamage(PlayerDamage * (isBoost ? 2 : 1));
             Debug.Log($"원");
         }
 
@@ -271,7 +275,6 @@ public class PlayerControler : MonoBehaviour, IDamageable
         Debug.DrawLine((Vector2)transform.position + rightEdge, (Vector2)transform.position + attackDir * attackDistance + rightEdge, Color.cyan, 0.2f);
         Debug.DrawLine((Vector2)transform.position - rightEdge, (Vector2)transform.position + attackDir * attackDistance - rightEdge, Color.cyan, 0.2f);
         Debug.DrawLine((Vector2)transform.position + attackDir * attackDistance + rightEdge, (Vector2)transform.position + attackDir * attackDistance - rightEdge, Color.cyan, 0.2f);
-        playerSpeed = 5f;
 
         isAttack = true;
         AttackTimer = AttackDuration;
@@ -320,7 +323,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
             if (angle <= angleRange) // 부채꼴 범위 안에 들어와 있다면
             {
-                hit.GetComponent<IDamageable>()?.TakeDamage(attackDamage * 2f * (isBoost ? 2 : 1));
+                hit.GetComponent<IDamageable>()?.TakeDamage(PlayerDamage * 2f * (isBoost ? 2 : 1));
             }
         }
 
@@ -371,22 +374,28 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     public void Dash(Vector3 direction)
     {
-        if (direction == Vector3.zero) direction = transform.right;
+        if (direction.sqrMagnitude < 0.01f)
+            return;
 
         isDashing = true;
         dashTimer = dashDuration;
         cooldownTimerDashDash = dashCooldown;
         dashDirection = direction.normalized;
-        Debug.Log("대쉬!");
     }
+
 
     public void Boost()
     {
         isBoost = true;
         boostTimer = boostDuration;
+
+        //BoostTime.maxValue = boostDuration;
+        //BoostTime.value = boostDuration;
+        //BoostTime.gameObject.SetActive(true);
+
         cooldownTimerBoost = boostCooldown;
-        Debug.Log("금강불괴 활성화!");
     }
+
 
     public float Guard()
     {
@@ -438,8 +447,12 @@ public class PlayerControler : MonoBehaviour, IDamageable
     {
         if (ExpSlider != null) ExpSlider.value = currentExp;
         PlayerMaxHp = plusHp + numHp + playerStartHp;
+        if (hpSlider != null) hpSlider.value = PlayerCurrentHp;
+        if (hpText != null) hpText.text = $"{PlayerCurrentHp} / {PlayerMaxHp}";
+
         PlayerDamage = plusPW + numPW + playerStartPw;
-        PlayerCurrentHp = PlayerMaxHp;
+        AttackDamageText.text = $"공격력 : {PlayerDamage}";
+        
 
     }
 
@@ -454,6 +467,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
             PlayerDamage += 0.05f * PlayerDamage;
             PlayerLvl++;
             if (ExpSlider != null) ExpSlider.value = currentExp;
+            AttackDamageText.text = $"공격력 : {PlayerDamage}";
             if (expText != null) expText.text = $"{currentExp} / {MaxExp}";
             LvlText.text = $"{PlayerLvl}";
             
@@ -471,53 +485,64 @@ public class PlayerControler : MonoBehaviour, IDamageable
     {
         float dt = Time.deltaTime;
 
-        if (cooldownTimerBoost > 0) 
-        { 
-            cooldownTimerBoost -= dt; 
-            CoolDownText4.text = $"금광불괴\n{(int)cooldownTimerBoost}"; 
-        }
-        else
+        // 1. 대쉬 쿨타임 (CoolDownText1)
+        if (cooldownTimerDashDash > 0)
         {
-            CoolDownText4.text = "금광불괴";
+            cooldownTimerDashDash -= dt;
         }
-        if (isBoost) { boostTimer -= dt; if (boostTimer <= 0) isBoost = false; }
-
-
-        if (cooldownTimerDashDash > 0) 
-        { 
-            cooldownTimerDashDash -= dt; 
-            CoolDownText1.text = ""; 
-        }
-        else
+       
+        // 대쉬 지속시간 관리
+        if (isDashing)
         {
-            CoolDownText1.text = "";
+            dashTimer -= dt;
+            if (dashTimer <= 0) isDashing = false;
         }
-        if (isDashing) { dashTimer -= dt; if (dashTimer <= 0) isDashing = false; }
+
+        // 2. 공격 쿨타임 (CoolDownText2)
+        if (cooldownTimerAttack > 0)
+        {
+            cooldownTimerAttack -= dt;
+        }
         
-
-        if (cooldownTimerHook > 0) 
-        {
-            cooldownTimerHook -= dt; 
-            CoolDownText3.text = $"훅\n{(int)cooldownTimerHook}"; 
-        }
-        else
-        {
-            CoolDownText3.text = "훅";
-        }
-        if (isHook) { hookTimer -= dt; if (hookTimer <= 0) isHook = false; }
-
-
-        // 원투는 쿨타임 표시 제외
-        if (cooldownTimerAttack > 0) 
-        { 
-            cooldownTimerAttack -= dt; 
-            CoolDownText2.text = ""; 
-        }
-        else
-        {
-            CoolDownText2.text = "";
-        }
         if (isAttack) { AttackTimer -= dt; if (AttackTimer <= 0) isAttack = false; }
+
+        // 3. 훅 쿨타임 (CoolDownText3)
+        if (cooldownTimerHook > 0)
+        {
+            cooldownTimerHook -= dt;
+            CoolDownText3.text = Mathf.Ceil(cooldownTimerHook).ToString();
+            if (hookIconOverlay != null) hookIconOverlay.fillAmount = cooldownTimerHook / hookCooldown;
+        }
+        else
+        {
+            CoolDownText3.text = "";
+            if (hookIconOverlay != null) hookIconOverlay.fillAmount = 0;
+        }
+
+        // 4. 부스트 쿨타임 (CoolDownText4)
+        if (cooldownTimerBoost > 0)
+        {
+            cooldownTimerBoost -= dt;
+            CoolDownText4.text = Mathf.Ceil(cooldownTimerBoost).ToString();
+            if (boostIconOverlay != null) boostIconOverlay.fillAmount = cooldownTimerBoost / boostCooldown;
+        }
+        else
+        {
+            CoolDownText4.text = "";
+            if (boostIconOverlay != null) boostIconOverlay.fillAmount = 0;
+        }
+
+        // 부스트 지속시간 관리
+        if (isBoost)
+        {
+            boostTimer -= dt;
+            //BoostTime.value = boostTimer;
+            if (boostTimer <= 0)
+            {
+                isBoost = false;
+                //BoostTime.gameObject.SetActive(false);
+            }
+        }
     }
 
     public void GoMain()

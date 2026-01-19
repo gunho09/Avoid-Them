@@ -104,11 +104,11 @@ public class Boss4 : MonoBehaviour, IDamageable
                 break;
             case State.Attack2:
                 rb.linearVelocity = Vector2.zero;
-                AttackPlayer();
+                AttackPlayer2();
                 break;
             case State.Attack1:
                 rb.linearVelocity = Vector2.zero;
-                AttackPlayer();
+                AttackPlayer1();
                 break;
 
             case State.Move:
@@ -123,7 +123,7 @@ public class Boss4 : MonoBehaviour, IDamageable
         rb.linearVelocity = direction * speed;
     }
 
-    void AttackPlayer()
+    void AttackPlayer1()
     {
         if (Time.time - lastAttackTime >= atackSpeed)
         {
@@ -133,6 +133,36 @@ public class Boss4 : MonoBehaviour, IDamageable
                 lastAttackTime = Time.time;
             }
         }
+    }
+
+    void AttackPlayer2()
+    {
+        if (Time.time - lastAttackTime >= atackSpeed)
+        {
+            if (PlayerControler != null)
+            {
+                PlayerControler.TakeDamage(attackDamage);
+                lastAttackTime = Time.time;
+            }
+        }
+    }
+
+    void Skill1()
+    {
+        
+
+    }
+
+    void Skill2()
+    {
+
+
+    }
+
+    void Skill3()
+    {
+
+
     }
 
     public void TakeDamage(float damage)
