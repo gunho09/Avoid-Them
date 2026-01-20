@@ -1,11 +1,15 @@
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
-using TMPro;
+using TMPro; // TextMeshPro 사용
 using System.Collections;
+using System.Collections.Generic;
+
+// 주의: SceneManager 이름 충돌 방지를 위해 네임스페이스 명시적 사용
 
 public class PlayerControler : MonoBehaviour, IDamageable
 {
+    public static PlayerControler Instance;
+
     [Header("기본 스탯")]
     public float playerSpeed = 5f;
     public float playerStartHp = 100f;
@@ -14,17 +18,18 @@ public class PlayerControler : MonoBehaviour, IDamageable
     public float plusPW = 0f, numPW = 0f;
 
     [Header("공격 설정 (쨉/찌르기)")]
-    public float attackDistance = 2.0f; // 쨉 거리
-    public float attackWidth = 0.8f;    // 쨉 너비
+    public float attackDistance = 2.0f; 
+    public float attackWidth = 0.8f;    
     public float attackDamage = 10f;
     public int attackNum = 2;
-    public LayerMask enemy;             // 적 레이어 설정 필수
+    public LayerMask enemy;             
     private bool isAttacking = false;
 
     [Header("계산된 스탯")]
     public float PlayerMaxHp;
     public float PlayerDamage;
     public float PlayerCurrentHp;
+    public float PlayerCurrentShield = 0f;
 
     [Header("UI 연결")]
     public Slider hpSlider;
@@ -34,10 +39,10 @@ public class PlayerControler : MonoBehaviour, IDamageable
     public TextMeshProUGUI LvlText;
     public TextMeshProUGUI hpText;   
     public TextMeshProUGUI expText;
-    public TextMeshProUGUI CoolDownText1;
-    public TextMeshProUGUI CoolDownText2;
-    public TextMeshProUGUI CoolDownText3;
-    public TextMeshProUGUI CoolDownText4;
+    public TextMeshProUGUI CoolDownText1; // 평타
+    public TextMeshProUGUI CoolDownText2; // 훅
+    public TextMeshProUGUI CoolDownText3; // 대시
+    public TextMeshProUGUI CoolDownText4; // 부스트
     public Image boostIconOverlay;
     public Image hookIconOverlay;
     public Image bloodOverlay;
@@ -54,7 +59,6 @@ public class PlayerControler : MonoBehaviour, IDamageable
     private bool isHook = false;
     private bool isAttack = false;
 
-
     [Header("레벨관리")]
     public float exp;
     public float currentExp = 0;
@@ -68,7 +72,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
     private float dashTimer, cooldownTimerDashDash;
     private Vector3 dashDirection;
 
-    public float boostCooldown = 30f;
+    public float boostCooldown = 30f; 
     private float boostTimer, cooldownTimerBoost;
     public float boostDuration = 6f;
 
@@ -76,118 +80,114 @@ public class PlayerControler : MonoBehaviour, IDamageable
     private float AttackTimer, cooldownTimerAttack;
     public float AttackDuration = 0.2f;
 
-
     public float hookCooldown = 5f;
-    public float attackRange = 1.5f; // 훅 범위
+    public float attackRange = 1.5f; 
     private float hookTimer, cooldownTimerHook;
     public float hookDuration = 0.3f;
 
     private Rigidbody2D rb;
     private Vector2 inputMovement;
 
-    SpriteRenderer spriter;
+    // --- [아이템 관련 변수] ---
+    [Header("아이템/더미 설정")]
+    public GameObject dummyPrefab; 
+    public GameObject magneticFieldVisual; // 자기장 이펙트 오브젝트 
 
+    private float reflectCooldownTimer = 0f;
+    private float reflectDurationTimer = 0f;
+    private bool isReflecting = false;
+
+    private float magneticCooldownTimer = 0f;
+    private float magneticDurationTimer = 0f;
+    private bool isMagnetic = false;
+
+    private float shockwaveTimer = 0f;
+    
+    private int attackHitCount = 0;
+    private int driveHitCount = 0;
+    private bool isSlayerActive = false;
+    private float driveSpeedBonus = 0f;
+    private float driveTimer = 0f;
+    // -------------------------
 
     void Start()
     {
-        CurrentPlayer();
-        PlayerCurrentHp = PlayerMaxHp;
+        if (Instance == null) Instance = this;
+
+        // 초기화 시점에는 Stats 계산 (이벤트 전)
+        RecalculateStats();
+        PlayerCurrentHp = PlayerMaxHp; 
         
         LvlText.text = $"{PlayerLvl}";
         if (expText != null) expText.text = $"{currentExp} / {MaxExp}";
-        if (hpText != null) hpText.text = $"{PlayerCurrentHp} / {PlayerMaxHp}";
+        UpdateHpUI();
 
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         sr = GetComponent<SpriteRenderer>();
 
-
-        if (rb != null)
-        {
-            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-        }
-
-        if (hpSlider != null)
+        if (rb != null) rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+        if (hpSlider != null) 
         {
             hpSlider.maxValue = PlayerMaxHp;
             hpSlider.value = PlayerCurrentHp;
+        }
+
+        // 이벤트 구독
+        if (Inventory.Instance != null)
+        {
+            Inventory.Instance.OnInventoryChanged += RecalculateStats;
+            RecalculateStats(); // 초기 계산
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (Inventory.Instance != null)
+        {
+            Inventory.Instance.OnInventoryChanged -= RecalculateStats;
         }
     }
 
     void Update()
     {
+        float dt = Time.deltaTime;
 
-        // 이동 입력
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveY = Input.GetAxisRaw("Vertical");
         inputMovement = new Vector2(moveX, moveY);
-
-        
-        
-        float h = Input.GetAxis("Horizontal");
+       
+        float h = Input.GetAxis("Horizontal"); 
         float v = Input.GetAxis("Vertical");
 
         anim.SetFloat("hInput", h);
         anim.SetFloat("vInput", v);
 
-        if (h > 0)
-        {
-            sr.flipX = false;
-        }
-        else if (h < 0)
-        {
-            sr.flipX = true;
-        }
+        if (h > 0) sr.flipX = false;
+        else if (h < 0) sr.flipX = true;
 
-
-        CurrentPlayer();
-
-
-        //if (sr != null)
-        //{
-        //    if (moveX > 0) sr.flipX = false;
-        //    else if (moveX < 0) sr.flipX = true;
-        //}
-
-
-
-        // 입력 처리
-
+        // CurrentPlayer() 삭제됨 -> RecalculateStats가 이벤트로 처리
+        UpdateItemTimers(dt); 
 
         if (Input.GetMouseButtonDown(1))
         {
-            
             Guarding = true;
             playerSpeed = 1f;
-            
         }
         if (Input.GetMouseButtonUp(1))
         {
-            
             Guarding = false;
-            playerSpeed = 5f;
-
-
+            playerSpeed = 5f + driveSpeedBonus;
         }
 
-        if (Input.GetMouseButtonDown(0) && cooldownTimerAttack <= 0)
-        {
-            Attack1();
-        }
-
-        // 2. 훅 기술에 쿨타임 조건 추가 (기존에는 조건이 없었음)
-        if (Input.GetKeyDown(KeyCode.E) && cooldownTimerHook <= 0)
-        {
-            LeftHook();
-        }
-
-        // 대쉬와 부스트는 이미 조건문이 잘 들어가 있습니다.
+        if (Input.GetMouseButtonDown(0) && cooldownTimerAttack <= 0) Attack1();
+        if (Input.GetKeyDown(KeyCode.E) && cooldownTimerHook <= 0) LeftHook();
         if (Input.GetKeyDown(KeyCode.LeftShift) && cooldownTimerDashDash <= 0) Dash(inputMovement);
         if (Input.GetKeyDown(KeyCode.Q) && cooldownTimerBoost <= 0) Boost();
 
-        CoolDownMananger(); // 이 함수가 돌아가면서 수치를 깎음
+        // 쿨타임 UI 및 타이머 관리 함수 호출
+        CoolDownMananger(); 
 
-        // 시각화 디버깅 (항상 마우스 방향으로 빨간 선 표시)
         Vector3 mPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector2 d = ((Vector2)mPos - (Vector2)transform.position).normalized;
         Debug.DrawRay(transform.position, d * attackDistance, Color.red);
@@ -207,195 +207,335 @@ public class PlayerControler : MonoBehaviour, IDamageable
         }
         else
         {
-            rb.linearVelocity = inputMovement.normalized * playerSpeed;
+            rb.linearVelocity = inputMovement.normalized * (playerSpeed + driveSpeedBonus);
         }
     }
 
-
-    IEnumerator AttackStopRoutine()
+    // --- [쿨타임 매니저] ---
+    void CoolDownMananger()
     {
-        isAttacking = true;
-        rb.linearVelocity = Vector2.zero;
+        float dt = Time.deltaTime;
 
-        // 2. 여기에 애니메이션 실행 코드 작성 (예: anim.SetTrigger("Attack"))
+        // 1. 공격 (Attack)
+        if (cooldownTimerAttack > 0) cooldownTimerAttack -= dt;
+        if (AttackTimer > 0) AttackTimer -= dt;
+        else if(isAttack) isAttack = false;
 
-        yield return new WaitForSeconds(0.2f); // 0.2초간 멈춤
-
-        isAttacking = false;
-    }
-
-    IEnumerator ScreenFlash()
-    {
-        float duration = 0.3f;
-        float maxAlpha = 0.6f;
-
-        bloodOverlay.color = new Color(0.4f, 0, 0, maxAlpha);
-
-        float elapsed = 0f;
-        while (elapsed < duration)
+        if (CoolDownText1 != null)
         {
-            elapsed += Time.deltaTime;
-            float alpha = Mathf.Lerp(maxAlpha, 0, elapsed / duration);
-            bloodOverlay.color = new Color(0.4f, 0, 0, alpha);
-            yield return null;
+            if (cooldownTimerAttack > 0) CoolDownText1.text = $"{cooldownTimerAttack:F1}";
+            else CoolDownText1.text = "";
         }
-        bloodOverlay.color = new Color(0, 0, 0, 0);
+
+        // 2. 훅 (Hook E)
+        if (cooldownTimerHook > 0) cooldownTimerHook -= dt;
+        if (hookTimer > 0) hookTimer -= dt;
+        else if(isHook) isHook = false;
+
+        if (CoolDownText2 != null)
+        {
+            if (cooldownTimerHook > 0) CoolDownText2.text = $"{cooldownTimerHook:F1}";
+            else CoolDownText2.text = "";
+        }
+
+        // 3. 대시 (Shift)
+        if (cooldownTimerDashDash > 0) cooldownTimerDashDash -= dt;
+        if (dashTimer > 0) dashTimer -= dt;
+        else if(isDashing) isDashing = false;
+
+        if (CoolDownText3 != null)
+        {
+            if (cooldownTimerDashDash > 0) CoolDownText3.text = $"{cooldownTimerDashDash:F1}";
+            else CoolDownText3.text = "";
+        }
+
+        // 4. 부스트 (Boost Q)
+        if (cooldownTimerBoost > 0) cooldownTimerBoost -= dt;
+        if (boostTimer > 0) boostTimer -= dt;
+        else if(isBoost) isBoost = false;
+
+        if (CoolDownText4 != null)
+        {
+            if (cooldownTimerBoost > 0) CoolDownText4.text = $"{cooldownTimerBoost:F1}";
+            else CoolDownText4.text = "";
+        }
+        
+        // 부스트 지속시간 바
+        if (BoostTime != null)
+        {
+            BoostTime.maxValue = boostDuration;
+            BoostTime.value = boostTimer;
+        }
     }
 
-   
+    void UpdateItemTimers(float dt)
+    {
+        if (Inventory.Instance == null) return;
 
-    public void Attack1() //원
+        // 1. 반사 
+        if (Inventory.Instance.GetStackCount(ItemEffectType.Reflection) > 0)
+        {
+            if (isReflecting)
+            {
+                reflectDurationTimer -= dt;
+                if (reflectDurationTimer <= 0)
+                {
+                    isReflecting = false;
+                    reflectCooldownTimer = 10f;
+                }
+            }
+            else
+            {
+                reflectCooldownTimer -= dt;
+                if (reflectCooldownTimer <= 0)
+                {
+                    isReflecting = true;
+                    reflectDurationTimer = 3f;
+                    StartCoroutine(ScreenFlash(Color.yellow));
+                }
+            }
+        }
+
+        // 2. 자기장
+        if (Inventory.Instance.GetStackCount(ItemEffectType.DamageReduction) > 0)
+        {
+            if (isMagnetic)
+            {
+                if (magneticFieldVisual != null) magneticFieldVisual.SetActive(true);
+
+                magneticDurationTimer -= dt;
+                if (magneticDurationTimer <= 0)
+                {
+                    isMagnetic = false;
+                    magneticCooldownTimer = 20f;
+                }
+            }
+            else
+            {
+                if (magneticFieldVisual != null) magneticFieldVisual.SetActive(false);
+
+                magneticCooldownTimer -= dt;
+                if (magneticCooldownTimer <= 0)
+                {
+                    isMagnetic = true;
+                    magneticDurationTimer = 5f;
+                    StartCoroutine(ScreenFlash(Color.blue));
+                }
+            }
+        }
+        else
+        {
+             if (magneticFieldVisual != null) magneticFieldVisual.SetActive(false);
+        }
+
+        // 3. 충격파
+        if (Inventory.Instance.GetStackCount(ItemEffectType.Knockback) > 0)
+        {
+            shockwaveTimer -= dt;
+            if (shockwaveTimer <= 0)
+            {
+                TriggerShockwave();
+                shockwaveTimer = 15f;
+            }
+        }
+
+        // 4. 드라이브
+        if (driveTimer > 0)
+        {
+            driveTimer -= dt;
+            if (driveTimer <= 0)
+            {
+                driveSpeedBonus = 0f;
+                driveHitCount = 0;
+            }
+        }
+    }
+
+    void TriggerShockwave()
+    {
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 4f, enemy); 
+        foreach (var hit in hits)
+        {
+            float shockDamage = PlayerDamage * 0.5f; 
+            hit.GetComponent<IDamageable>()?.TakeDamage(shockDamage);
+            
+            var zombie = hit.GetComponent<zombie>();
+            if (zombie != null)
+            {
+                Vector2 dir = (hit.transform.position - transform.position).normalized;
+                zombie.ApplyCcKnockback(dir * 5f);
+                zombie.ApplyCcStun(2f);
+            }
+        }
+        StartCoroutine(ScreenFlash(Color.white));
+    }
+
+    public void Attack1() 
     {
         attackNum++;
-        // 1. 마우스 방향 계산
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPos.z = 0f;
         Vector2 attackDir = ((Vector2)mouseWorldPos - (Vector2)transform.position).normalized;
 
-
-
-        // 2. 공격 박스 설정 (쨉)
         Vector2 boxCenter = (Vector2)transform.position + attackDir * (attackDistance / 2f);
         Vector2 boxSize = new Vector2(attackWidth, attackDistance);
         float angle = Mathf.Atan2(attackDir.y, attackDir.x) * Mathf.Rad2Deg - 90f;
         
-       
         StartCoroutine(AttackStopRoutine());
-        // 3. 판정 및 데미지
+        
+        float dashBonus = 0f;
+        bool hasQuickAttack = Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.DashAttackUp) > 0;
+        if (hasQuickAttack && (isDashing || dashTimer > 0 || cooldownTimerDashDash > (dashCooldown - 1f)))
+        {
+             dashBonus = 0.2f; 
+        }
+
         Collider2D[] hits = Physics2D.OverlapBoxAll(boxCenter, boxSize, angle, enemy);
         foreach (Collider2D hit in hits)
         {
-            hit.GetComponent<IDamageable>()?.TakeDamage(PlayerDamage * (isBoost ? 2 : 1));
-            Debug.Log($"원");
-        }
-
-        // 4. 공격 시각화 (네모 상자 그리기)
-        Vector2 rightEdge = new Vector2(-attackDir.y, attackDir.x) * (attackWidth / 2f);
-        Debug.DrawLine((Vector2)transform.position + rightEdge, (Vector2)transform.position - rightEdge, Color.cyan, 0.2f);
-        Debug.DrawLine((Vector2)transform.position + rightEdge, (Vector2)transform.position + attackDir * attackDistance + rightEdge, Color.cyan, 0.2f);
-        Debug.DrawLine((Vector2)transform.position - rightEdge, (Vector2)transform.position + attackDir * attackDistance - rightEdge, Color.cyan, 0.2f);
-        Debug.DrawLine((Vector2)transform.position + attackDir * attackDistance + rightEdge, (Vector2)transform.position + attackDir * attackDistance - rightEdge, Color.cyan, 0.2f);
-
-        isAttack = true;
-        AttackTimer = AttackDuration;
-        cooldownTimerAttack = AttackCooldown;
-    }
-
-    public void LeftHook()
-    {
-
-        // 1. 마우스 방향 계산
-        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mousePos.z = 0;
-        Vector2 attackDir = (mousePos - transform.position).normalized;
-
-        // --- [시각화: Debug.DrawLine] ---
-        float angleRange = 60f; // 중심에서 좌우 60도 (총 120도)
-        int segments = 10;  
-        float duration = 0.2f;
-
-        Vector3 leftRay = Quaternion.Euler(0, 0, angleRange) * attackDir;
-        Vector3 rightRay = Quaternion.Euler(0, 0, -angleRange) * attackDir;
-
-        Debug.DrawLine(transform.position, transform.position + leftRay * attackRange, Color.cyan, duration);
-        Debug.DrawLine(transform.position, transform.position + rightRay * attackRange, Color.cyan, duration);
-
-        Vector3 previousPoint = transform.position + leftRay * attackRange;
-        for (int i = 1; i <= segments; i++)
-        {
-            float currentAngle = Mathf.Lerp(angleRange, -angleRange, (float)i / segments);
-            Vector3 nextDir = Quaternion.Euler(0, 0, currentAngle) * attackDir;
-            Vector3 nextPoint = transform.position + nextDir * attackRange;
-            Debug.DrawLine(previousPoint, nextPoint, Color.cyan, duration);
-            previousPoint = nextPoint;
-        }
-        StartCoroutine(AttackStopRoutine());
-
-        // --- [공격 판정: Physics2D] ---
-        // 1. 먼저 내 주변 원형 범위의 적을 다 찾습니다.
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, attackRange, enemy);
-
-        foreach (Collider2D hit in hits)
-        {
-            // 2. 적이 내 앞에 있는지(각도 체크) 확인합니다.
-            Vector2 dirToEnemy = (hit.transform.position - transform.position).normalized;
-            float angle = Vector2.Angle(attackDir, dirToEnemy);
-
-            if (angle <= angleRange) // 부채꼴 범위 안에 들어와 있다면
+            float finalDamage = PlayerDamage * (1f + dashBonus) * (isBoost ? 2 : 1);
+            
+            if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.DoubleAttack) > 0)
             {
-                hit.GetComponent<IDamageable>()?.TakeDamage(PlayerDamage * 2f * (isBoost ? 2 : 1));
+                if (isSlayerActive)
+                {
+                    finalDamage *= 2f;
+                    isSlayerActive = false;
+                    attackHitCount = 0;
+                }
+                else
+                {
+                    attackHitCount++;
+                    if (attackHitCount >= 3) isSlayerActive = true;
+                }
+            }
+
+            if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.InstantKill) > 0)
+            {
+                if (Random.value < 0.05f) finalDamage = 9999f;
+            }
+
+            if (Inventory.Instance != null)
+            {
+                float amp = Inventory.Instance.GetTotalStatBonus(ItemEffectType.DamageAmplification); 
+                finalDamage *= (1f + amp);
+                
+                // 정밀 타격 (ConditionalDamageUp): 적 체력 80% 이상일 때
+                IDamageable target = hit.GetComponent<IDamageable>();
+                if (target != null && target.GetHpRatio() > 0.8f)
+                {
+                    float precisionBonus = Inventory.Instance.GetTotalStatBonus(ItemEffectType.ConditionalDamageUp);
+                    finalDamage *= (1f + precisionBonus);
+                }
+
+                float vamp = Inventory.Instance.GetTotalStatBonus(ItemEffectType.Vampirism);
+                if (vamp > 0) Heal(finalDamage * vamp);
+            }
+
+            hit.GetComponent<IDamageable>()?.TakeDamage(finalDamage);
+            
+            if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.Drive) > 0)
+            {
+                driveHitCount++;
+                if (driveHitCount >= 5)
+                {
+                    driveSpeedBonus = 2f;
+                    driveTimer = 2f;
+                    driveHitCount = 0;
+                }
             }
         }
 
-        // 상태 업데이트
-        Debug.Log("훅훅!");
-        isHook = true;
-        hookTimer = hookDuration;
-        cooldownTimerHook = hookCooldown;
+        DebugDrawBox(transform.position, attackDir, attackDistance, attackWidth);
 
-
+        isAttack = true;
+        AttackTimer = AttackDuration;
+        
+        cooldownTimerAttack = AttackCooldown * (1f - GetTotalCooldownReduction()); 
     }
 
-    private void OnDrawGizmos()
+    public void LeftHook() 
     {
-        // 1. 마우스 방향 벡터 계산 (공격 로직과 동일하게)
         Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mousePos.z = 0;
         Vector2 attackDir = (mousePos - transform.position).normalized;
 
-        // 2. Gizmos 색상 설정
-        Gizmos.color = Color.red;
+        DebugDrawFan(attackDir, 60f, attackRange);
+        StartCoroutine(AttackStopRoutine());
 
-        // 3. 중심선 그리기
-        Gizmos.DrawRay(transform.position, attackDir * attackRange);
-
-        // 4. 부채꼴의 양 끝선 계산 (60도씩 회전)
-        Vector3 leftBoundary = Quaternion.Euler(0, 0, 60f) * attackDir;
-        Vector3 rightBoundary = Quaternion.Euler(0, 0, -60f) * attackDir;
-
-        // 5. 양 끝 경계선 그리기
-        Gizmos.DrawRay(transform.position, leftBoundary * attackRange);
-        Gizmos.DrawRay(transform.position, rightBoundary * attackRange);
-
-        // 6. [심화] 끝부분을 곡선으로 연결 (원 모양처럼 보이게)
-        int segments = 10; // 선을 10개로 쪼개서 곡선 만들기
-        Vector3 previousPoint = leftBoundary;
-        for (int i = 1; i <= segments; i++)
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, attackRange, enemy);
+        foreach (Collider2D hit in hits)
         {
-            // 60도에서 -60도까지 순차적으로 회전하며 점 찍기
-            float angle = Mathf.Lerp(60f, -60f, (float)i / segments);
-            Vector3 nextPoint = Quaternion.Euler(0, 0, angle) * attackDir;
+            Vector2 dirToEnemy = (hit.transform.position - transform.position).normalized;
+            float angle = Vector2.Angle(attackDir, dirToEnemy);
 
-            Gizmos.DrawLine(transform.position + previousPoint * attackRange,
-                            transform.position + nextPoint * attackRange);
-            previousPoint = nextPoint;
+            if (angle <= 60f) 
+            {
+                float finalDamage = PlayerDamage * 2f * (isBoost ? 2 : 1);
+                
+                if (Inventory.Instance != null)
+                {
+                    float amp = Inventory.Instance.GetTotalStatBonus(ItemEffectType.DamageAmplification); 
+                    finalDamage *= (1f + amp);
+                    
+                    // 정밀 타격 (ConditionalDamageUp)
+                    IDamageable target = hit.GetComponent<IDamageable>();
+                    if (target != null && target.GetHpRatio() > 0.8f)
+                    {
+                        float precisionBonus = Inventory.Instance.GetTotalStatBonus(ItemEffectType.ConditionalDamageUp);
+                        finalDamage *= (1f + precisionBonus);
+                    }
+
+                    float vamp = Inventory.Instance.GetTotalStatBonus(ItemEffectType.Vampirism);
+                    if (vamp > 0) Heal(finalDamage * vamp);
+                }
+
+                hit.GetComponent<IDamageable>()?.TakeDamage(finalDamage);
+            }
         }
+
+        isHook = true;
+        hookTimer = hookDuration;
+        cooldownTimerHook = hookCooldown * (1f - GetTotalCooldownReduction());
     }
 
-    public void Dash(Vector3 direction)
-    {
-        if (direction.sqrMagnitude < 0.01f)
-            return;
-
-        isDashing = true;
-        dashTimer = dashDuration;
-        cooldownTimerDashDash = dashCooldown;
-        dashDirection = direction.normalized;
-    }
-
-
-    public void Boost()
+    public void Boost() 
     {
         isBoost = true;
         boostTimer = boostDuration;
 
-        //BoostTime.maxValue = boostDuration;
-        //BoostTime.value = boostDuration;
-        //BoostTime.gameObject.SetActive(true);
+        if (Inventory.Instance != null)
+        {
+             if (Inventory.Instance.GetStackCount(ItemEffectType.MoveSpeedUp) > 0) 
+             {
+                 PlayerCurrentShield += PlayerCurrentHp * 0.2f;
+                 StartCoroutine(ScreenFlash(Color.cyan)); 
+             }
+        }
 
-        cooldownTimerBoost = boostCooldown;
+        float reduction = 0f;
+        if(Inventory.Instance != null)
+            reduction = Inventory.Instance.GetTotalStatBonus(ItemEffectType.CooldownReduction); 
+
+        cooldownTimerBoost = boostCooldown * (1f - reduction); 
     }
 
+    public void Dash(Vector3 direction)
+    {
+        if (direction.sqrMagnitude < 0.01f) return;
+        isDashing = true;
+        dashTimer = dashDuration;
+        cooldownTimerDashDash = dashCooldown * (1f - GetTotalCooldownReduction()); 
+        dashDirection = direction.normalized;
+    }
+
+    float GetTotalCooldownReduction()
+    {
+        if (Inventory.Instance == null) return 0f;
+        float cdr = Inventory.Instance.GetTotalStatBonus(ItemEffectType.CooldownReduction);
+        float aspd = Inventory.Instance.GetTotalStatBonus(ItemEffectType.AttackSpeedUp);
+        return Mathf.Clamp(cdr + aspd, 0f, 0.8f);
+    }
 
     public float Guard()
     {
@@ -406,157 +546,239 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     public void TakeDamage(float damage)
     {
-        float finalDamage = damage * Guard();
-        PlayerCurrentHp -= finalDamage;
-        
-        Debug.Log($"플레이어 데미지 입음: {finalDamage}, 남은 체력: {PlayerCurrentHp}");
+        if (isReflecting) 
+        {
+             Debug.Log("반사!");
+             return; 
+        }
 
-        if (hpSlider != null) hpSlider.value = PlayerCurrentHp;
-      
-        
+        float reduction = 1f;
+        if (isMagnetic) reduction = 0.5f; 
+        float finalDamage = damage * Guard() * reduction;
+
+        if (finalDamage > 0 && Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.AggroDistribution) > 0)
+        {
+            if (Random.value < 0.1f)
+            {
+                 // DummyItem 찾기
+                 if (dummyPrefab != null && FindObjectOfType<DummyItem>() == null)
+                 {
+                     GameObject dummyObj = Instantiate(dummyPrefab, transform.position, Quaternion.identity);
+                     DummyItem dummyScript = dummyObj.GetComponent<DummyItem>();
+                     
+                     if (dummyScript != null)
+                     {
+                         // 플레이어 최대 체력의 50%로 설정
+                         dummyScript.Setup(PlayerMaxHp * 0.5f);
+                     }
+                 }
+            }
+        }
+
+        if (PlayerCurrentShield > 0)
+        {
+            if (PlayerCurrentShield >= finalDamage)
+            {
+                PlayerCurrentShield -= finalDamage;
+                finalDamage = 0f;
+            }
+            else
+            {
+                finalDamage -= PlayerCurrentShield;
+                PlayerCurrentShield = 0f;
+            }
+        }
+
+        if (finalDamage > 0)
+        {
+            PlayerCurrentHp -= finalDamage;
+            StartCoroutine(ScreenFlash(Color.red));
+            
+            if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.RecoveryUp) > 0)
+            {
+                if (PlayerCurrentHp < PlayerMaxHp * 0.1f)
+                {
+                    Heal(PlayerMaxHp * 0.5f);
+                    Inventory.Instance.DecreaseItemCount(ItemEffectType.RecoveryUp); 
+                    Debug.Log("비상식량 사용!");
+                }
+            }
+        }
+
+        UpdateHpUI();
+
         if (PlayerCurrentHp <= 0)
         {
+            bool hasBand = Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.Resurrection) > 0;
+            if (hasBand)
+            {
+                PlayerCurrentHp = 1f; 
+                PlayerCurrentShield += 20f; 
+                Inventory.Instance.DecreaseItemCount(ItemEffectType.Resurrection); 
+                Debug.Log("밴드로 생존!");
+                UpdateHpUI();
+                return;
+            }
+
             PlayerCurrentHp = 0;
             Die();
         }
-        if (hpText != null) hpText.text = $"{PlayerCurrentHp} / {PlayerMaxHp}";
     }
 
     void Die()
     {
-        PlayerCurrentHp = 0; if (hpText != null) hpText.text = $"{PlayerCurrentHp} / {PlayerMaxHp}";
+        UpdateHpUI();
         if (deathUI != null) deathUI.SetActive(true);
         Time.timeScale = 0f;
-        Debug.Log("플레이어 사망");
     }
 
-    public void TakeExp(float exp)
-    {      
-        currentExp += exp;
-        if (ExpSlider != null) ExpSlider.value = currentExp;
-        if (expText != null) expText.text = $"{currentExp} / {MaxExp}";
+    public void Heal(float amount)
+    {
+        PlayerCurrentHp += amount;
+        if (PlayerCurrentHp > PlayerMaxHp) PlayerCurrentHp = PlayerMaxHp;
+        UpdateHpUI();
+    }
 
-        if(MaxExp <= currentExp)
+    public void TakeExp(float amount)
+    {
+        currentExp += amount;
+        
+        if (expText != null) expText.text = $"{currentExp} / {MaxExp}";
+        if (ExpSlider != null) ExpSlider.value = currentExp;
+
+        if(currentExp >= MaxExp)
         {
             LevelUp();
         }
-
     }
 
-    void CurrentPlayer()
+    public void RecalculateStats()
     {
-        if (ExpSlider != null) ExpSlider.value = currentExp;
-        PlayerMaxHp = plusHp + numHp + playerStartHp;
-        if (hpSlider != null) hpSlider.value = PlayerCurrentHp;
-        if (hpText != null) hpText.text = $"{PlayerCurrentHp} / {PlayerMaxHp}";
+        float extraHpPercent = 0f;
+        float extraAtkPercent = 0f;
 
-        PlayerDamage = plusPW + numPW + playerStartPw;
-        AttackDamageText.text = $"공격력 : {PlayerDamage}";
+        if (Inventory.Instance != null)
+        {
+            // 1. 유리 글로브
+            if(Inventory.Instance.GetStackCount(ItemEffectType.GlassCannon) > 0) 
+                 extraHpPercent = -(0.2f * Inventory.Instance.GetStackCount(ItemEffectType.GlassCannon));
+            
+            // 2. 강타자
+            extraAtkPercent += Inventory.Instance.GetTotalStatBonus(ItemEffectType.AttackUp); 
+            
+            // 3. 부서진 배트
+            if (PlayerMaxHp > 0)
+            {
+                float lostRatio = 1f - (PlayerCurrentHp / PlayerMaxHp);
+                if (lostRatio > 0)
+                {
+                    float batBonus = Inventory.Instance.GetTotalStatBonus(ItemEffectType.ConditionalAttackUp);
+                    extraAtkPercent += lostRatio * batBonus; 
+                }
+            }
+        }
+
+        float baseMaxHp = plusHp + numHp + playerStartHp;
+        PlayerMaxHp = baseMaxHp * (1f + extraHpPercent);
         
+        if (PlayerMaxHp < 10f) PlayerMaxHp = 10f; 
 
+        // 4. 두꺼운 과잠
+        if (Inventory.Instance != null)
+        {
+            float shieldBonus = Inventory.Instance.GetTotalStatBonus(ItemEffectType.MaxHpShield);
+            if (shieldBonus > 0)
+            {
+                float targetShield = PlayerMaxHp * shieldBonus;
+                if (PlayerCurrentShield < targetShield)
+                {
+                    PlayerCurrentShield = targetShield;
+                }
+            }
+        }
+
+        UpdateHpUI();
+
+        float baseDamage = plusPW + numPW + playerStartPw;
+        PlayerDamage = baseDamage * (1f + extraAtkPercent);
+        AttackDamageText.text = $"공격력 : {Mathf.Ceil(PlayerDamage)}";
+        
+        if (ExpSlider != null) ExpSlider.value = currentExp;
     }
 
-    void LevelUp()
+    void UpdateHpUI()
     {
+         if (hpSlider != null) 
+         {
+             hpSlider.maxValue = PlayerMaxHp;
+             hpSlider.value = PlayerCurrentHp; 
+         }
+         
+         string shieldStr = PlayerCurrentShield > 0 ? $" (+{Mathf.Ceil(PlayerCurrentShield)})" : "";
+         if (hpText != null) hpText.text = $"{Mathf.Ceil(PlayerCurrentHp)}{shieldStr} / {Mathf.Ceil(PlayerMaxHp)}";
+    }
 
-        while (currentExp >= 20) { 
+    public void Quit() { Application.Quit(); }
+    public void GoMain() 
+    { 
+        UnityEngine.SceneManagement.SceneManager.LoadScene("MainUI"); 
+    }
 
+    void LevelUp() 
+    {
+        while (currentExp >= MaxExp) { 
             currentExp -= MaxExp;
             PlayerCurrentHp += PlayerMaxHp * 0.2f;
             if(PlayerCurrentHp > PlayerMaxHp) PlayerCurrentHp = PlayerMaxHp;
             PlayerDamage += 0.05f * PlayerDamage;
             PlayerLvl++;
-            if (ExpSlider != null) ExpSlider.value = currentExp;
-            AttackDamageText.text = $"공격력 : {PlayerDamage}";
-            if (expText != null) expText.text = $"{currentExp} / {MaxExp}";
-            LvlText.text = $"{PlayerLvl}";
-            
-
-        }
-
-    }
-
-    void inventoryMananger()
-    {
-       // 나중에 아이템 
-    }
-
-    private void CoolDownMananger()
-    {
-        float dt = Time.deltaTime;
-
-        // 1. 대쉬 쿨타임 (CoolDownText1)
-        if (cooldownTimerDashDash > 0)
-        {
-            cooldownTimerDashDash -= dt;
-        }
-       
-        // 대쉬 지속시간 관리
-        if (isDashing)
-        {
-            dashTimer -= dt;
-            if (dashTimer <= 0) isDashing = false;
-        }
-
-        // 2. 공격 쿨타임 (CoolDownText2)
-        if (cooldownTimerAttack > 0)
-        {
-            cooldownTimerAttack -= dt;
-        }
+        } 
         
-        if (isAttack) { AttackTimer -= dt; if (AttackTimer <= 0) isAttack = false; }
-
-        // 3. 훅 쿨타임 (CoolDownText3)
-        if (cooldownTimerHook > 0)
+        LvlText.text = $"{PlayerLvl}"; 
+        if (expText != null) expText.text = $"{currentExp} / {MaxExp}";
+        if (ExpSlider != null) 
         {
-            cooldownTimerHook -= dt;
-            CoolDownText3.text = Mathf.Ceil(cooldownTimerHook).ToString();
-            if (hookIconOverlay != null) hookIconOverlay.fillAmount = cooldownTimerHook / hookCooldown;
+            ExpSlider.maxValue = MaxExp;
+            ExpSlider.value = currentExp;
         }
-        else
-        {
-            CoolDownText3.text = "";
-            if (hookIconOverlay != null) hookIconOverlay.fillAmount = 0;
-        }
-
-        // 4. 부스트 쿨타임 (CoolDownText4)
-        if (cooldownTimerBoost > 0)
-        {
-            cooldownTimerBoost -= dt;
-            CoolDownText4.text = Mathf.Ceil(cooldownTimerBoost).ToString();
-            if (boostIconOverlay != null) boostIconOverlay.fillAmount = cooldownTimerBoost / boostCooldown;
-        }
-        else
-        {
-            CoolDownText4.text = "";
-            if (boostIconOverlay != null) boostIconOverlay.fillAmount = 0;
-        }
-
-        // 부스트 지속시간 관리
-        if (isBoost)
-        {
-            boostTimer -= dt;
-            //BoostTime.value = boostTimer;
-            if (boostTimer <= 0)
-            {
-                isBoost = false;
-                //BoostTime.gameObject.SetActive(false);
-            }
-        }
+        UpdateHpUI();
     }
 
-    public void GoMain()
-        {
-            if (deathUI != null) deathUI.SetActive(false);
-            UnityEngine.SceneManagement.SceneManager.LoadScene("MainUI");
-        }
+    IEnumerator AttackStopRoutine()
+    {
+        isAttacking = true;
+        rb.linearVelocity = Vector2.zero;
+        yield return new WaitForSeconds(0.2f); 
+        isAttacking = false;
+    }
 
-        public void Quit()
-        {
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#else
-            Application.Quit();
-#endif
-        }
+    void DebugDrawBox(Vector2 pos, Vector2 dir, float dist, float width)
+    {
+        Vector2 rightEdge = new Vector2(-dir.y, dir.x) * (width / 2f);
+        Debug.DrawLine(pos + rightEdge, pos - rightEdge, Color.cyan, 0.2f);
+        Debug.DrawLine(pos + rightEdge, pos + dir * dist + rightEdge, Color.cyan, 0.2f);
+        Debug.DrawLine(pos - rightEdge, pos + dir * dist - rightEdge, Color.cyan, 0.2f);
+        Debug.DrawLine(pos + dir * dist + rightEdge, pos + dir * dist - rightEdge, Color.cyan, 0.2f);
+    }
+    void DebugDrawFan(Vector2 dir, float angle, float range)
+    {
+        Vector3 left = Quaternion.Euler(0,0,angle) * dir * range;
+        Vector3 right = Quaternion.Euler(0,0,-angle) * dir * range;
+        Debug.DrawLine(transform.position, transform.position + left, Color.cyan);
+        Debug.DrawLine(transform.position, transform.position + right, Color.cyan);
+    }
+    IEnumerator ScreenFlash(Color c)
+    {
+        if(bloodOverlay == null) yield break;
+        bloodOverlay.color = new Color(c.r,c.g,c.b, 0.6f);
+        yield return new WaitForSeconds(0.3f);
+        bloodOverlay.color = Color.clear;
+    }
+    
+    // [NEW] 인터페이스 구현
+    public float GetHpRatio()
+    {
+        if (PlayerMaxHp <= 0) return 0f;
+        return PlayerCurrentHp / PlayerMaxHp;
+    }
 }
