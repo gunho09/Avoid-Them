@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   itemName: "\uD559\uC0B4\uC790"
   description: "3\uD0C0\uB9C8\uB2E4 \uD53C\uD574\uB7C9\uC774 2\uBC30\uAC00 \uB429\uB2C8\uB2E4."
-  icon: {fileID: 0}
+  icon: {fileID: 5348415343698134925, guid: d973eb51040791740b20891b8767299f, type: 3}
   rarity: 2
   effectType: 10
   valuePerStack: 1

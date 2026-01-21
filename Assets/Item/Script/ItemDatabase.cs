@@ -44,8 +44,27 @@ public class ItemDatabase : MonoBehaviour
         List<ItemData> result = new List<ItemData>();
         for(int i=0; i<count; i++)
         {
-            result.Add(GetRandomItem());
+            ItemData item = GetRandomItem();
+            if (item != null) result.Add(item);
         }
         return result;
     }
+
+#if UNITY_EDITOR
+    [ContextMenu("Load All Items From Folder")]
+    public void LoadAllItems()
+    {
+        allItems = new List<ItemData>();
+        string[] connectionGuids = UnityEditor.AssetDatabase.FindAssets("t:ItemData", new[] { "Assets/Item/Data" });
+        
+        foreach (string guid in connectionGuids)
+        {
+            string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+            ItemData data = UnityEditor.AssetDatabase.LoadAssetAtPath<ItemData>(path);
+            if (data != null) allItems.Add(data);
+        }
+        Debug.Log($"[ItemDatabase] {allItems.Count} Items Loaded.");
+        UnityEditor.EditorUtility.SetDirty(this);
+    }
+#endif
 }

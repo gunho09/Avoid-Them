@@ -1956,8 +1956,8 @@ MonoBehaviour:
   cameraPoint: {fileID: 0}
   viewWidth: 18
   viewHeight: 13
-  rewardChest: {fileID: 8331316713063346958}
   returnDoor: {fileID: 3371777494364566851}
+  itemDropPrefab: {fileID: 1225989697395536146, guid: a12abaf9da31dc1468278edec17e79bc, type: 3}
 --- !u!1 &2268042379216991047
 GameObject:
   m_ObjectHideFlags: 0

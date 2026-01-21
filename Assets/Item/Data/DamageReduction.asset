@@ -15,7 +15,7 @@ MonoBehaviour:
   itemName: "\uC790\uAE30\uC7A5"
   description: "\uC8FC\uAE30\uC801\uC73C\uB85C \uD53C\uD574\uB97C \uB9C9\uC544\uC8FC\uB294
     \uC790\uAE30\uC7A5\uC744 \uC0DD\uC131\uD569\uB2C8\uB2E4."
-  icon: {fileID: 0}
+  icon: {fileID: 104849329948780251, guid: 9f18de80ca2dee64a9398c8fcffadf30, type: 3}
   rarity: 2
   effectType: 7
   valuePerStack: 1

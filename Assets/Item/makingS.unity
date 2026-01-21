@@ -268,9 +268,67 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a024f8feb6a1d7d478de8fd57215346c, type: 3}
+--- !u!1001 &8973673449584069697
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 5384495396829474074, guid: 7ea83bd8d7c507d44a221ad41c316d0b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -2.44576
+      objectReference: {fileID: 0}
+    - target: {fileID: 5384495396829474074, guid: 7ea83bd8d7c507d44a221ad41c316d0b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.95945
+      objectReference: {fileID: 0}
+    - target: {fileID: 5384495396829474074, guid: 7ea83bd8d7c507d44a221ad41c316d0b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5384495396829474074, guid: 7ea83bd8d7c507d44a221ad41c316d0b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5384495396829474074, guid: 7ea83bd8d7c507d44a221ad41c316d0b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5384495396829474074, guid: 7ea83bd8d7c507d44a221ad41c316d0b, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5384495396829474074, guid: 7ea83bd8d7c507d44a221ad41c316d0b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5384495396829474074, guid: 7ea83bd8d7c507d44a221ad41c316d0b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5384495396829474074, guid: 7ea83bd8d7c507d44a221ad41c316d0b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5384495396829474074, guid: 7ea83bd8d7c507d44a221ad41c316d0b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9038758526006688532, guid: 7ea83bd8d7c507d44a221ad41c316d0b, type: 3}
+      propertyPath: m_Name
+      value: MagneticField
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 7ea83bd8d7c507d44a221ad41c316d0b, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1268846287}
   - {fileID: 6777120964951486765}
+  - {fileID: 8973673449584069697}

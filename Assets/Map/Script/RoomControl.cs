@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class RoomControl : MonoBehaviour
 {
@@ -20,8 +21,12 @@ public class RoomControl : MonoBehaviour
     
     //
     
-    public GameObject rewardChest;  
+    // public GameObject rewardChest; // [삭제됨]
     public GameObject returnDoor;   
+    
+    [Header("Item Drop Settings")]
+    public GameObject itemDropPrefab; // 아이템 드랍 프리팹 (ItemPickup 스크립트가 붙어있어야 함)
+    private List<GameObject> activeDrops = new List<GameObject>(); // 현재 방에 떨어진 아이템들 추적   
     
     private int livingEnemyCount = 0; 
     private bool isCleared = false;
@@ -103,9 +108,17 @@ public class RoomControl : MonoBehaviour
         isCleared = true;
         Debug.Log("방 클리어! 보상 생성 & 문 열림");
 
-        if (rewardChest != null)
-            rewardChest.SetActive(true);
+        // [변경] 물리 아이템 3개 드랍
+        SpawnItemRewards();
 
+        // 기존 UI 호출 코드 삭제/주석
+        // if (ItemSelectUI.Instance != null) ...
+            
+        // if (rewardChest != null)
+        //    rewardChest.SetActive(true);
+
+        // 문 열기 로직은 OnItemPicked로 이동됨 (보상 먹어야 열림)
+        /*
         if (returnDoor != null)
         {
             
@@ -115,12 +128,68 @@ public class RoomControl : MonoBehaviour
                 doorScript.SetStatus(true);
             }
         }
+        */
 
         
         if (MapManager.Instance != null)
             MapManager.Instance.OnRoomCleared();
     }
 
+    void SpawnItemRewards()
+    {
+        if (itemDropPrefab == null || ItemDatabase.Instance == null) return;
+
+        List<ItemData> rewards = ItemDatabase.Instance.GetRandomItems(3);
+        activeDrops.Clear();
+
+        // 방 중앙 기준 왼쪽/중앙/오른쪽 offset
+        Vector3[] offsets = { new Vector3(-2, 0, 0), Vector3.zero, new Vector3(2, 0, 0) };
+
+        // 아이템 3개 생성
+        for (int i = 0; i < rewards.Count; i++)
+        {
+            if (i >= offsets.Length) break;
+
+            Vector3 spawnPos = transform.position + offsets[i];
+            
+            // 프리팹 생성
+            GameObject drop = Instantiate(itemDropPrefab, spawnPos, Quaternion.identity);
+            
+            // 데이터 설정 & 본인(RoomControl) 연결
+            ItemPickup pickup = drop.GetComponent<ItemPickup>();
+            if (pickup != null)
+            {
+                pickup.Setup(rewards[i], this);
+            }
+
+            activeDrops.Add(drop);
+        }
+    }
+
+    public void OnItemPicked()
+    {
+        // 하나를 먹으면 나머지는 싹 없앰
+        foreach (GameObject drop in activeDrops)
+        {
+            if (drop != null)
+            {
+                Destroy(drop);
+            }
+        }
+        activeDrops.Clear();
+
+        // 문 열기 (보상 획득 후에만 열리도록)
+        if (returnDoor != null)
+        {
+            Door doorScript = returnDoor.GetComponent<Door>();
+            if (doorScript != null)
+            {
+                doorScript.SetStatus(true);
+            }
+        }
+        Debug.Log("아이템 획득 완료! 문이 열립니다.");
+    }
+    
     public void OnRoomEntered()
     {
         Debug.Log("Player entered the room");

@@ -2581,7 +2581,7 @@ MonoBehaviour:
   expDrop: 3
   range: 100
   attackRange: 1
-  PlayerControler: {fileID: 0}
+  playerCtrl: {fileID: 0}
 --- !u!50 &2871145934106867383
 Rigidbody2D:
   serializedVersion: 5
@@ -2703,8 +2703,8 @@ MonoBehaviour:
   cameraPoint: {fileID: 0}
   viewWidth: 18
   viewHeight: 13
-  rewardChest: {fileID: 8499238778778225286}
   returnDoor: {fileID: 2264889864865602255}
+  itemDropPrefab: {fileID: 1225989697395536146, guid: a12abaf9da31dc1468278edec17e79bc, type: 3}
 --- !u!1 &6184866671081722356
 GameObject:
   m_ObjectHideFlags: 0
@@ -2891,7 +2891,7 @@ MonoBehaviour:
   expDrop: 10
   range: 100
   attackRange: 1
-  PlayerControler: {fileID: 0}
+  playerCtrl: {fileID: 0}
 --- !u!1 &7872934696049306924
 GameObject:
   m_ObjectHideFlags: 0
