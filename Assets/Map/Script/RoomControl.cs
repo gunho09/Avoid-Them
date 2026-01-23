@@ -137,7 +137,17 @@ public class RoomControl : MonoBehaviour
 
     void SpawnItemRewards()
     {
-        if (itemDropPrefab == null || ItemDatabase.Instance == null) return;
+        if (ItemDatabase.Instance == null)
+        {
+            Debug.LogError("SpawnItemRewards Failed: ItemDatabase.Instance is null! Scene에 ItemDatabase가 있는지 확인하세요.");
+            return;
+        }
+
+        if (itemDropPrefab == null)
+        {
+            Debug.LogError($"SpawnItemRewards Failed: RoomControl({gameObject.name})에 'Item Drop Prefab'이 연결되지 않았습니다! 인스펙터에서 확인해주세요.");
+            return;
+        }
 
         List<ItemData> rewards = ItemDatabase.Instance.GetRandomItems(3);
         activeDrops.Clear();
