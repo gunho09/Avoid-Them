@@ -26,6 +26,9 @@ public class MapManager : MonoBehaviour
     private GameObject currentRoomInstance; 
     private GameObject currentHallwayInstance; 
     private Vector3 lastDoorPosition;
+    
+    // [방문한 문 위치 저장용]
+    private System.Collections.Generic.List<Vector3> visitedDoors = new System.Collections.Generic.List<Vector3>();
 
     private void Awake()
     {
@@ -72,6 +75,13 @@ public class MapManager : MonoBehaviour
             Debug.LogError("MapManager: Player/MainChar를 찾을 수 없습니다! Inspector에서 할당해주세요.");
         }
 
+        // [카메라 타겟 해제] 복도에서는 고정 카메라
+        if (mainCamera != null)
+        {
+            mainCamera.target = null;
+            mainCamera.MoveCamera(hallwaySpawnPosition); // 복도 위치로 카메라 이동
+        }
+
         SpawnHallway();
         
         // 초기 층 표시
@@ -94,7 +104,11 @@ public class MapManager : MonoBehaviour
 
             currentHallwayInstance = Instantiate(hallwayPrefab, hallwaySpawnPosition, Quaternion.identity);
             currentHallwayInstance.name = "CurrentHallway";
+            currentHallwayInstance.name = "CurrentHallway";
             Debug.Log("복도 생성 완료 (게임 시작)");
+
+            // [이미 들어갔던 문 끄기]
+            DisableVisitedDoors();
         }
         else
         {
@@ -104,7 +118,18 @@ public class MapManager : MonoBehaviour
 
     public void EnterRoom(Vector3 doorPos, bool forceBoss = false)
     {
+        // [방문 기록 저장] - 실제 문 위치는 doorPos - returnOffset 이지만, 
+        // Door.cs에서 safeReturnPos = transform.position + returnOffset 으로 보냈음.
+        // 역산해서 원래 위치를 추정하거나, safeReturnPos 자체를 키로 써도 됨 (복귀 위치니까 고유함).
+        // 여기서는 간단히 lastDoorPosition(== doorPos)을 저장.
         lastDoorPosition = doorPos;
+        
+        // 문 위치가 겹칠 일은 거의 없으므로, 현재 층에서 방문한 곳으로 등록
+        // (단, 보스방 입장은 제외할 수도 있지만, 일단 다 저장)
+        if (!visitedDoors.Contains(doorPos))
+        {
+            visitedDoors.Add(doorPos);
+        }
 
         
         if (currentHallwayInstance != null)
@@ -158,6 +183,19 @@ public class MapManager : MonoBehaviour
             if (roomCtrl != null && roomCtrl.playerSpawnPoint != null)
             {
                 playerTargetPos = roomCtrl.playerSpawnPoint.position;
+                
+                if (mainCamera != null)
+                {
+                    // [카메라 타겟 해제] 방에서는 고정
+                    mainCamera.target = null;
+
+                    // [카메라 위치 이동]
+                    Vector3 camCenter = (roomCtrl.cameraPoint != null) ? roomCtrl.cameraPoint.position : roomCtrl.transform.position;
+                    mainCamera.MoveCamera(camCenter);
+
+                    // [카메라 크기 적용]
+                    mainCamera.SetCameraToFit(roomCtrl.viewWidth, roomCtrl.viewHeight);
+                }
             }
             else
             {
@@ -219,6 +257,22 @@ public class MapManager : MonoBehaviour
         {
             currentHallwayInstance = Instantiate(hallwayPrefab, hallwaySpawnPosition, Quaternion.identity);
             Debug.Log("복도 생성 완료");
+            
+            // [이미 들어갔던 문 끄기]
+            DisableVisitedDoors();
+            
+            // [복도 귀환 시 카메라 크기 초기화] (기본값: 가로 18, 세로 10)
+            if (mainCamera != null)
+            {
+                // [카메라 타겟 해제]
+                mainCamera.target = null;
+
+                // [카메라 위치 이동] - 복도 중앙(SpawnPosition)으로 이동
+                mainCamera.MoveCamera(hallwaySpawnPosition);
+                
+                // [카메라 크기 초기화] (18x10)
+                mainCamera.ResetCamera();
+            }
         }
         else
         {
@@ -251,7 +305,9 @@ public class MapManager : MonoBehaviour
     public void NextFloor()
     {
         currentFloor++;
+        currentFloor++;
         clearedRooms = 0;
+        visitedDoors.Clear(); // [새 층이므로 방문 기록 초기화]
         Debug.Log($"=== {currentFloor}층으로 이동합니다. ===");
         
         // 층 표시 UI 업데이트
@@ -273,5 +329,46 @@ public class MapManager : MonoBehaviour
         
         // 게임 클리어 UI 씬 호출
         UnityEngine.SceneManagement.SceneManager.LoadScene("ClearUI");
+    }
+
+    // [방문한 문 비활성화 함수]
+    private void DisableVisitedDoors()
+    {
+        if (currentHallwayInstance == null) return;
+        
+        Door[] doors = currentHallwayInstance.GetComponentsInChildren<Door>();
+        foreach (Door door in doors)
+        {
+            // Door.cs에서 보내는 위치는 transform.position + returnOffset 이었습니다.
+            // 하지만 우리는 비교를 위해, '입장했을 때 저장된 위치(lastDoorPosition)'와
+            // '지금 이 문의 복귀 예상 위치(transform.position + returnOffset)'가 같은지 봅니다.
+            // 혹은 더 간단히: lastDoorPosition은 '들어갔던 문의 복귀 위치'입니다.
+            // 이 문이 그 문인지 확인하려면:
+            
+            Vector3 thisDoorReturnPos = door.transform.position + door.returnOffset;
+            
+            // 위치 비교 (오차 감안)
+            foreach (Vector3 visitedPos in visitedDoors)
+            {
+                if (Vector3.Distance(thisDoorReturnPos, visitedPos) < 0.1f)
+                {
+                    // 방문했던 문 처리
+                    // 1. 기능 끄기 (열지 못하게)
+                    door.SetStatus(false);
+                    
+                    // 2. 시각적으로 '닫힘/어두움' 표시
+                    if (door.spriteRenderer != null)
+                    {
+                        door.spriteRenderer.color = Color.gray; // 회색으로 어둡게 처리
+                    }
+                    
+                    // 3. 더 이상 상호작용 안 되게 Collider 끄기 (선택 사항)
+                    Collider2D col = door.GetComponent<Collider2D>();
+                    if (col != null) col.enabled = false;
+
+                    break;
+                }
+            }
+        }
     }
 }

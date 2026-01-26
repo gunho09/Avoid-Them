@@ -3,6 +3,13 @@ using System.Collections;
 
 public class zombie : MonoBehaviour, IDamageable
 {
+    // ...
+    public float GetHpRatio()
+    {
+        if (health <= 0) return 0f;
+        return currentHealth / (float)health;
+    }
+
     [Header("Stats")]
     public int health;          // 인스펙터에서 설정
     public int attackDamage;    // 인스펙터에서 설정
@@ -15,7 +22,7 @@ public class zombie : MonoBehaviour, IDamageable
     public float attackRange;   // 인스펙터에서 설정 (예: 1.5)
 
     [Header("References")]
-    public PlayerControler PlayerControler;
+    public PlayerControler playerCtrl;
 
     private float currentHealth;
     private float lastAttackTime;
@@ -25,21 +32,65 @@ public class zombie : MonoBehaviour, IDamageable
     private Rigidbody2D rb;
 
     private bool canAct = false; // 0.5초 경직 플래그
+    private bool isStunned = false; // 스턴 상태 플래그
+
+    public void ApplyCcKnockback(Vector2 force)
+    {
+        if (rb != null)
+        {
+            rb.AddForce(force, ForceMode2D.Impulse);
+        }
+    }
+
+    public void ApplyCcStun(float duration)
+    {
+        if (!gameObject.activeSelf) return;
+        StartCoroutine(StunRoutine(duration));
+    }
+
+    IEnumerator StunRoutine(float duration)
+    {
+        isStunned = true;
+        // 색상 변경 등 시각효과 추가 가능
+        yield return new WaitForSeconds(duration);
+        isStunned = false;
+    }
+
+    // 타겟 강제 변경 (더미용)
+    public void SetTarget(Transform newTarget)
+    {
+        targetCharacter = newTarget;
+    }
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+
+        // [Golden Balance] 층별 성장 적용
+        if (MapManager.Instance != null)
+        {
+            int floor = MapManager.Instance.currentFloor;
+            if (floor > 1)
+            {
+                // HP: 층당 +55%
+                health = Mathf.RoundToInt(health * (1 + 0.55f * (floor - 1)));
+                
+                // ATK: 층당 +20%
+                attackDamage = Mathf.RoundToInt(attackDamage * (1 + 0.20f * (floor - 1)));
+            }
+        }
+
         currentHealth = health; // 인스펙터에서 넣은 health 값이 적용됨
 
         // "Player" 태그를 가진 부모 오브젝트를 찾습니다.
         GameObject playerParent = GameObject.FindGameObjectWithTag("Player");
         if (playerParent != null)
         {
-            PlayerControler = playerParent.GetComponentInChildren<PlayerControler>();
+            playerCtrl = playerParent.GetComponentInChildren<PlayerControler>();
 
-            if (PlayerControler != null)
+            if (playerCtrl != null)
             {
-                targetCharacter = PlayerControler.transform;
+                targetCharacter = playerCtrl.transform;
             }
             else
             {
@@ -58,7 +109,7 @@ public class zombie : MonoBehaviour, IDamageable
 
     void Update()
     {
-        if (currentState == State.Dead || targetCharacter == null || !canAct) return;
+        if (currentState == State.Dead || targetCharacter == null || !canAct || isStunned) return;
 
         float distToPlayer = Vector2.Distance(transform.position, targetCharacter.position);
 
@@ -100,9 +151,9 @@ public class zombie : MonoBehaviour, IDamageable
     {
         if (Time.time - lastAttackTime >= atackSpeed)
         {
-            if (PlayerControler != null)
+            if (playerCtrl != null)
             {
-                PlayerControler.TakeDamage(attackDamage);
+                playerCtrl.TakeDamage(attackDamage);
                 lastAttackTime = Time.time;
             }
         }
@@ -134,9 +185,9 @@ public class zombie : MonoBehaviour, IDamageable
             room.OnEnemyKilled();
         }
 
-        if (PlayerControler != null)
+        if (playerCtrl != null)
         {
-            PlayerControler.TakeExp(expDrop);
+            playerCtrl.TakeExp(expDrop);
         }
 
         Destroy(gameObject, 0.2f);

@@ -3,18 +3,20 @@ using System.Collections;
 
 public class Boss4 : MonoBehaviour, IDamageable
 {
+    public float GetHpRatio() { return (float)health / 100f; } // ì„ì‹œ êµ¬í˜„ (MaxHealth ë¯¸í™•ì¸)
+
     [Header("Stats")]
-    public int health;          // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
-    public int attackDamage;    // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
-    public float speed;         // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
-    public float atackSpeed;    // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
-    public float dodgeChance;   // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
-    public int expDrop;         // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
+    public int health;          // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •
+    public int attackDamage;    // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •
+    public float speed;         // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •
+    public float atackSpeed;    // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •
+    public float dodgeChance;   // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •
+    public int expDrop;         // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •
 
     [Header("Detection")]
-    public float range;         // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤ (¿¹: 10)
-    public float attackRange1;   // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤ (¿¹: 1.5)
-    public float attackRange2;   // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤ (¿¹: 1.5)
+    public float range;         // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì • (ì˜ˆ: 10)
+    public float attackRange1;   // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì • (ì˜ˆ: 1.5)
+    public float attackRange2;   // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì • (ì˜ˆ: 1.5)
 
     [Header("References")]
     public PlayerControler PlayerControler;
@@ -26,14 +28,14 @@ public class Boss4 : MonoBehaviour, IDamageable
     private State currentState = State.Idle;
     private Rigidbody2D rb;
 
-    private bool canAct = false; // 0.5ÃÊ °æÁ÷ ÇÃ·¡±×
+    private bool canAct = false; // 0.5ì´ˆ ê²½ì§ í”Œë˜ê·¸
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        currentHealth = health; // ÀÎ½ºÆåÅÍ¿¡¼­ ³ÖÀº health °ªÀÌ Àû¿ëµÊ
+        currentHealth = health; // ì¸ìŠ¤í™í„°ì—ì„œ ë„£ì€ health ê°’ì´ ì ìš©ë¨
 
-        // "Player" ÅÂ±×¸¦ °¡Áø ºÎ¸ğ ¿ÀºêÁ§Æ®¸¦ Ã£½À´Ï´Ù.
+        // "Player" íƒœê·¸ë¥¼ ê°€ì§„ ë¶€ëª¨ ì˜¤ë¸Œì íŠ¸ë¥¼ ì°¾ìŠµë‹ˆë‹¤.
         GameObject playerParent = GameObject.FindGameObjectWithTag("Player");
         if (playerParent != null)
         {
@@ -104,11 +106,11 @@ public class Boss4 : MonoBehaviour, IDamageable
                 break;
             case State.Attack2:
                 rb.linearVelocity = Vector2.zero;
-                AttackPlayer();
+                AttackPlayer2();
                 break;
             case State.Attack1:
                 rb.linearVelocity = Vector2.zero;
-                AttackPlayer();
+                AttackPlayer1();
                 break;
 
             case State.Move:
@@ -123,7 +125,7 @@ public class Boss4 : MonoBehaviour, IDamageable
         rb.linearVelocity = direction * speed;
     }
 
-    void AttackPlayer()
+    void AttackPlayer1()
     {
         if (Time.time - lastAttackTime >= atackSpeed)
         {
@@ -133,6 +135,36 @@ public class Boss4 : MonoBehaviour, IDamageable
                 lastAttackTime = Time.time;
             }
         }
+    }
+
+    void AttackPlayer2()
+    {
+        if (Time.time - lastAttackTime >= atackSpeed)
+        {
+            if (PlayerControler != null)
+            {
+                PlayerControler.TakeDamage(attackDamage);
+                lastAttackTime = Time.time;
+            }
+        }
+    }
+
+    void Skill1()
+    {
+        
+
+    }
+
+    void Skill2()
+    {
+
+
+    }
+
+    void Skill3()
+    {
+
+
     }
 
     public void TakeDamage(float damage)
