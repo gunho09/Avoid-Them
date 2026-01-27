@@ -18,7 +18,7 @@ public class Inventory : MonoBehaviour
 {
     public static Inventory Instance;
 
-    public int MaxSlots = 10;          // 최대로 가질 수 있는 아이템 수
+    public int MaxSlots = 15;          // 최대로 가질 수 있는 아이템 수 (5 Active + 10 Storage)
     public int MaxActiveSlots = 5;     // 실제 효과가 발동되는 장착 슬롯 수
 
     public List<ItemSlot> slots = new List<ItemSlot>();

@@ -27,8 +27,23 @@ public class ItemPickup : MonoBehaviour
         transform.localScale = Vector3.one * 1.5f; 
     }
 
+    private bool canPickup = false;
+
+    private void Start()
+    {
+        StartCoroutine(EnablePickupRoutine());
+    }
+
+    System.Collections.IEnumerator EnablePickupRoutine()
+    {
+        yield return new WaitForSeconds(1.0f);
+        canPickup = true;
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (!canPickup) return;
+
         // "Player" 태그가 맞는지 꼭 확인해야 함
         if (collision.CompareTag("Player"))
         {
@@ -56,12 +71,17 @@ public class ItemPickup : MonoBehaviour
 
     void PickUp()
     {
-        Debug.Log($"{_data.itemName} 획득!");
+        Debug.Log($"[ItemPickup] {_data.itemName} 획득 시도!");
 
         // 1. 인벤토리에 추가
         if (Inventory.Instance != null)
         {
             Inventory.Instance.AddItem(_data);
+            Debug.Log($"[ItemPickup] 인벤토리에 추가 요청 보냄");
+        }
+        else
+        {
+             Debug.LogError("[ItemPickup] Inventory.Instance가 null입니다!");
         }
 
         // 2. 방 컨트롤러에게 "나 먹혔어!"라고 알림 (나머지 2개 삭제 + 문 열기 위해)
