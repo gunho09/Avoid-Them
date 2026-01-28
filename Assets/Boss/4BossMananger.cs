@@ -24,7 +24,7 @@ public class Boss4 : MonoBehaviour, IDamageable
     private float currentHealth;
     private float lastAttackTime;
     private Transform targetCharacter;
-    private enum State { Idle, Chase, Attack1, Attack2, Dead, Skill1, Skill2, Skill3, Move }
+    private enum State { Idle, Chase, Combe1, Combe2, Combe3, Combe4, Dead}
     private State currentState = State.Idle;
     private Rigidbody2D rb;
 
@@ -67,54 +67,47 @@ public class Boss4 : MonoBehaviour, IDamageable
 
         float distToPlayer = Vector2.Distance(transform.position, targetCharacter.position);
 
-        if (distToPlayer <= attackRange2 && attackRange2 > attackRange1)
-        {
-            currentState = State.Attack2;
-        }
-        else if (distToPlayer <= attackRange1)
-        {
-            currentState = State.Attack1;
-        }
-        
+        int r = random.range(1, 10);
 
-        else if (distToPlayer <= range)
+        switch (r)
         {
-            currentState = State.Skill1;
+            case 1:
+                currentState = State.Combe1;
+                break;
+            case 2:
+                currentState = State.Combe2;
+                break;
+            case 3:
+                currentState = State.Combe3;
+                break;
+            case 4:
+                currentState = State.Combe4;
+                break;
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+            case 9:
+                currentState = State.Idle;
+                break;
         }
-
-        else if (distToPlayer <= range)
-        {
-            currentState = State.Skill2;
-        }
-
-        else if (distToPlayer <= range)
-        {
-            currentState = State.Skill3;
-        }
-
-        else
-        {
-            currentState = State.Move;
-        }
-
-
 
         switch (currentState)
         {
             case State.Idle:
                 rb.linearVelocity = Vector2.zero;
                 break;
-            case State.Attack2:
-                rb.linearVelocity = Vector2.zero;
-                AttackPlayer2();
+            case State.Combe1:
+                Combe1();
                 break;
-            case State.Attack1:
-                rb.linearVelocity = Vector2.zero;
-                AttackPlayer1();
+            case State.Combe2:
+                Combe2();
                 break;
-
-            case State.Move:
-                MoveToPlayer();
+            case State.Combe3:
+                Combe3();
+                break;
+            case State.Combe4:
+                Combe4();
                 break;
         }
     }
@@ -152,20 +145,46 @@ public class Boss4 : MonoBehaviour, IDamageable
     void Skill1()
     {
         
+        //좀비 생성
 
     }
 
     void Skill2()
     {
 
+        //초록웅덩이 생성
 
     }
 
-    void Skill3()
+    void Combe1()
     {
-
-
+        MoveToPlayer();
+        AttackPlayer1();
+        Skill2();
     }
+
+    void Combe2()
+    {
+        MoveToPlayer();
+        AttackPlayer1();
+        AttackPlayer2();
+    }
+
+    void Combe3()
+    {
+        AttackPlayer2();
+        Skill1();
+        MoveToPlayer();
+        AttackPlayer1();
+    }
+    
+    void Combe4()
+    {
+        AttackPlayer2();
+        Skill1();
+        Skill2();
+    }
+
 
     public void TakeDamage(float damage)
     {
