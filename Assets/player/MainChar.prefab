@@ -1494,6 +1494,7 @@ MonoBehaviour:
   PlayerMaxHp: 0
   PlayerDamage: 0
   PlayerCurrentHp: 0
+  PlayerCurrentShield: 0
   hpSlider: {fileID: 1232821224692740459}
   deathUI: {fileID: 2109044085730608521}
   ExpSlider: {fileID: 2571871561296713459}
@@ -1502,8 +1503,8 @@ MonoBehaviour:
   hpText: {fileID: 1022659715813087062}
   expText: {fileID: 1311001958176327581}
   CoolDownText1: {fileID: 0}
-  CoolDownText2: {fileID: 0}
-  CoolDownText3: {fileID: 531047937200855067}
+  CoolDownText2: {fileID: 531047937200855067}
+  CoolDownText3: {fileID: 0}
   CoolDownText4: {fileID: 8564555748475990882}
   boostIconOverlay: {fileID: 5986655349143231920}
   hookIconOverlay: {fileID: 8316843830908302002}
@@ -1523,6 +1524,8 @@ MonoBehaviour:
   hookCooldown: 6
   attackRange: 1.5
   hookDuration: 0
+  dummyPrefab: {fileID: 0}
+  magneticFieldVisual: {fileID: 0}
 --- !u!114 &6254198517122689622
 MonoBehaviour:
   m_ObjectHideFlags: 0

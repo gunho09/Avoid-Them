@@ -771,7 +771,8 @@ public class PlayerControler : MonoBehaviour, IDamageable
             if(PlayerCurrentHp > PlayerMaxHp) PlayerCurrentHp = PlayerMaxHp;
         } 
         
-        LvlText.text = $"{PlayerLvl}"; 
+        LvlText.text = $"{PlayerLvl}";
+        AttackDamageText.text = $"공격력 : {Mathf.Ceil(PlayerDamage)}";
         if (expText != null) expText.text = $"{currentExp} / {MaxExp}";
         if (ExpSlider != null) 
         {
