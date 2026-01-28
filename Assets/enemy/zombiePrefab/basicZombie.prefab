@@ -107,13 +107,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::zombie
   health: 100
-  attackDamage: 40
-  speed: 1
+  attackDamage: 30
+  speed: 2.5
   atackSpeed: 3
-  expDrop: 3
+  expDrop: 12
   range: 100
   attackRange: 1
-  PlayerControler: {fileID: 0}
+  playerCtrl: {fileID: 0}
 --- !u!50 &80925673544774025
 Rigidbody2D:
   serializedVersion: 5

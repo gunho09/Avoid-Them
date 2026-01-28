@@ -72,11 +72,11 @@ public class zombie : MonoBehaviour, IDamageable
             int floor = MapManager.Instance.currentFloor;
             if (floor > 1)
             {
-                // HP: 층당 +55%
-                health = Mathf.RoundToInt(health * (1 + 0.55f * (floor - 1)));
+                // HP: 층당 +80%
+                health = Mathf.RoundToInt(health * (1 + 0.8f * (floor - 1)));
                 
-                // ATK: 층당 +20%
-                attackDamage = Mathf.RoundToInt(attackDamage * (1 + 0.20f * (floor - 1)));
+                // ATK: +10 * (Floor - 1)
+                attackDamage = attackDamage + (10 * (floor - 1));
             }
         }
 
@@ -179,6 +179,10 @@ public class zombie : MonoBehaviour, IDamageable
 
         rb.linearVelocity = Vector2.zero;
 
+        // 콜라이더 끄기 (추가 타격 방지)
+        Collider2D col = GetComponent<Collider2D>();
+        if (col != null) col.enabled = false;
+
         RoomControl room = GetComponentInParent<RoomControl>();
         if (room != null)
         {
@@ -190,7 +194,15 @@ public class zombie : MonoBehaviour, IDamageable
             playerCtrl.TakeExp(expDrop);
         }
 
-        Destroy(gameObject, 0.2f);
+        // [NEW] 사망 이펙트 재생
+        DeathEffect effect = GetComponent<DeathEffect>();
+        if (effect == null) effect = gameObject.AddComponent<DeathEffect>();
+        
+        // 이펙트 재생 후 삭제
+        effect.PlayEffect(() => 
+        {
+            Destroy(gameObject);
+        });
     }
 
     void OnDrawGizmos()
@@ -200,8 +212,11 @@ public class zombie : MonoBehaviour, IDamageable
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, attackRange);
     }
+
     IEnumerator HitFlashRoutine()
     {
+        if (currentState == State.Dead) yield break; // 죽었을 땐 깜빡임 스킵 (빨간색 유지 위해)
+
         SpriteRenderer sprite = GetComponentInChildren<SpriteRenderer>();
         if (sprite != null)
         {
@@ -210,7 +225,8 @@ public class zombie : MonoBehaviour, IDamageable
 
             yield return new WaitForSeconds(0.1f);
 
-            sprite.color = originalColor;
+            if (currentState != State.Dead) // 살아있을 때만 복구
+                sprite.color = originalColor;
         }
     }
 }

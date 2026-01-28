@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 3735604927057173224, guid: 5344322510a5cfe46b6e8deb457fc8dd, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -142,7 +142,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -8104783145122104587, guid: e80eb1c934158f04ba660ae5ad9e5dec, type: 3}
+  m_Sprite: {fileID: 3412908974078662053, guid: 5344322510a5cfe46b6e8deb457fc8dd, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -166,3 +166,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemSlotUI
   iconImage: {fileID: 1771602970796432314}
   stackText: {fileID: 0}
+  slotIndex: 0

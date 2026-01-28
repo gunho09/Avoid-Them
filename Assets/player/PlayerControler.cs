@@ -113,6 +113,10 @@ public class PlayerControler : MonoBehaviour, IDamageable
     void Start()
     {
         if (Instance == null) Instance = this;
+        
+        // [New Formula] Start시 경험치 테이블 초기화 (Lv 1 -> 100)
+        // 공식: 100 + ((Lv-1) * 50)
+        MaxExp = 100f + (Mathf.Max(0, PlayerLvl - 1) * 50f);
 
         // 초기화 시점에는 Stats 계산 (이벤트 전)
         RecalculateStats();
@@ -627,9 +631,29 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     void Die()
     {
+        // 이미 죽었으면 무시
+        if (PlayerCurrentHp > 0) return; // Die() 재호출 방지용 (TakeDamage에서 0 이하일때만 호출됨)
+        
         UpdateHpUI();
-        if (deathUI != null) deathUI.SetActive(true);
-        Time.timeScale = 0f;
+
+        // [NEW] 사망 연출
+        // 1. 물리/조작 비활성화 (이미 죽었으므로)
+        if (rb != null) rb.linearVelocity = Vector2.zero;
+        // 추가: 입력 막는 플래그가 필요하면 여기서 설정 (현재는 Update에서 Check 없음, Hp<=0이면 로직상 문제될 수 있음)
+        // 간단히 Collider 꺼서 무적 처리
+        Collider2D col = GetComponent<Collider2D>();
+        if (col != null) col.enabled = false;
+
+        // 2. 이펙트 재생
+        DeathEffect effect = GetComponent<DeathEffect>();
+        if (effect == null) effect = gameObject.AddComponent<DeathEffect>();
+
+        effect.PlayEffect(() => 
+        {
+            // 3. 연출 끝난 후 UI 표시 및 정지
+            if (deathUI != null) deathUI.SetActive(true);
+            Time.timeScale = 0f;
+        });
     }
 
     public void Heal(float amount)
@@ -678,7 +702,10 @@ public class PlayerControler : MonoBehaviour, IDamageable
             }
         }
 
-        float baseMaxHp = plusHp + numHp + playerStartHp;
+        // [New Formula] HP: 기본 + ((레벨-1) * 20)
+        // Lv 1일 때는 보너스 없음 (300 유지)
+        float levelBonusHp = Mathf.Max(0, (PlayerLvl - 1) * 20f);
+        float baseMaxHp = plusHp + numHp + playerStartHp + levelBonusHp;
         PlayerMaxHp = baseMaxHp * (1f + extraHpPercent);
         
         if (PlayerMaxHp < 10f) PlayerMaxHp = 10f; 
@@ -698,6 +725,9 @@ public class PlayerControler : MonoBehaviour, IDamageable
         }
 
         UpdateHpUI();
+
+       
+        extraAtkPercent += (Mathf.Max(0, PlayerLvl - 1) * 0.05f);
 
         float baseDamage = plusPW + numPW + playerStartPw;
         PlayerDamage = baseDamage * (1f + extraAtkPercent);
@@ -728,10 +758,17 @@ public class PlayerControler : MonoBehaviour, IDamageable
     {
         while (currentExp >= MaxExp) { 
             currentExp -= MaxExp;
+            PlayerLvl++;
+
+            // [New Formula] Exp: 100 + ((Lv-1) * 50)
+            MaxExp = 100f + (Mathf.Max(0, PlayerLvl - 1) * 50f);
+
+            // 스탯 재계산 (레벨 반영)
+            RecalculateStats();
+
+            // 체력 회복 (선택사항, 기존 유지)
             PlayerCurrentHp += PlayerMaxHp * 0.2f;
             if(PlayerCurrentHp > PlayerMaxHp) PlayerCurrentHp = PlayerMaxHp;
-            PlayerDamage += 0.05f * PlayerDamage;
-            PlayerLvl++;
         } 
         
         LvlText.text = $"{PlayerLvl}"; 

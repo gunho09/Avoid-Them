@@ -187,81 +187,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 5218158965369317558, guid: f5168eed14bfd714bb0dff12e973b699, type: 3}
   m_PrefabInstance: {fileID: 1056522995}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &228603705
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 228603706}
-  - component: {fileID: 228603708}
-  - component: {fileID: 228603707}
-  m_Layer: 5
-  m_Name: Image
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &228603706
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 228603705}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2113296680}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 75.9}
-  m_SizeDelta: {x: 600, y: 7}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &228603707
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 228603705}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 0.028301895, g: 0.025498405, b: 0.025498405, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &228603708
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 228603705}
-  m_CullTransparentMesh: 1
 --- !u!1 &488867837
 GameObject:
   m_ObjectHideFlags: 0
@@ -486,8 +411,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 600, y: 434.6639}
+  m_AnchoredPosition: {x: -0.0014725, y: -0.00090027}
+  m_SizeDelta: {x: 896.23, y: 704.1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &739842352
 MonoBehaviour:
@@ -502,14 +427,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.20754719, g: 0.1771983, b: 0.1771983, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 2491128980637532833, guid: 5344322510a5cfe46b6e8deb457fc8dd, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -725,11 +650,11 @@ PrefabInstance:
       objectReference: {fileID: 5528248079662578319, guid: a024f8feb6a1d7d478de8fd57215346c, type: 3}
     - target: {fileID: 6477009639273144782, guid: f5168eed14bfd714bb0dff12e973b699, type: 3}
       propertyPath: playerStartHp
-      value: 1000
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 6477009639273144782, guid: f5168eed14bfd714bb0dff12e973b699, type: 3}
       propertyPath: playerStartPw
-      value: 40
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 6477009639273144782, guid: f5168eed14bfd714bb0dff12e973b699, type: 3}
       propertyPath: magneticFieldVisual
@@ -1094,8 +1019,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -85.72305}
-  m_SizeDelta: {x: 900, y: 171.4461}
+  m_AnchoredPosition: {x: 0.0000061989, y: -184}
+  m_SizeDelta: {x: 821.9395, y: 171.4461}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1337668810
 MonoBehaviour:
@@ -1117,8 +1042,8 @@ MonoBehaviour:
   m_ChildAlignment: 4
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 100, y: 100}
-  m_Spacing: {x: 10, y: 10}
+  m_CellSize: {x: 140, y: 140}
+  m_Spacing: {x: 5, y: 5}
   m_Constraint: 2
   m_ConstraintCount: 1
 --- !u!1 &1495767126
@@ -1388,8 +1313,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -160}
-  m_SizeDelta: {x: 900, y: 400}
+  m_AnchoredPosition: {x: -0.0014763, y: -142}
+  m_SizeDelta: {x: 832.95, y: 400}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1683061871
 MonoBehaviour:
@@ -1411,8 +1336,8 @@ MonoBehaviour:
   m_ChildAlignment: 1
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 100, y: 100}
-  m_Spacing: {x: 10, y: 10}
+  m_CellSize: {x: 140, y: 150}
+  m_Spacing: {x: 5, y: 5}
   m_Constraint: 1
   m_ConstraintCount: 5
 --- !u!1 &2027022297
@@ -1581,13 +1506,12 @@ RectTransform:
   - {fileID: 739842351}
   - {fileID: 1337668809}
   - {fileID: 1683061870}
-  - {fileID: 228603706}
   m_Father: {fileID: 488867838}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.000026703, y: 32.836823}
-  m_SizeDelta: {x: 600, y: 434.6639}
+  m_AnchoredPosition: {x: -0.000030518, y: 66.02341}
+  m_SizeDelta: {x: 896.23, y: 704.1057}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2113296681
 MonoBehaviour:
@@ -1602,7 +1526,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.392}
+  m_Color: {r: 0, g: 0, b: 0, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

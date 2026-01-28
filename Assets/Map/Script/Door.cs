@@ -187,24 +187,25 @@ public class Door : MonoBehaviour
         if (Time.time - lastDoorUseTime < doorCooldown) return;
 
         // 1. 보스 방 진입 조건 체크 (동적)
+        // 1. 보스 방 진입 조건 체크 (동적)
         if (type == DoorType.ToBossRoom)
         {
             if (MapManager.Instance != null && MapManager.Instance.clearedRooms < MapManager.Instance.totalRoomsPerFloor)
             {
                 // 조건 미달
-                Debug.Log("보스방 진입 불가: 방 5개 클리어 필요");
+                int current = MapManager.Instance.clearedRooms;
+                int target = MapManager.Instance.totalRoomsPerFloor;
                 
-                // 경고 UI 표시 (메시지는 WarningUI 프리팹에 설정된 텍스트 사용)
+                string msg = $"보스방 진입 불가: 현재 {current}/{target} 클리어";
+                Debug.Log(msg);
+                
+                // 경고 UI 표시
                 if (WarningUI.Instance != null)
                 {
-                    WarningUI.Instance.ShowWarning();
-                }
-                else
-                {
-                    Debug.LogWarning("WarningUI Instance가 없습니다!");
+                    WarningUI.Instance.ShowWarning($"{target - current}개의 방을 더 클리어하세요!");
                 }
                 
-                lastDoorUseTime = Time.time; // 메시지 도배 방지용 쿨타임 적용
+                lastDoorUseTime = Time.time; 
                 return;
             }
         }

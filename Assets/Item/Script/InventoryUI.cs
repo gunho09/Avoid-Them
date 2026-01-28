@@ -92,26 +92,44 @@ public class InventoryUI : MonoBehaviour
         {
             if (i < allItems.Count)
             {
-                activeSlots[i].Setup(allItems[i]);
+                if (allItems[i] != null) // Null(빈칸)이 아니면 표시
+                {
+                    activeSlots[i].Setup(allItems[i], i);
+                }
+                else // Null(빈칸)이면 클리어 + 인덱스 설정
+                {
+                    activeSlots[i].ClearSlot();
+                    activeSlots[i].slotIndex = i;
+                }
             }
-            else
+            else // 인벤토리보다 슬롯 UI가 많을 때 (기본적으로 위 else와 동일)
             {
                 activeSlots[i].ClearSlot();
+                activeSlots[i].slotIndex = i;
             }
         }
 
         // Storage Slots (5~14) 표시
         for (int i = 0; i < storageSlots.Count; i++)
         {
-            int dataIndex = i + 5; // Inventory 리스트 상의 인덱스 (5부터 시작)
+            int dataIndex = i + 5; 
             
             if (dataIndex < allItems.Count)
             {
-                storageSlots[i].Setup(allItems[dataIndex]);
+                if (allItems[dataIndex] != null)
+                {
+                    storageSlots[i].Setup(allItems[dataIndex], dataIndex);
+                }
+                else
+                {
+                    storageSlots[i].ClearSlot();
+                    storageSlots[i].slotIndex = dataIndex;
+                }
             }
             else
             {
                 storageSlots[i].ClearSlot();
+                storageSlots[i].slotIndex = dataIndex;
             }
         }
     }

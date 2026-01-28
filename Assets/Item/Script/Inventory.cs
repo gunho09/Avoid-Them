@@ -33,7 +33,10 @@ public class Inventory : MonoBehaviour
         get 
         {
             int count = 0;
-            foreach (var slot in slots) count += slot.stackCount;
+            foreach (var slot in slots) 
+            {
+                if (slot != null) count += slot.stackCount;
+            }
             return count;
         }
     }
@@ -42,6 +45,12 @@ public class Inventory : MonoBehaviour
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+
+        // [Refactor] MaxSlots만큼 null로 미리 채움
+        while (slots.Count < MaxSlots)
+        {
+            slots.Add(null);
+        }
     }
 
     public bool CanAcquire(ItemData newItem)
@@ -52,8 +61,8 @@ public class Inventory : MonoBehaviour
         // 2. 이미 있는 아이템이면? (Stack) -> 가능
         if (HasItem(newItem)) return true;
 
-        // 3. 새로운 아이템이면? -> 10칸 꽉 찼으면 불가
-        return slots.Count < MaxSlots;
+        // 3. 새로운 아이템이면? -> 빈 칸이 하나라도 있으면 가능
+        return slots.Exists(s => s == null);
     }
 
     // 아이템 변경 알림 이벤트
@@ -63,14 +72,21 @@ public class Inventory : MonoBehaviour
     {
         if (!CanAcquire(newItem)) return;
 
-        ItemSlot existingSlot = slots.Find(s => s.itemData == newItem);
+        // 1. 기존에 있는 아이템인지 확인 (Null이 아닌 것 중에서)
+        ItemSlot existingSlot = slots.Find(s => s != null && s.itemData == newItem);
+
         if (existingSlot != null)
         {
             existingSlot.stackCount++;
         }
         else
         {
-            slots.Add(new ItemSlot(newItem));
+            // 2. 없다면 빈 칸(null)을 찾아서 채움
+            int emptyIndex = slots.FindIndex(s => s == null);
+            if (emptyIndex != -1)
+            {
+                slots[emptyIndex] = new ItemSlot(newItem);
+            }
         }
         
         // 변경 알림
@@ -79,7 +95,7 @@ public class Inventory : MonoBehaviour
 
     public bool HasItem(ItemData item)
     {
-        return slots.Exists(s => s.itemData == item);
+        return slots.Exists(s => s != null && s.itemData == item);
     }
 
     // --- Active Slot Logic (앞에서부터 5개만 적용) ---
@@ -89,14 +105,15 @@ public class Inventory : MonoBehaviour
     {
         float total = 0f;
         
-        // 최대 5개까지만 순회
-        int count = Mathf.Min(slots.Count, MaxActiveSlots);
-        
-        for (int i = 0; i < count; i++)
+        // 최대 5개까지만 순회 (고정 크기이므로 index 접근 안전)
+        for (int i = 0; i < MaxActiveSlots; i++)
         {
-            if (slots[i].itemData.effectType == effectType)
+            if (i < slots.Count && slots[i] != null) // Index Bound Check & Null Check
             {
-                total += slots[i].itemData.valuePerStack * slots[i].stackCount;
+                if (slots[i].itemData.effectType == effectType)
+                {
+                    total += slots[i].itemData.valuePerStack * slots[i].stackCount;
+                }
             }
         }
         return total;
@@ -117,26 +134,25 @@ public class Inventory : MonoBehaviour
 
     public int GetStackCount(ItemEffectType effectType)
     {
-        // 활성화된 슬롯에서만 체크할지, 보유량 전체를 보여줄지 결정해야 함.
-        // UI 표시용이라면 전체를 찾는게 맞고, 로직용이라면 Active만.
-        // 현재는 UI 표시용(ItemCard)으로 주로 쓰이므로 전체 검색 유지하되,
-        // 필요 시 Active Check 로직 추가.
-        ItemSlot slot = slots.Find(s => s.itemData.effectType == effectType);
+        // 전체 검색 (Null 제외)
+        ItemSlot slot = slots.Find(s => s != null && s.itemData.effectType == effectType);
         return slot != null ? slot.stackCount : 0;
     }
 
     // 아이템 소모 (비상식량, 밴드 등)
     public void DecreaseItemCount(ItemEffectType effectType)
     {
-        ItemSlot slot = slots.Find(s => s.itemData.effectType == effectType);
-        if (slot != null)
+        // FindIndex 사용해서 삭제 시 해당 슬롯을 null로 만들어야 함
+        int index = slots.FindIndex(s => s != null && s.itemData.effectType == effectType);
+        
+        if (index != -1)
         {
-            slot.stackCount--;
-            Debug.Log($"[Inventory] Used {slot.itemData.itemName}. Remaining: {slot.stackCount}");
+            slots[index].stackCount--;
+            Debug.Log($"[Inventory] Used {slots[index].itemData.itemName}. Remaining: {slots[index].stackCount}");
             
-            if (slot.stackCount <= 0)
+            if (slots[index].stackCount <= 0)
             {
-                slots.Remove(slot);
+                slots[index] = null; // 리스트에서 제거가 아니라 null로 비움
             }
             
             // 변경 알림
@@ -147,7 +163,7 @@ public class Inventory : MonoBehaviour
     // Active 상태인지 확인 (특정 아이템 데이터 기준)
     public bool IsActive(ItemData item)
     {
-        int index = slots.FindIndex(s => s.itemData == item);
+        int index = slots.FindIndex(s => s != null && s.itemData == item);
         return index != -1 && index < MaxActiveSlots;
     }
 }

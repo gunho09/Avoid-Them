@@ -104,7 +104,6 @@ public class MapManager : MonoBehaviour
 
             currentHallwayInstance = Instantiate(hallwayPrefab, hallwaySpawnPosition, Quaternion.identity);
             currentHallwayInstance.name = "CurrentHallway";
-            currentHallwayInstance.name = "CurrentHallway";
             Debug.Log("복도 생성 완료 (게임 시작)");
 
             // [이미 들어갔던 문 끄기]
@@ -304,7 +303,6 @@ public class MapManager : MonoBehaviour
    
     public void NextFloor()
     {
-        currentFloor++;
         currentFloor++;
         clearedRooms = 0;
         visitedDoors.Clear(); // [새 층이므로 방문 기록 초기화]
