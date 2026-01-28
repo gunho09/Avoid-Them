@@ -67,7 +67,7 @@ public class Boss4 : MonoBehaviour, IDamageable
 
         float distToPlayer = Vector2.Distance(transform.position, targetCharacter.position);
 
-        int r = random.range(1, 10);
+        int r = Random.Range(1, 10);
 
         switch (r)
         {

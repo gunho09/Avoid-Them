@@ -194,15 +194,15 @@ public class Door : MonoBehaviour
             {
                 // 조건 미달
                 int current = MapManager.Instance.clearedRooms;
-                int target = MapManager.Instance.totalRoomsPerFloor;
+                int targetCount = MapManager.Instance.totalRoomsPerFloor;
                 
-                string msg = $"보스방 진입 불가: 현재 {current}/{target} 클리어";
+                string msg = $"보스방 진입 불가: 현재 {current}/{targetCount} 클리어";
                 Debug.Log(msg);
                 
                 // 경고 UI 표시
                 if (WarningUI.Instance != null)
                 {
-                    WarningUI.Instance.ShowWarning($"{target - current}개의 방을 더 클리어하세요!");
+                    WarningUI.Instance.ShowWarning($"{targetCount - current}개의 방을 더 클리어하세요!");
                 }
                 
                 lastDoorUseTime = Time.time; 
