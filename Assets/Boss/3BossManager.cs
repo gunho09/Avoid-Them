@@ -1,22 +1,22 @@
 using UnityEngine;
 using System.Collections;
 
-public class Boss4 : MonoBehaviour, IDamageable
+public class Boss3 : MonoBehaviour, IDamageable
 {
-    public float GetHpRatio() { return (float)health / 100f; } // ì„ì‹œ êµ¬í˜„ (MaxHealth ë¯¸í™•ì¸)
+    public float GetHpRatio() { return (float)health / 100f; } // ÀÓ½Ã ±¸Çö (MaxHealth ¹ÌÈ®ÀÎ)
 
     [Header("Stats")]
-    public int health;          // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •
-    public int attackDamage;    // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •
-    public float speed;         // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •
-    public float atackSpeed;    // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •
-    public float dodgeChance;   // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •
-    public int expDrop;         // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì •
+    public int health;          // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
+    public int attackDamage;    // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
+    public float speed;         // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
+    public float atackSpeed;    // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
+    public float dodgeChance;   // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
+    public int expDrop;         // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤
 
     [Header("Detection")]
-    public float range;         // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì • (ì˜ˆ: 10)
-    public float attackRange1;   // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì • (ì˜ˆ: 1.5)
-    public float attackRange2;   // ì¸ìŠ¤í™í„°ì—ì„œ ì„¤ì • (ì˜ˆ: 1.5)
+    public float range;         // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤ (¿¹: 10)
+    public float attackRange1;   // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤ (¿¹: 1.5)
+    public float attackRange2;   // ÀÎ½ºÆåÅÍ¿¡¼­ ¼³Á¤ (¿¹: 1.5)
 
     [Header("References")]
     public PlayerControler PlayerControler;
@@ -24,18 +24,18 @@ public class Boss4 : MonoBehaviour, IDamageable
     private float currentHealth;
     private float lastAttackTime;
     private Transform targetCharacter;
-    private enum State { Idle, Chase, Combe1, Combe2, Combe3, Combe4, Dead}
+    private enum State { Idle, Chase, Combe1, Combe2, Combe3, Combe4, Dead }
     private State currentState = State.Idle;
     private Rigidbody2D rb;
 
-    private bool canAct = false; // 0.5ì´ˆ ê²½ì§ í”Œë˜ê·¸
+    private bool canAct = false; // 0.5ÃÊ °æÁ÷ ÇÃ·¡±×
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        currentHealth = health; // ì¸ìŠ¤í™í„°ì—ì„œ ë„£ì€ health ê°’ì´ ì ìš©ë¨
+        currentHealth = health; // ÀÎ½ºÆåÅÍ¿¡¼­ ³ÖÀº health °ªÀÌ Àû¿ëµÊ
 
-        // "Player" íƒœê·¸ë¥¼ ê°€ì§„ ë¶€ëª¨ ì˜¤ë¸Œì íŠ¸ë¥¼ ì°¾ìŠµë‹ˆë‹¤.
+        // "Player" ÅÂ±×¸¦ °¡Áø ºÎ¸ğ ¿ÀºêÁ§Æ®¸¦ Ã£½À´Ï´Ù.
         GameObject playerParent = GameObject.FindGameObjectWithTag("Player");
         if (playerParent != null)
         {
@@ -62,7 +62,7 @@ public class Boss4 : MonoBehaviour, IDamageable
 
     void Update()
     {
-        
+
         if (currentState == State.Dead || targetCharacter == null || !canAct) return;
 
         float distToPlayer = Vector2.Distance(transform.position, targetCharacter.position);
@@ -116,11 +116,7 @@ public class Boss4 : MonoBehaviour, IDamageable
         }
     }
 
-    void MoveToPlayer()
-    {
-        Vector2 direction = ((Vector2)targetCharacter.position - (Vector2)transform.position).normalized;
-        rb.linearVelocity = direction * speed;
-    }
+   
 
     void AttackPlayer1()
     {
@@ -134,57 +130,41 @@ public class Boss4 : MonoBehaviour, IDamageable
         }
     }
 
-    void AttackPlayer2()
-    {
-        if (Time.time - lastAttackTime >= atackSpeed)
-        {
-            if (PlayerControler != null)
-            {
-                PlayerControler.TakeDamage(attackDamage);
-                lastAttackTime = Time.time;
-            }
-        }
-    }
+    
 
     void Skill1()
     {
-        
-        //ì¢€ë¹„ ìƒì„±
+
+        //Á»ºñ »ı¼º
 
     }
 
     void Skill2()
     {
 
-        //ì´ˆë¡ì›…ë©ì´ ìƒì„±
+        //ÃÊ·Ï¿õµ¢ÀÌ »ı¼º
 
     }
 
     void Combe1()
     {
-        MoveToPlayer();
         AttackPlayer1();
         Skill2();
     }
 
     void Combe2()
     {
-        MoveToPlayer();
         AttackPlayer1();
-        AttackPlayer2();
     }
 
     void Combe3()
     {
-        AttackPlayer2();
         Skill1();
-        MoveToPlayer();
         AttackPlayer1();
     }
-    
+
     void Combe4()
     {
-        AttackPlayer2();
         Skill1();
         Skill2();
     }
@@ -225,7 +205,7 @@ public class Boss4 : MonoBehaviour, IDamageable
         Destroy(gameObject, 1f);
     }
 
-    
+
     IEnumerator HitFlashRoutine()
     {
         SpriteRenderer sprite = GetComponentInChildren<SpriteRenderer>();
