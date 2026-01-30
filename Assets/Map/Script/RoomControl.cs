@@ -31,8 +31,28 @@ public class RoomControl : MonoBehaviour
     private int livingEnemyCount = 0; 
     private bool isCleared = false;
 
+    [Header("Obstacle Settings")]
+    public GameObject[] obstaclePrefabs;
+    public int obstacleCountMin = 3;
+    public int obstacleCountMax = 6;
+    [Tooltip("체크하면 랜덤 생성, 끄면 직접 배치한 것만 사용")]
+    public bool spawnRandomObstacles = true;
+
     void Start()
     {
+        if (spawnRandomObstacles)
+        {
+            SpawnObstacles();
+        }
+
+        // [중요] 장애물 생성(혹은 수동 배치) 후 Grid(경로찾기) 갱신
+        GridManager gridMgr = FindFirstObjectByType<GridManager>();
+        if (gridMgr != null)
+        {
+            gridMgr.CreateGrid();
+        }
+
+
         if (returnDoor != null)
         {
             returnDoor.SetActive(true); 
@@ -204,5 +224,32 @@ public class RoomControl : MonoBehaviour
     {
         Debug.Log("Player entered the room");
         
+    }
+
+    void SpawnObstacles()
+    {
+        if (obstaclePrefabs == null || obstaclePrefabs.Length == 0) return;
+
+        int count = Random.Range(obstacleCountMin, obstacleCountMax + 1);
+
+        // 방 범위 내 랜덤 (여백 2f 줌)
+        float xRange = (viewWidth / 2f) - 2f;
+        float yRange = (viewHeight / 2f) - 2f;
+
+        for (int i = 0; i < count; i++)
+        {
+            Vector3 randomPos = transform.position + new Vector3(
+                Random.Range(-xRange, xRange),
+                Random.Range(-yRange, yRange),
+                0
+            );
+
+            // 플레이어 시작 위치나 문 근처에는 안 생기게 거리 체크 (2유닛 이내면 스킵)
+            if (playerSpawnPoint != null && Vector3.Distance(randomPos, playerSpawnPoint.position) < 2f) continue;
+            if (returnDoor != null && Vector3.Distance(randomPos, returnDoor.transform.position) < 2f) continue;
+
+            GameObject prefab = obstaclePrefabs[Random.Range(0, obstaclePrefabs.Length)];
+            Instantiate(prefab, randomPos, Quaternion.identity, transform); // 방의 자식으로 생성
+        }
     }
 }
