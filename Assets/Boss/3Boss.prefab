@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8896176551389663620}
   - component: {fileID: 1078349955243592040}
+  - component: {fileID: -3550931393901650353}
   m_Layer: 0
   m_Name: 3Boss
   m_TagString: Untagged
@@ -91,3 +92,23 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &-3550931393901650353
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4325382887119645559}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6833a2ac016d2241b211bcbf98506d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Boss3
+  maxHealth: 100
+  attackDamage: 200
+  speed: 2
+  attackCooldown: 1.5
+  dodgeChance: 0
+  expDrop: 150
+  arrowPrefab: {fileID: 4086670332679718199, guid: e014c398728054e4aa6cdac359fd70d2, type: 3}
+  arrowSpeed: 10

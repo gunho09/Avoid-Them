@@ -549,6 +549,16 @@ public class PlayerControler : MonoBehaviour, IDamageable
         return 1f;                           
     }
 
+    public void Slow()
+    {
+        playerSpeed = 1f;
+    }
+
+    public void Fast()
+    {
+        playerSpeed = 5f;
+    }
+
     public void TakeDamage(float damage)
     {
         if (isReflecting) 
