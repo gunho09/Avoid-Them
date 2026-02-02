@@ -3,53 +3,88 @@ using System.Collections;
 
 public class Boss4 : MonoBehaviour, IDamageable
 {
-    public float GetHpRatio() { return (float)health / 100f; } // 임시 구현 (MaxHealth 미확인)
-
+    /* =======================
+     * Stats
+     * ======================= */
     [Header("Stats")]
-    public int health;          // 인스펙터에서 설정
-    public int attackDamage;    // 인스펙터에서 설정
-    public float speed;         // 인스펙터에서 설정
-    public float atackSpeed;    // 인스펙터에서 설정
-    public float dodgeChance;   // 인스펙터에서 설정
-    public int expDrop;         // 인스펙터에서 설정
-
-    [Header("Detection")]
-    public float range;         // 인스펙터에서 설정 (예: 10)
-    public float attackRange1;   // 인스펙터에서 설정 (예: 1.5)
-    public float attackRange2;   // 인스펙터에서 설정 (예: 1.5)
-
-    [Header("References")]
-    public PlayerControler PlayerControler;
+    public int maxHealth = 100;
+    public int attackDamage = 10;
+    public float speed = 3f;
+    public float attackCooldown = 1.5f;
+    public float dodgeChance = 0.1f;
+    public int expDrop = 100;
 
     private float currentHealth;
     private float lastAttackTime;
-    private Transform targetCharacter;
-    private enum State { Idle, Chase, Combe1, Combe2, Combe3, Combe4, Dead}
-    private State currentState = State.Idle;
+
+    /* =======================
+     * Player References
+     * ======================= */
+    private Transform playerTransform;
+    private PlayerControler playerController;
+
+    /* =======================
+     * Movement
+     * ======================= */
+    [Header("Movement")]
+    public float stopDistance = 1.5f;
     private Rigidbody2D rb;
 
-    private bool canAct = false; // 0.5초 경직 플래그
+    /* =======================
+     * State
+     * ======================= */
+    private enum State { Idle, Combo1, Combo2, Combo3, Combo4, Dead }
+    private State currentState = State.Idle;
+    private bool canAct = false;
 
+    /* =======================
+     * Poison Skill
+     * ======================= */
+    [Header("Poison")]
+    public GameObject poison1;
+    public GameObject poison2;
+    public GameObject poison3;
+    public GameObject poison4;
+    public float poisonOffDelay = 5f;
+
+    /* =======================
+     * Spawner Skill
+     * ======================= */
+    [Header("Spawner")]
+    public GameObject spawner;
+    public float spawnerOffDelay = 5f;
+
+    /* =======================
+     * Melee Attack
+     * ======================= */
+    [Header("Melee Attack")]
+    public Vector2 boxCenter;
+    public Vector2 boxSize = new Vector2(2f, 2f);
+    public float angle = 0f;
+    public LayerMask playerLayer;
+    public float knockbackPower = 8f;
+
+    /* =======================
+     * Ranged Attack
+     * ======================= */
+    [Header("Ranged Attack")]
+    public GameObject bulletPrefab;
+    public float bulletSpeed = 10f;
+    private Transform firePoint;
+
+    /* =======================
+     * Init
+     * ======================= */
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        currentHealth = health; // 인스펙터에서 넣은 health 값이 적용됨
+        currentHealth = maxHealth;
 
-        // "Player" 태그를 가진 부모 오브젝트를 찾습니다.
-        GameObject playerParent = GameObject.FindGameObjectWithTag("Player");
-        if (playerParent != null)
-        {
-            PlayerControler = playerParent.GetComponentInChildren<PlayerControler>();
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        playerTransform = playerObj.transform;
+        playerController = playerObj.GetComponentInChildren<PlayerControler>();
 
-            if (PlayerControler != null)
-            {
-                targetCharacter = PlayerControler.transform;
-            }
-            else
-            {
-                targetCharacter = playerParent.transform;
-            }
-        }
+        firePoint = transform.Find("FirePoint"); // 보스 자식 빈 오브젝트
 
         StartCoroutine(SpawnDelay());
     }
@@ -60,183 +95,204 @@ public class Boss4 : MonoBehaviour, IDamageable
         canAct = true;
     }
 
+    /* =======================
+     * Update
+     * ======================= */
     void Update()
     {
-        
-        if (currentState == State.Dead || targetCharacter == null || !canAct) return;
+        if (!canAct || currentState == State.Dead) return;
 
-        float distToPlayer = Vector2.Distance(transform.position, targetCharacter.position);
+        if (Time.time - lastAttackTime < attackCooldown) return;
 
-        int r = Random.Range(1, 10);
-
-        switch (r)
-        {
-            case 1:
-                currentState = State.Combe1;
-                break;
-            case 2:
-                currentState = State.Combe2;
-                break;
-            case 3:
-                currentState = State.Combe3;
-                break;
-            case 4:
-                currentState = State.Combe4;
-                break;
-            case 5:
-            case 6:
-                currentState = State.Combe2;
-                break;
-            case 7:
-                currentState = State.Combe4;
-                break;
-            case 8:
-            case 9:
-                currentState = State.Idle;
-                break;
-        }
+        int r = Random.Range(1, 5);
+        currentState = (State)r;
 
         switch (currentState)
         {
             case State.Idle:
                 rb.linearVelocity = Vector2.zero;
                 break;
-            case State.Combe1:
-                Combe1();
+            case State.Combo1:
+                Combo1();
                 break;
-            case State.Combe2:
-                Combe2();
+            case State.Combo2:
+                Combo2();
                 break;
-            case State.Combe3:
-                Combe3();
+            case State.Combo3:
+                Combo3();
                 break;
-            case State.Combe4:
-                Combe4();
+            case State.Combo4:
+                Combo4();
                 break;
         }
     }
 
+    /* =======================
+     * Movement
+     * ======================= */
     void MoveToPlayer()
     {
-        Vector2 direction = ((Vector2)targetCharacter.position - (Vector2)transform.position).normalized;
-        rb.linearVelocity = direction * speed;
-    }
+        float distance = Vector2.Distance(transform.position, playerTransform.position);
 
-    void AttackPlayer1()
-    {
-        if (Time.time - lastAttackTime >= atackSpeed)
+        if (distance > stopDistance)
         {
-            if (PlayerControler != null)
-            {
-                PlayerControler.TakeDamage(attackDamage);
-                lastAttackTime = Time.time;
-            }
+            Vector2 dir =
+                ((Vector2)playerTransform.position - (Vector2)transform.position).normalized;
+            rb.linearVelocity = dir * speed;
+        }
+        else
+        {
+            rb.linearVelocity = Vector2.zero;
         }
     }
 
-    void AttackPlayer2()
+    /* =======================
+     * Attacks
+     * ======================= */
+    void MeleeAttack()
     {
-        if (Time.time - lastAttackTime >= atackSpeed)
+        playerController.TakeDamage(attackDamage);
+
+        Collider2D[] hits =
+            Physics2D.OverlapBoxAll(boxCenter, boxSize, angle, playerLayer);
+
+        foreach (Collider2D hit in hits)
         {
-            if (PlayerControler != null)
-            {
-                PlayerControler.TakeDamage(attackDamage);
-                lastAttackTime = Time.time;
-            }
+            Rigidbody2D hitRb = hit.GetComponent<Rigidbody2D>();
+            if (hitRb == null) continue;
+
+            Vector2 dir =
+                ((Vector2)hit.transform.position - (Vector2)transform.position).normalized;
+
+            hitRb.linearVelocity = Vector2.zero;
+            hitRb.AddForce(dir * knockbackPower, ForceMode2D.Impulse);
         }
+
+        lastAttackTime = Time.time;
     }
 
-    void Skill1()
+    void RangedAttack()
     {
-        
-        //좀비 생성
+        Vector2 dir =
+            ((Vector2)playerTransform.position - (Vector2)firePoint.position).normalized;
 
+        GameObject bullet =
+            Instantiate(bulletPrefab, firePoint.position, Quaternion.identity);
+
+        Bullet b = bullet.GetComponent<Bullet>();
+        b.speed = bulletSpeed;
+        b.Init(dir);
+
+        lastAttackTime = Time.time;
     }
 
-    void Skill2()
+    /* =======================
+     * Skills
+     * ======================= */
+    void SkillPoison()
     {
-
-        //초록웅덩이 생성
-
+        poison1.SetActive(true);
+        poison2.SetActive(true);
+        poison3.SetActive(true);
+        poison4.SetActive(true);
+        StartCoroutine(PoisonOff());
     }
 
-    void Combe1()
+    void SkillSpawner()
+    {
+        spawner.SetActive(true);
+        StartCoroutine(SpawnerOff());
+    }
+
+    /* =======================
+     * Combos
+     * ======================= */
+    void Combo1()
     {
         MoveToPlayer();
-        AttackPlayer1();
-        Skill2();
+        MeleeAttack();
+        SkillPoison();
     }
 
-    void Combe2()
+    void Combo2()
     {
         MoveToPlayer();
-        AttackPlayer1();
-        AttackPlayer2();
+        MeleeAttack();
+        RangedAttack();
     }
 
-    void Combe3()
+    void Combo3()
     {
-        AttackPlayer2();
-        Skill1();
-        MoveToPlayer();
-        AttackPlayer1();
+        RangedAttack();
+        SkillSpawner();
     }
-    
-    void Combe4()
+
+    void Combo4()
     {
-        AttackPlayer2();
-        Skill1();
-        Skill2();
+        RangedAttack();
+        SkillPoison();
+        SkillSpawner();
     }
 
-
+    /* =======================
+     * Damage / Death
+     * ======================= */
     public void TakeDamage(float damage)
     {
         if (Random.value < dodgeChance) return;
 
         currentHealth -= damage;
+        StartCoroutine(HitFlash());
 
-        StartCoroutine(HitFlashRoutine());
-
-        if (currentHealth <= 0 && currentState != State.Dead)
-        {
+        if (currentHealth <= 0)
             Die();
-        }
     }
 
     void Die()
     {
-        if (currentState == State.Dead) return;
         currentState = State.Dead;
-
         rb.linearVelocity = Vector2.zero;
 
         RoomControl room = GetComponentInParent<RoomControl>();
         if (room != null)
-        {
             room.OnEnemyKilled();
-        }
 
-        if (PlayerControler != null)
-        {
-            PlayerControler.TakeExp(expDrop);
-        }
-
+        playerController.TakeExp(expDrop);
         Destroy(gameObject, 1f);
     }
 
-    
-    IEnumerator HitFlashRoutine()
+    public float GetHpRatio()
     {
-        SpriteRenderer sprite = GetComponentInChildren<SpriteRenderer>();
-        if (sprite != null)
+        return currentHealth / maxHealth;
+    }
+
+    /* =======================
+     * Coroutines
+     * ======================= */
+    IEnumerator HitFlash()
+    {
+        SpriteRenderer sr = GetComponentInChildren<SpriteRenderer>();
+        if (sr != null)
         {
-            Color originalColor = sprite.color;
-            sprite.color = new Color(0.3f, 0.3f, 0.3f, 1f);
-
+            Color origin = sr.color;
+            sr.color = Color.gray;
             yield return new WaitForSeconds(0.1f);
-
-            sprite.color = originalColor;
+            sr.color = origin;
         }
+    }
+
+    IEnumerator PoisonOff()
+    {
+        yield return new WaitForSeconds(poisonOffDelay);
+        poison1.SetActive(false);
+        poison2.SetActive(false);
+        poison3.SetActive(false);
+        poison4.SetActive(false);
+    }
+
+    IEnumerator SpawnerOff()
+    {
+        yield return new WaitForSeconds(spawnerOffDelay);
+        spawner.SetActive(false);
     }
 }
