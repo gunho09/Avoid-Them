@@ -33,6 +33,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     [Header("UI 연결")]
     public Slider hpSlider;
+    public Slider shieldSlider; // [New] 쉴드 슬라이더 (회색)
     public GameObject deathUI;
     public Slider ExpSlider;
     public Slider BoostTime;
@@ -752,6 +753,21 @@ public class PlayerControler : MonoBehaviour, IDamageable
          {
              hpSlider.maxValue = PlayerMaxHp;
              hpSlider.value = PlayerCurrentHp; 
+         }
+
+         if (shieldSlider != null)
+         {
+             // 쉴드가 체력을 초과할 경우를 대비해 MaxValue 조정 (선택사항이나, 일단 기본 MaxHp 기준)
+             float totalValue = PlayerCurrentHp + PlayerCurrentShield;
+             
+             // 만약 전체 양(체력+쉴드)이 MaxHp보다 크면 슬라이더 Max를 늘려줌 (그래야 쉴드가 보임)
+             float displayMax = Mathf.Max(PlayerMaxHp, totalValue);
+
+             shieldSlider.maxValue = displayMax;
+             shieldSlider.value = totalValue;
+
+             // HP 슬라이더도 비율을 맞추려면 같이 늘려줘야 함
+             if (hpSlider != null) hpSlider.maxValue = displayMax;
          }
          
          string shieldStr = PlayerCurrentShield > 0 ? $" (+{Mathf.Ceil(PlayerCurrentShield)})" : "";
