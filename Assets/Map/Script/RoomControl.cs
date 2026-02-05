@@ -215,6 +215,7 @@ public class RoomControl : MonoBehaviour
             if (doorScript != null)
             {
                 doorScript.SetStatus(true);
+                if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-2"); // 문 여는 소리
             }
         }
         Debug.Log("아이템 획득 완료! 문이 열립니다.");

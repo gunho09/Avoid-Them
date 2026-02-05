@@ -77,6 +77,7 @@ public class ItemPickup : MonoBehaviour
         if (Inventory.Instance != null)
         {
             Inventory.Instance.AddItem(_data);
+            if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-7"); // 아이템 획득
             Debug.Log($"[ItemPickup] 인벤토리에 추가 요청 보냄");
         }
         else

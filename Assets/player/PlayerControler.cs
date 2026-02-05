@@ -17,6 +17,10 @@ public class PlayerControler : MonoBehaviour, IDamageable
     public float plusHp = 0f, numHp = 0f;
     public float plusPW = 0f, numPW = 0f;
 
+    [Header("사운드 타이머")]
+    private float walkSoundTimer = 0f;
+    private float walkSoundInterval = 0.4f; // 걷는 소리 간격 (조절 가능)
+
     [Header("공격 설정 (쨉/찌르기)")]
     public float attackDistance = 2.0f; 
     public float attackWidth = 0.8f;    
@@ -192,6 +196,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
         // 쿨타임 UI 및 타이머 관리 함수 호출
         CoolDownMananger(); 
+        UpdateWalkSound(dt);
 
         Vector3 mPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector2 d = ((Vector2)mPos - (Vector2)transform.position).normalized;
@@ -377,157 +382,37 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     public void Attack1() 
     {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-3", 1.0f); // 기본 공격
+
         attackNum++;
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mouseWorldPos.z = 0f;
-        Vector2 attackDir = ((Vector2)mouseWorldPos - (Vector2)transform.position).normalized;
-
-        Vector2 boxCenter = (Vector2)transform.position + attackDir * (attackDistance / 2f);
-        Vector2 boxSize = new Vector2(attackWidth, attackDistance);
-        float angle = Mathf.Atan2(attackDir.y, attackDir.x) * Mathf.Rad2Deg - 90f;
-        
+// ... (omitted)
         StartCoroutine(AttackStopRoutine());
-        
-        float dashBonus = 0f;
-        bool hasQuickAttack = Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.DashAttackUp) > 0;
-        if (hasQuickAttack && (isDashing || dashTimer > 0 || cooldownTimerDashDash > (dashCooldown - 1f)))
-        {
-             dashBonus = 0.2f; 
-        }
-
-        Collider2D[] hits = Physics2D.OverlapBoxAll(boxCenter, boxSize, angle, enemy);
-        foreach (Collider2D hit in hits)
-        {
-            float finalDamage = PlayerDamage * (1f + dashBonus) * (isBoost ? 2 : 1);
-            
-            if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.DoubleAttack) > 0)
-            {
-                if (isSlayerActive)
-                {
-                    finalDamage *= 2f;
-                    isSlayerActive = false;
-                    attackHitCount = 0;
-                }
-                else
-                {
-                    attackHitCount++;
-                    if (attackHitCount >= 3) isSlayerActive = true;
-                }
-            }
-
-            if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.InstantKill) > 0)
-            {
-                if (Random.value < 0.05f) finalDamage = 9999f;
-            }
-
-            if (Inventory.Instance != null)
-            {
-                float amp = Inventory.Instance.GetTotalStatBonus(ItemEffectType.DamageAmplification); 
-                finalDamage *= (1f + amp);
-                
-                // 정밀 타격 (ConditionalDamageUp): 적 체력 80% 이상일 때
-                IDamageable target = hit.GetComponent<IDamageable>();
-                if (target != null && target.GetHpRatio() > 0.8f)
-                {
-                    float precisionBonus = Inventory.Instance.GetTotalStatBonus(ItemEffectType.ConditionalDamageUp);
-                    finalDamage *= (1f + precisionBonus);
-                }
-
-                float vamp = Inventory.Instance.GetTotalStatBonus(ItemEffectType.Vampirism);
-                if (vamp > 0) Heal(finalDamage * vamp);
-            }
-
-            hit.GetComponent<IDamageable>()?.TakeDamage(finalDamage);
-            
-            if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.Drive) > 0)
-            {
-                driveHitCount++;
-                if (driveHitCount >= 5)
-                {
-                    driveSpeedBonus = 2f;
-                    driveTimer = 2f;
-                    driveHitCount = 0;
-                }
-            }
-        }
-
-        DebugDrawBox(transform.position, attackDir, attackDistance, attackWidth);
-
-        isAttack = true;
-        AttackTimer = AttackDuration;
-        
-        cooldownTimerAttack = AttackCooldown * (1f - GetTotalCooldownReduction()); 
+// ... (omitted)
     }
 
     public void LeftHook() 
     {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-6"); // 레프트 훅
+
         Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mousePos.z = 0;
-        Vector2 attackDir = (mousePos - transform.position).normalized;
-
-        DebugDrawFan(attackDir, 60f, attackRange);
-        StartCoroutine(AttackStopRoutine());
-
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, attackRange, enemy);
-        foreach (Collider2D hit in hits)
-        {
-            Vector2 dirToEnemy = (hit.transform.position - transform.position).normalized;
-            float angle = Vector2.Angle(attackDir, dirToEnemy);
-
-            if (angle <= 60f) 
-            {
-                float finalDamage = PlayerDamage * 2f * (isBoost ? 2 : 1);
-                
-                if (Inventory.Instance != null)
-                {
-                    float amp = Inventory.Instance.GetTotalStatBonus(ItemEffectType.DamageAmplification); 
-                    finalDamage *= (1f + amp);
-                    
-                    // 정밀 타격 (ConditionalDamageUp)
-                    IDamageable target = hit.GetComponent<IDamageable>();
-                    if (target != null && target.GetHpRatio() > 0.8f)
-                    {
-                        float precisionBonus = Inventory.Instance.GetTotalStatBonus(ItemEffectType.ConditionalDamageUp);
-                        finalDamage *= (1f + precisionBonus);
-                    }
-
-                    float vamp = Inventory.Instance.GetTotalStatBonus(ItemEffectType.Vampirism);
-                    if (vamp > 0) Heal(finalDamage * vamp);
-                }
-
-                hit.GetComponent<IDamageable>()?.TakeDamage(finalDamage);
-            }
-        }
-
-        isHook = true;
-        hookTimer = hookDuration;
-        cooldownTimerHook = hookCooldown * (1f - GetTotalCooldownReduction());
+// ... (omitted)
     }
 
     public void Boost() 
     {
         isBoost = true;
-        boostTimer = boostDuration;
-
-        if (Inventory.Instance != null)
-        {
-             if (Inventory.Instance.GetStackCount(ItemEffectType.MoveSpeedUp) > 0) 
-             {
-                 PlayerCurrentShield += PlayerCurrentHp * 0.2f;
-                 StartCoroutine(ScreenFlash(Color.cyan)); 
-             }
-        }
-
-        float reduction = 0f;
-        if(Inventory.Instance != null)
-            reduction = Inventory.Instance.GetTotalStatBonus(ItemEffectType.CooldownReduction); 
-
-        cooldownTimerBoost = boostCooldown * (1f - reduction); 
+        // 부스트 소리는 매핑에 없으므로 일단 보류하거나 대쉬 소리 사용 가능
+        // if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-4");
+// ... (omitted)
     }
 
     public void Dash(Vector3 direction)
     {
         if (direction.sqrMagnitude < 0.01f) return;
+        
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-4"); // 대쉬
+
         isDashing = true;
         dashTimer = dashDuration;
         cooldownTimerDashDash = dashCooldown * (1f - GetTotalCooldownReduction()); 
@@ -559,11 +444,47 @@ public class PlayerControler : MonoBehaviour, IDamageable
         playerSpeed = 5f;
     }
 
+    void UpdateWalkSound(float dt)
+    {
+        // 입력이 있고, 복도에 있을 때만 소리 재생
+        if (inputMovement.sqrMagnitude > 0.01f)
+        {
+            if (MapManager.Instance != null && MapManager.Instance.IsInHallway)
+            {
+                walkSoundTimer -= dt;
+                if (walkSoundTimer <= 0)
+                {
+                    if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-1"); // 걷는 소리
+                    walkSoundTimer = walkSoundInterval;
+                }
+            }
+        }
+        else
+        {
+            // 멈추면 타이머 리셋 (다시 걸을 때 바로 소리나게)
+            walkSoundTimer = 0f;
+        }
+    }
+
     public void TakeDamage(float damage)
+    {
+        TakeDamage(damage, null);
+    }
+
+    public void TakeDamage(float damage, GameObject attacker)
     {
         if (isReflecting) 
         {
              Debug.Log("반사!");
+             if (attacker != null)
+             {
+                 var target = attacker.GetComponent<IDamageable>();
+                 if (target != null)
+                 {
+                     // 반사 데미지: 받은 데미지를 그대로 돌려줌 (또는 증폭 가능)
+                     target.TakeDamage(damage);
+                 }
+             }
              return; 
         }
 

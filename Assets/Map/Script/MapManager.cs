@@ -91,6 +91,9 @@ public class MapManager : MonoBehaviour
         }
     }
 
+    // [Sound] 플레이어 발소리 체크용
+    public bool IsInHallway => currentHallwayInstance != null;
+
     private void SpawnHallway()
     {
         if (hallwayPrefab != null)
@@ -105,6 +108,9 @@ public class MapManager : MonoBehaviour
             currentHallwayInstance = Instantiate(hallwayPrefab, hallwaySpawnPosition, Quaternion.identity);
             currentHallwayInstance.name = "CurrentHallway";
             Debug.Log("복도 생성 완료 (게임 시작)");
+
+            // [Sound] 복도 BGM
+            if (SoundManager.Instance != null) SoundManager.Instance.PlayBGM("1-1");
 
             // [이미 들어갔던 문 끄기]
             DisableVisitedDoors();
@@ -155,12 +161,18 @@ public class MapManager : MonoBehaviour
         
         if (isBoss) 
         {
+            // [Sound] 보스방 BGM
+            if (SoundManager.Instance != null) SoundManager.Instance.PlayBGM("1-3");
+
             int index = Mathf.Clamp(currentFloor - 1, 0, bossRoomPrefabs.Length - 1);
             prefabToSpawn = bossRoomPrefabs[index];
             Debug.Log($"보스 방 진입! 층: {currentFloor}, 프리팹 Index: {index}");
         }
         else 
         {
+            // [Sound] 일반방 BGM
+            if (SoundManager.Instance != null) SoundManager.Instance.PlayBGM("1-2");
+
             prefabToSpawn = roomPrefabs[Random.Range(0, roomPrefabs.Length)];
         }
        
@@ -238,8 +250,7 @@ public class MapManager : MonoBehaviour
             {
                 NextFloor(); // 다음 층으로 이동 (내부에서 ReturnToHallway 로직 일부 수행하지 않도록 주의하거나, 여기서 복도 생성)
                 // NextFloor 함수가 아래에 있으니, 여기서 복도를 또 생성하면 중복될 수 있음.
-                // NextFloor에서 ReturnToHallway를 호출하고 있음 -> 무한 재귀 위험?
-                // 아니요, NextFloor -> ReturnToHallway 호출 구조이므로, 
+                // NextFloor -> ReturnToHallway 호출 구조이므로, 
                 // 여기서 NextFloor를 부르면 -> 다시 ReturnToHallway가 불림 -> currentStageIsBoss가 false이므로 일반 복도 생성 루틴으로 감.
                 // 괜찮음. 하지만 NextFloor 호출 후 바로 리턴해야 함.
                 return;
@@ -256,6 +267,9 @@ public class MapManager : MonoBehaviour
         {
             currentHallwayInstance = Instantiate(hallwayPrefab, hallwaySpawnPosition, Quaternion.identity);
             Debug.Log("복도 생성 완료");
+
+            // [Sound] 복도 BGM (돌아올 때)
+            if (SoundManager.Instance != null) SoundManager.Instance.PlayBGM("1-1");
             
             // [이미 들어갔던 문 끄기]
             DisableVisitedDoors();

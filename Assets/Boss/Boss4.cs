@@ -151,6 +151,7 @@ public class Boss4 : MonoBehaviour, IDamageable
      * ======================= */
     void MeleeAttack()
     {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-9"); // 4층 보스 밀치기
         playerController.TakeDamage(attackDamage);
 
         Collider2D[] hits =
@@ -173,6 +174,8 @@ public class Boss4 : MonoBehaviour, IDamageable
 
     void RangedAttack()
     {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-10"); // 4층 보스 총
+
         Vector2 dir =
             ((Vector2)playerTransform.position - (Vector2)firePoint.position).normalized;
 
@@ -191,6 +194,8 @@ public class Boss4 : MonoBehaviour, IDamageable
      * ======================= */
     void SkillPoison()
     {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-12"); // 4층 보스 초록 웅덩이
+
         poison1.SetActive(true);
         poison2.SetActive(true);
         poison3.SetActive(true);
@@ -200,6 +205,8 @@ public class Boss4 : MonoBehaviour, IDamageable
 
     void SkillSpawner()
     {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-11"); // 4층 보스 아포칼립스
+
         spawner.SetActive(true);
         StartCoroutine(SpawnerOff());
     }
@@ -251,6 +258,9 @@ public class Boss4 : MonoBehaviour, IDamageable
     void Die()
     {
         currentState = State.Dead;
+        
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-11"); // 보스 사망
+
         rb.linearVelocity = Vector2.zero;
 
         RoomControl room = GetComponentInParent<RoomControl>();

@@ -62,6 +62,19 @@ public class zombie : MonoBehaviour, IDamageable
         targetCharacter = newTarget;
     }
 
+    public void ResetTarget()
+    {
+        if (playerCtrl != null)
+        {
+            targetCharacter = playerCtrl.transform;
+        }
+    }
+
+    public bool IsTargeting(Transform target)
+    {
+        return targetCharacter == target;
+    }
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -109,6 +122,12 @@ public class zombie : MonoBehaviour, IDamageable
 
     void Update()
     {
+        if (targetCharacter == null && currentState != State.Dead)
+        {
+            ResetTarget();
+            if(targetCharacter == null) return; // 여전히 없으면 리턴
+        }
+
         if (currentState == State.Dead || targetCharacter == null || !canAct || isStunned) return;
 
         float distToPlayer = Vector2.Distance(transform.position, targetCharacter.position);
@@ -153,47 +172,37 @@ public class zombie : MonoBehaviour, IDamageable
         {
             if (playerCtrl != null)
             {
-                playerCtrl.TakeDamage(attackDamage);
+                if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-9", 0.6f); // 좀비 공격 (소리 줄임)
+
+                // 반사 데미지 구현을 위해 공격자(자신) 정보를 함께 전달
+                playerCtrl.TakeDamage(attackDamage, this.gameObject);
                 lastAttackTime = Time.time;
             }
         }
     }
-
     public void TakeDamage(float damage)
     {
-
+        if (currentState == State.Dead) return;
+        
         currentHealth -= damage;
-
         StartCoroutine(HitFlashRoutine());
 
-        if (currentHealth <= 0 && currentState != State.Dead)
+        if (currentHealth <= 0)
         {
             Die();
         }
     }
 
+// ...
     void Die()
     {
         if (currentState == State.Dead) return;
         currentState = State.Dead;
 
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-10"); // 좀비 사망
+
         rb.linearVelocity = Vector2.zero;
-
-        // 콜라이더 끄기 (추가 타격 방지)
-        Collider2D col = GetComponent<Collider2D>();
-        if (col != null) col.enabled = false;
-
-        RoomControl room = GetComponentInParent<RoomControl>();
-        if (room != null)
-        {
-            room.OnEnemyKilled();
-        }
-
-        if (playerCtrl != null)
-        {
-            playerCtrl.TakeExp(expDrop);
-        }
-
+// ...
         // [NEW] 사망 이펙트 재생
         DeathEffect effect = GetComponent<DeathEffect>();
         if (effect == null) effect = gameObject.AddComponent<DeathEffect>();

@@ -112,6 +112,7 @@ public class FirstBoss : MonoBehaviour, IDamageable
         currentState = State.Attack;
         lastAttackTime = Time.time;
         
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-1"); // 1층 보스 기본 공격
         if (punchVFX != null) punchVFX.Play();
 
         if (Vector2.Distance(transform.position, playerControler.transform.position) <= attackRange)
@@ -129,6 +130,7 @@ public class FirstBoss : MonoBehaviour, IDamageable
         currentState = State.Skill;
         lastSkillTime = Time.time;
 
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-2"); // 1층 보스 난타
         if (zonnahitVFX != null) zonnahitVFX.Play();
 
         float timer = 0;
@@ -166,6 +168,8 @@ public class FirstBoss : MonoBehaviour, IDamageable
         isDead = true;
         currentState = State.Die;
         
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-11"); // 보스 사망
+
         Collider2D col = GetComponent<Collider2D>();
         if(col != null) col.enabled = false;
 
