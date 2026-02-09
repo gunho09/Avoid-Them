@@ -1496,6 +1496,7 @@ MonoBehaviour:
   PlayerCurrentHp: 0
   PlayerCurrentShield: 0
   hpSlider: {fileID: 1232821224692740459}
+  shieldSlider: {fileID: 0}
   deathUI: {fileID: 2109044085730608521}
   ExpSlider: {fileID: 2571871561296713459}
   BoostTime: {fileID: 0}
@@ -1949,6 +1950,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2299825471048836653}
+  - component: {fileID: 167654831277734866}
   m_Layer: 0
   m_Name: MainChar
   m_TagString: Untagged
@@ -1974,6 +1976,28 @@ Transform:
   - {fileID: 6393819997724233638}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!95 &167654831277734866
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6865519403547124712}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 56374c20931158944a3cf0f2a39e564f, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &7207122717690827011
 GameObject:
   m_ObjectHideFlags: 0

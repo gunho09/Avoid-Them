@@ -175,6 +175,12 @@ public class PlayerControler : MonoBehaviour, IDamageable
         if (h > 0) sr.flipX = false;
         else if (h < 0) sr.flipX = true;
 
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 lookDir = (mousePos - transform.position).normalized;
+
+        anim.SetFloat("MouseX", lookDir.x);
+        anim.SetFloat("MouseY", lookDir.y);
+
         // CurrentPlayer() 삭제됨 -> RecalculateStats가 이벤트로 처리
         UpdateItemTimers(dt); 
 
@@ -189,7 +195,15 @@ public class PlayerControler : MonoBehaviour, IDamageable
             playerSpeed = 5f + driveSpeedBonus;
         }
 
-        if (Input.GetMouseButtonDown(0) && cooldownTimerAttack <= 0) Attack1();
+        if (Input.GetMouseButtonDown(0) && cooldownTimerAttack <= 0)
+        {
+            mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            sr.flipX = (mousePos.x < transform.position.x);
+
+            anim.SetTrigger("Attack");
+            Attack1();
+
+        }
         if (Input.GetKeyDown(KeyCode.E) && cooldownTimerHook <= 0) LeftHook();
         if (Input.GetKeyDown(KeyCode.LeftShift) && cooldownTimerDashDash <= 0) Dash(inputMovement);
         if (Input.GetKeyDown(KeyCode.Q) && cooldownTimerBoost <= 0) Boost();
@@ -233,7 +247,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
         if (CoolDownText1 != null)
         {
-            if (cooldownTimerAttack > 0) CoolDownText1.text = $"{cooldownTimerAttack:F1}";
+            if (cooldownTimerAttack > 0) CoolDownText1.text = $"{cooldownTimerAttack}";
             else CoolDownText1.text = "";
         }
 
@@ -244,7 +258,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
         if (CoolDownText2 != null)
         {
-            if (cooldownTimerHook > 0) CoolDownText2.text = $"{cooldownTimerHook:F1}";
+            if (cooldownTimerHook > 0) CoolDownText2.text = $"{cooldownTimerHook}";
             else CoolDownText2.text = "";
         }
 
@@ -255,7 +269,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
         if (CoolDownText3 != null)
         {
-            if (cooldownTimerDashDash > 0) CoolDownText3.text = $"{cooldownTimerDashDash:F1}";
+            if (cooldownTimerDashDash > 0) CoolDownText3.text = $"{cooldownTimerDashDash}";
             else CoolDownText3.text = "";
         }
 
@@ -266,7 +280,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
         if (CoolDownText4 != null)
         {
-            if (cooldownTimerBoost > 0) CoolDownText4.text = $"{cooldownTimerBoost:F1}";
+            if (cooldownTimerBoost > 0) CoolDownText4.text = $"{cooldownTimerBoost}";
             else CoolDownText4.text = "";
         }
         
