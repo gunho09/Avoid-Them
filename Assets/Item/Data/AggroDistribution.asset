@@ -15,7 +15,7 @@ MonoBehaviour:
   itemName: "\uB354\uBBF8"
   description: "\uD53C\uACA9 \uC2DC \uD655\uB960\uC801\uC73C\uB85C \uB354\uBBF8\uB97C
     \uC18C\uD658\uD569\uB2C8\uB2E4."
-  icon: {fileID: 2444433806506217067, guid: 9f18de80ca2dee64a9398c8fcffadf30, type: 3}
+  icon: {fileID: -1030638412525562489, guid: 237d1959f3b511640aa68ecf947de4e0, type: 3}
   rarity: 1
   effectType: 9
   valuePerStack: 1

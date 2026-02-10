@@ -125,7 +125,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
         // [New Formula] Start시 경험치 테이블 초기화 (Lv 1 -> 100)
         // 공식: 100 + ((Lv-1) * 50)
         MaxExp = 100f + (Mathf.Max(0, PlayerLvl - 1) * 50f);
-        BoostTime.gameObject.SetActive(false);
+        if (BoostTime != null) BoostTime.gameObject.SetActive(false);
     
     // 초기화 시점에는 Stats 계산 (이벤트 전)
     RecalculateStats();
@@ -526,12 +526,6 @@ public class PlayerControler : MonoBehaviour, IDamageable
         StartCoroutine(AttackStopRoutine());
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-6"); // 레프트 훅
 
-        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mousePos.z = 0;
-        Vector2 attackDir = (mousePos - transform.position).normalized;
-
-        DebugDrawFan(attackDir, 60f, attackRange);
-        StartCoroutine(AttackStopRoutine());
 
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, attackRange, enemy);
         foreach (Collider2D hit in hits)
@@ -591,22 +585,6 @@ public class PlayerControler : MonoBehaviour, IDamageable
         // 부스트 소리는 매핑에 없으므로 일단 보류하거나 대쉬 소리 사용 가능
         // if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-4");
 
-        boostTimer = boostDuration;
-
-        if (Inventory.Instance != null)
-        {
-             if (Inventory.Instance.GetStackCount(ItemEffectType.MoveSpeedUp) > 0) 
-             {
-                 PlayerCurrentShield += PlayerCurrentHp * 0.2f;
-                 StartCoroutine(ScreenFlash(Color.cyan)); 
-             }
-        }
-
-        float reduction = 0f;
-        if(Inventory.Instance != null)
-            reduction = Inventory.Instance.GetTotalStatBonus(ItemEffectType.CooldownReduction); 
-
-        cooldownTimerBoost = boostCooldown * (1f - reduction); 
     }
 
     public void Dash(Vector3 direction)

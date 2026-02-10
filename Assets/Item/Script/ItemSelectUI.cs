@@ -20,6 +20,7 @@ public class ItemSelectUI : MonoBehaviour
 
     public void ShowSelectUI()
     {
+        Debug.Log($"[UI Debug] ShowSelectUI Called! Called by: {new System.Diagnostics.StackTrace()}");
         if (panel == null) return;
         
         panel.SetActive(true);
