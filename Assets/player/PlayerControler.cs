@@ -400,9 +400,84 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
         attackNum++;
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-// ... (omitted)
+        mouseWorldPos.z = 0f;
+        Vector2 attackDir = ((Vector2)mouseWorldPos - (Vector2)transform.position).normalized;
+
+        Vector2 boxCenter = (Vector2)transform.position + attackDir * (attackDistance / 2f);
+        Vector2 boxSize = new Vector2(attackWidth, attackDistance);
+        float angle = Mathf.Atan2(attackDir.y, attackDir.x) * Mathf.Rad2Deg - 90f;
+        
         StartCoroutine(AttackStopRoutine());
-// ... (omitted)
+        
+        float dashBonus = 0f;
+        bool hasQuickAttack = Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.DashAttackUp) > 0;
+        if (hasQuickAttack && (isDashing || dashTimer > 0 || cooldownTimerDashDash > (dashCooldown - 1f)))
+        {
+             dashBonus = 0.2f; 
+        }
+
+        Collider2D[] hits = Physics2D.OverlapBoxAll(boxCenter, boxSize, angle, enemy);
+        foreach (Collider2D hit in hits)
+        {
+            float finalDamage = PlayerDamage * (1f + dashBonus) * (isBoost ? 2 : 1);
+            
+            if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.DoubleAttack) > 0)
+            {
+                if (isSlayerActive)
+                {
+                    finalDamage *= 2f;
+                    isSlayerActive = false;
+                    attackHitCount = 0;
+                }
+                else
+                {
+                    attackHitCount++;
+                    if (attackHitCount >= 3) isSlayerActive = true;
+                }
+            }
+
+            if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.InstantKill) > 0)
+            {
+                if (Random.value < 0.05f) finalDamage = 9999f;
+            }
+
+            if (Inventory.Instance != null)
+            {
+                float amp = Inventory.Instance.GetTotalStatBonus(ItemEffectType.DamageAmplification); 
+                finalDamage *= (1f + amp);
+                
+                // 정밀 타격 (ConditionalDamageUp): 적 체력 80% 이상일 때
+                IDamageable target = hit.GetComponent<IDamageable>();
+                if (target != null && target.GetHpRatio() > 0.8f)
+                {
+                    float precisionBonus = Inventory.Instance.GetTotalStatBonus(ItemEffectType.ConditionalDamageUp);
+                    finalDamage *= (1f + precisionBonus);
+                }
+
+                float vamp = Inventory.Instance.GetTotalStatBonus(ItemEffectType.Vampirism);
+                if (vamp > 0) Heal(finalDamage * vamp);
+            }
+
+            hit.GetComponent<IDamageable>()?.TakeDamage(finalDamage);
+            
+            if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.Drive) > 0)
+            {
+                driveHitCount++;
+                if (driveHitCount >= 5)
+                {
+                    driveSpeedBonus = 2f;
+                    driveTimer = 2f;
+                    driveHitCount = 0;
+                }
+            }
+        }
+
+        DebugDrawBox(transform.position, attackDir, attackDistance, attackWidth);
+
+        isAttack = true;
+        AttackTimer = AttackDuration;
+        
+        cooldownTimerAttack = AttackCooldown * (1f - GetTotalCooldownReduction()); 
     }
 
     public void LeftHook() 
@@ -410,7 +485,46 @@ public class PlayerControler : MonoBehaviour, IDamageable
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-6"); // 레프트 훅
 
         Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-// ... (omitted)
+        mousePos.z = 0;
+        Vector2 attackDir = (mousePos - transform.position).normalized;
+
+        DebugDrawFan(attackDir, 60f, attackRange);
+        StartCoroutine(AttackStopRoutine());
+
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, attackRange, enemy);
+        foreach (Collider2D hit in hits)
+        {
+            Vector2 dirToEnemy = (hit.transform.position - transform.position).normalized;
+            float angle = Vector2.Angle(attackDir, dirToEnemy);
+
+            if (angle <= 60f) 
+            {
+                float finalDamage = PlayerDamage * 2f * (isBoost ? 2 : 1);
+                
+                if (Inventory.Instance != null)
+                {
+                    float amp = Inventory.Instance.GetTotalStatBonus(ItemEffectType.DamageAmplification); 
+                    finalDamage *= (1f + amp);
+                    
+                    // 정밀 타격 (ConditionalDamageUp)
+                    IDamageable target = hit.GetComponent<IDamageable>();
+                    if (target != null && target.GetHpRatio() > 0.8f)
+                    {
+                        float precisionBonus = Inventory.Instance.GetTotalStatBonus(ItemEffectType.ConditionalDamageUp);
+                        finalDamage *= (1f + precisionBonus);
+                    }
+
+                    float vamp = Inventory.Instance.GetTotalStatBonus(ItemEffectType.Vampirism);
+                    if (vamp > 0) Heal(finalDamage * vamp);
+                }
+
+                hit.GetComponent<IDamageable>()?.TakeDamage(finalDamage);
+            }
+        }
+
+        isHook = true;
+        hookTimer = hookDuration;
+        cooldownTimerHook = hookCooldown * (1f - GetTotalCooldownReduction());
     }
 
     public void Boost() 
@@ -418,7 +532,23 @@ public class PlayerControler : MonoBehaviour, IDamageable
         isBoost = true;
         // 부스트 소리는 매핑에 없으므로 일단 보류하거나 대쉬 소리 사용 가능
         // if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-4");
-// ... (omitted)
+
+        boostTimer = boostDuration;
+
+        if (Inventory.Instance != null)
+        {
+             if (Inventory.Instance.GetStackCount(ItemEffectType.MoveSpeedUp) > 0) 
+             {
+                 PlayerCurrentShield += PlayerCurrentHp * 0.2f;
+                 StartCoroutine(ScreenFlash(Color.cyan)); 
+             }
+        }
+
+        float reduction = 0f;
+        if(Inventory.Instance != null)
+            reduction = Inventory.Instance.GetTotalStatBonus(ItemEffectType.CooldownReduction); 
+
+        cooldownTimerBoost = boostCooldown * (1f - reduction); 
     }
 
     public void Dash(Vector3 direction)
