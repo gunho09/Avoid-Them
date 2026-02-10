@@ -67,7 +67,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
     [Header("레벨관리")]
     public float exp;
     public float currentExp = 0;
-    public float PlayerLvl = 0;
+    public float PlayerLvl = 1;
     public float MaxExp = 20;
 
     [Header("쿨타임")]
@@ -177,12 +177,13 @@ public class PlayerControler : MonoBehaviour, IDamageable
         // 2) 마우스 / 바라보는 방향(애니메이터용)
         Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector2 lookDir = ((Vector2)mousePos - (Vector2)transform.position).normalized;
-
-        anim.SetFloat("hInput", h);
-        anim.SetFloat("vInput", v);
-        anim.SetFloat("MouseX", lookDir.x);
-        anim.SetFloat("MouseY", lookDir.y);
-
+        if (anim != null)
+        {
+            anim.SetFloat("hInput", h);
+            anim.SetFloat("vInput", v);
+            anim.SetFloat("MouseX", lookDir.x);
+            anim.SetFloat("MouseY", lookDir.y);
+        }
         // 3) 아이템 타이머
         UpdateItemTimers(dt);
 
@@ -292,7 +293,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
         if (CoolDownText2 != null)
         {
-            if (cooldownTimerHook > 0) CoolDownText2.text = $"훅/{(int)cooldownTimerHook}";
+            if (cooldownTimerHook > 0) CoolDownText2.text = $"훅/ {(int)cooldownTimerHook}";
             else CoolDownText2.text = "";
         }
 
@@ -314,18 +315,25 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
         if (CoolDownText4 != null)
         {
-            if (cooldownTimerBoost > 0) { CoolDownText4.text = $"금강불괴/{(int)cooldownTimerBoost}"; BoostTime.gameObject.SetActive(false);
+            if (cooldownTimerBoost > 0) {
+                CoolDownText4.text = $"금강불괴/{(int)cooldownTimerBoost}";
             }
             else CoolDownText4.text = "";
         }
-        
+
         // 부스트 지속시간 바
         if (BoostTime != null)
         {
-            BoostTime.gameObject.SetActive(true);
-            BoostTime.maxValue = boostDuration;
-            BoostTime.value = boostTimer;
+            bool show = boostTimer > 0;
+            BoostTime.gameObject.SetActive(show);
+
+            if (show)
+            {
+                BoostTime.maxValue = boostDuration;
+                BoostTime.value = boostTimer;
+            }
         }
+
     }
 
     void UpdateItemTimers(float dt)
@@ -442,21 +450,22 @@ public class PlayerControler : MonoBehaviour, IDamageable
         Vector2 boxCenter = (Vector2)transform.position + attackDir * (attackDistance / 2f);
         Vector2 boxSize = new Vector2(attackWidth, attackDistance);
         float angle = Mathf.Atan2(attackDir.y, attackDir.x) * Mathf.Rad2Deg - 90f;
-        
+
+        // ... (omitted)
         StartCoroutine(AttackStopRoutine());
-        
+
         float dashBonus = 0f;
         bool hasQuickAttack = Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.DashAttackUp) > 0;
         if (hasQuickAttack && (isDashing || dashTimer > 0 || cooldownTimerDashDash > (dashCooldown - 1f)))
         {
-             dashBonus = 0.2f; 
+            dashBonus = 0.2f;
         }
 
         Collider2D[] hits = Physics2D.OverlapBoxAll(boxCenter, boxSize, angle, enemy);
         foreach (Collider2D hit in hits)
         {
             float finalDamage = PlayerDamage * (1f + dashBonus) * (isBoost ? 2 : 1);
-            
+
             if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.DoubleAttack) > 0)
             {
                 if (isSlayerActive)
@@ -479,9 +488,9 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
             if (Inventory.Instance != null)
             {
-                float amp = Inventory.Instance.GetTotalStatBonus(ItemEffectType.DamageAmplification); 
+                float amp = Inventory.Instance.GetTotalStatBonus(ItemEffectType.DamageAmplification);
                 finalDamage *= (1f + amp);
-                
+
                 // 정밀 타격 (ConditionalDamageUp): 적 체력 80% 이상일 때
                 IDamageable target = hit.GetComponent<IDamageable>();
                 if (target != null && target.GetHpRatio() > 0.8f)
@@ -495,7 +504,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
             }
 
             hit.GetComponent<IDamageable>()?.TakeDamage(finalDamage);
-            
+
             if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.Drive) > 0)
             {
                 driveHitCount++;
@@ -512,8 +521,9 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
         isAttack = true;
         AttackTimer = AttackDuration;
-        
-        cooldownTimerAttack = AttackCooldown * (1f - GetTotalCooldownReduction()); 
+
+        cooldownTimerAttack = AttackCooldown * (1f - GetTotalCooldownReduction());
+        // ... (omitted)
     }
 
     public void LeftHook()
@@ -526,34 +536,22 @@ public class PlayerControler : MonoBehaviour, IDamageable
         StartCoroutine(AttackStopRoutine());
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-6"); // 레프트 훅
 
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mousePos.z = 0;
+        Vector2 attackDir = (mousePos - transform.position).normalized;
+
+        DebugDrawFan(attackDir, 60f, attackRange);
+        StartCoroutine(AttackStopRoutine());
 
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, attackRange, enemy);
         foreach (Collider2D hit in hits)
         {
-            Vector2 dirToEnemy = (hit.transform.position - transform.position).normalized;
+            Vector2 dirToEnemy = ((Vector2)hit.transform.position - (Vector2)transform.position).normalized;
             float angle = Vector2.Angle(attackDir, dirToEnemy);
 
-            if (angle <= 60f) 
+            if (angle <= 60f)
             {
                 float finalDamage = PlayerDamage * 2f * (isBoost ? 2 : 1);
-                
-                if (Inventory.Instance != null)
-                {
-                    float amp = Inventory.Instance.GetTotalStatBonus(ItemEffectType.DamageAmplification); 
-                    finalDamage *= (1f + amp);
-                    
-                    // 정밀 타격 (ConditionalDamageUp)
-                    IDamageable target = hit.GetComponent<IDamageable>();
-                    if (target != null && target.GetHpRatio() > 0.8f)
-                    {
-                        float precisionBonus = Inventory.Instance.GetTotalStatBonus(ItemEffectType.ConditionalDamageUp);
-                        finalDamage *= (1f + precisionBonus);
-                    }
-
-                    float vamp = Inventory.Instance.GetTotalStatBonus(ItemEffectType.Vampirism);
-                    if (vamp > 0) Heal(finalDamage * vamp);
-                }
-
                 hit.GetComponent<IDamageable>()?.TakeDamage(finalDamage);
             }
         }
@@ -562,6 +560,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
         hookTimer = hookDuration;
         cooldownTimerHook = hookCooldown * (1f - GetTotalCooldownReduction());
     }
+
 
     public void Boost()
     {
@@ -585,6 +584,22 @@ public class PlayerControler : MonoBehaviour, IDamageable
         // 부스트 소리는 매핑에 없으므로 일단 보류하거나 대쉬 소리 사용 가능
         // if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-4");
 
+        boostTimer = boostDuration;
+
+        if (Inventory.Instance != null)
+        {
+             if (Inventory.Instance.GetStackCount(ItemEffectType.MoveSpeedUp) > 0) 
+             {
+                 PlayerCurrentShield += PlayerCurrentHp * 0.2f;
+                 StartCoroutine(ScreenFlash(Color.cyan)); 
+             }
+        }
+
+        float reduction = 0f;
+        if(Inventory.Instance != null)
+            reduction = Inventory.Instance.GetTotalStatBonus(ItemEffectType.CooldownReduction); 
+
+        cooldownTimerBoost = boostCooldown * (1f - reduction); 
     }
 
     public void Dash(Vector3 direction)
