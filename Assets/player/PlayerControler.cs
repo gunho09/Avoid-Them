@@ -114,6 +114,9 @@ public class PlayerControler : MonoBehaviour, IDamageable
     private float driveSpeedBonus = 0f;
     private float driveTimer = 0f;
     // -------------------------
+    private bool facingLeft = false;
+    private bool lockFacing = false;
+    private int num = 0;
 
     void Start()
     {
@@ -162,60 +165,90 @@ public class PlayerControler : MonoBehaviour, IDamageable
     {
         float dt = Time.deltaTime;
 
+        // 1) 입력 받기
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveY = Input.GetAxisRaw("Vertical");
         inputMovement = new Vector2(moveX, moveY);
-       
-        float h = Input.GetAxis("Horizontal"); 
+
+        float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
+
+        // 2) 마우스 / 바라보는 방향(애니메이터용)
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 lookDir = ((Vector2)mousePos - (Vector2)transform.position).normalized;
 
         anim.SetFloat("hInput", h);
         anim.SetFloat("vInput", v);
-
-        if (h > 0) sr.flipX = false;
-        else if (h < 0) sr.flipX = true;
-
-        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector2 lookDir = (mousePos - transform.position).normalized;
-
         anim.SetFloat("MouseX", lookDir.x);
         anim.SetFloat("MouseY", lookDir.y);
 
-        // CurrentPlayer() 삭제됨 -> RecalculateStats가 이벤트로 처리
-        UpdateItemTimers(dt); 
+        // 3) 아이템 타이머
+        UpdateItemTimers(dt);
 
+        // 4) 가드 (우클릭)
         if (Input.GetMouseButtonDown(1))
         {
             Guarding = true;
+            anim.SetBool("isGuarding", true);
             playerSpeed = 1f;
         }
-        if (Input.GetMouseButtonUp(1))
+        else if (Input.GetMouseButtonUp(1))
         {
             Guarding = false;
+            anim.SetBool("isGuarding", false);
             playerSpeed = 5f + driveSpeedBonus;
         }
 
-        if (Input.GetMouseButtonDown(0) && cooldownTimerAttack <= 0)
+        // 5) 방향 결정: 공격/훅 입력이 있으면 "마우스 방향" 우선 + 잠금
+        bool attackPressed = Input.GetMouseButtonDown(0) && cooldownTimerAttack <= 0;
+        bool hookPressed = Input.GetKeyDown(KeyCode.E) && cooldownTimerHook <= 0;
+
+        if (attackPressed || hookPressed)
         {
-            mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            sr.flipX = (mousePos.x < transform.position.x);
-
-            anim.SetTrigger("Attack");
-            Attack1();
-
+            lockFacing = true;
+            facingLeft = (mousePos.x < transform.position.x);
         }
-        if (Input.GetKeyDown(KeyCode.E) && cooldownTimerHook <= 0) LeftHook();
+        else if (!lockFacing)
+        {
+            // 공격/훅 중이 아닐 때만 이동 방향으로 갱신
+            if (moveX > 0) facingLeft = false;
+            else if (moveX < 0) facingLeft = true;
+            // moveX == 0이면 기존 방향 유지
+        }
+
+        // 6) 실제 행동 실행 (트리거)
+        if (attackPressed)
+        {
+            if (num%2==0) { anim.SetTrigger("Attack"); num++; Debug.Log("원"); }
+
+            else { anim.SetTrigger("Attack2"); num++; Debug.Log("투"); }
+
+            Attack1();
+            StartCoroutine(UnlockFacingAfter(AttackDuration)); // 0.2f 하드코딩 말고 변수로!
+        }
+
+        if (hookPressed)
+        {
+            anim.SetTrigger("Hook");
+            LeftHook();
+            StartCoroutine(UnlockFacingAfter(hookDuration));   // 0.3f 하드코딩 말고 변수로!
+        }
+
+        // 7) 대시 / 부스트
         if (Input.GetKeyDown(KeyCode.LeftShift) && cooldownTimerDashDash <= 0) Dash(inputMovement);
         if (Input.GetKeyDown(KeyCode.Q) && cooldownTimerBoost <= 0) Boost();
 
-        // 쿨타임 UI 및 타이머 관리 함수 호출
-        CoolDownMananger(); 
+        // 8) flip 적용은 여기 한 줄만
+        sr.flipX = facingLeft;
+
+        // 9) 쿨타임/사운드/디버그
+        CoolDownMananger();
         UpdateWalkSound(dt);
 
-        Vector3 mPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector2 d = ((Vector2)mPos - (Vector2)transform.position).normalized;
+        Vector2 d = ((Vector2)mousePos - (Vector2)transform.position).normalized;
         Debug.DrawRay(transform.position, d * attackDistance, Color.red);
     }
+
 
     void FixedUpdate()
     {
@@ -872,7 +905,11 @@ public class PlayerControler : MonoBehaviour, IDamageable
         }
         UpdateHpUI();
     }
-
+    IEnumerator UnlockFacingAfter(float t)
+    {
+        yield return new WaitForSeconds(t);
+        lockFacing = false;
+    }
     IEnumerator AttackStopRoutine()
     {
         isAttacking = true;
