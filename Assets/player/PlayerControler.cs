@@ -125,9 +125,10 @@ public class PlayerControler : MonoBehaviour, IDamageable
         // [New Formula] Start시 경험치 테이블 초기화 (Lv 1 -> 100)
         // 공식: 100 + ((Lv-1) * 50)
         MaxExp = 100f + (Mathf.Max(0, PlayerLvl - 1) * 50f);
-
-        // 초기화 시점에는 Stats 계산 (이벤트 전)
-        RecalculateStats();
+        BoostTime.gameObject.SetActive(false);
+    
+    // 초기화 시점에는 Stats 계산 (이벤트 전)
+    RecalculateStats();
         PlayerCurrentHp = PlayerMaxHp; 
         
         LvlText.text = $"{PlayerLvl}";
@@ -291,7 +292,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
         if (CoolDownText2 != null)
         {
-            if (cooldownTimerHook > 0) CoolDownText2.text = $"{cooldownTimerHook}";
+            if (cooldownTimerHook > 0) CoolDownText2.text = $"훅/{(int)cooldownTimerHook}";
             else CoolDownText2.text = "";
         }
 
@@ -313,13 +314,15 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
         if (CoolDownText4 != null)
         {
-            if (cooldownTimerBoost > 0) CoolDownText4.text = $"{cooldownTimerBoost}";
+            if (cooldownTimerBoost > 0) { CoolDownText4.text = $"금강불괴/{(int)cooldownTimerBoost}"; BoostTime.gameObject.SetActive(false);
+            }
             else CoolDownText4.text = "";
         }
         
         // 부스트 지속시간 바
         if (BoostTime != null)
         {
+            BoostTime.gameObject.SetActive(true);
             BoostTime.maxValue = boostDuration;
             BoostTime.value = boostTimer;
         }
@@ -427,31 +430,164 @@ public class PlayerControler : MonoBehaviour, IDamageable
         StartCoroutine(ScreenFlash(Color.white));
     }
 
-    public void Attack1() 
+    public void Attack1()
     {
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-3", 1.0f); // 기본 공격
 
         attackNum++;
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-// ... (omitted)
+        mouseWorldPos.z = 0f;
+        Vector2 attackDir = ((Vector2)mouseWorldPos - (Vector2)transform.position).normalized;
+
+        Vector2 boxCenter = (Vector2)transform.position + attackDir * (attackDistance / 2f);
+        Vector2 boxSize = new Vector2(attackWidth, attackDistance);
+        float angle = Mathf.Atan2(attackDir.y, attackDir.x) * Mathf.Rad2Deg - 90f;
+
+        // ... (omitted)
         StartCoroutine(AttackStopRoutine());
-// ... (omitted)
+
+        float dashBonus = 0f;
+        bool hasQuickAttack = Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.DashAttackUp) > 0;
+        if (hasQuickAttack && (isDashing || dashTimer > 0 || cooldownTimerDashDash > (dashCooldown - 1f)))
+        {
+            dashBonus = 0.2f;
+        }
+
+        Collider2D[] hits = Physics2D.OverlapBoxAll(boxCenter, boxSize, angle, enemy);
+        foreach (Collider2D hit in hits)
+        {
+            float finalDamage = PlayerDamage * (1f + dashBonus) * (isBoost ? 2 : 1);
+
+            if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.DoubleAttack) > 0)
+            {
+                if (isSlayerActive)
+                {
+                    finalDamage *= 2f;
+                    isSlayerActive = false;
+                    attackHitCount = 0;
+                }
+                else
+                {
+                    attackHitCount++;
+                    if (attackHitCount >= 3) isSlayerActive = true;
+                }
+            }
+
+            if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.InstantKill) > 0)
+            {
+                if (Random.value < 0.05f) finalDamage = 9999f;
+            }
+
+            if (Inventory.Instance != null)
+            {
+                float amp = Inventory.Instance.GetTotalStatBonus(ItemEffectType.DamageAmplification);
+                finalDamage *= (1f + amp);
+
+                // 정밀 타격 (ConditionalDamageUp): 적 체력 80% 이상일 때
+                IDamageable target = hit.GetComponent<IDamageable>();
+                if (target != null && target.GetHpRatio() > 0.8f)
+                {
+                    float precisionBonus = Inventory.Instance.GetTotalStatBonus(ItemEffectType.ConditionalDamageUp);
+                    finalDamage *= (1f + precisionBonus);
+                }
+
+                float vamp = Inventory.Instance.GetTotalStatBonus(ItemEffectType.Vampirism);
+                if (vamp > 0) Heal(finalDamage * vamp);
+            }
+
+            hit.GetComponent<IDamageable>()?.TakeDamage(finalDamage);
+
+            if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.Drive) > 0)
+            {
+                driveHitCount++;
+                if (driveHitCount >= 5)
+                {
+                    driveSpeedBonus = 2f;
+                    driveTimer = 2f;
+                    driveHitCount = 0;
+                }
+            }
+        }
+
+        DebugDrawBox(transform.position, attackDir, attackDistance, attackWidth);
+
+        isAttack = true;
+        AttackTimer = AttackDuration;
+
+        cooldownTimerAttack = AttackCooldown * (1f - GetTotalCooldownReduction());
+        // ... (omitted)
     }
 
-    public void LeftHook() 
+    public void LeftHook()
     {
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mousePos.z = 0;
+        Vector2 attackDir = (mousePos - transform.position).normalized;
+
+        DebugDrawFan(attackDir, 60f, attackRange);
+        StartCoroutine(AttackStopRoutine());
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-6"); // 레프트 훅
 
-        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-// ... (omitted)
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, attackRange, enemy);
+        foreach (Collider2D hit in hits)
+        {
+            Vector2 dirToEnemy = (hit.transform.position - transform.position).normalized;
+            float angle = Vector2.Angle(attackDir, dirToEnemy);
+
+            if (angle <= 60f)
+            {
+                float finalDamage = PlayerDamage * 2f * (isBoost ? 2 : 1);
+
+                if (Inventory.Instance != null)
+                {
+                    float amp = Inventory.Instance.GetTotalStatBonus(ItemEffectType.DamageAmplification);
+                    finalDamage *= (1f + amp);
+
+                    // 정밀 타격 (ConditionalDamageUp)
+                    IDamageable target = hit.GetComponent<IDamageable>();
+                    if (target != null && target.GetHpRatio() > 0.8f)
+                    {
+                        float precisionBonus = Inventory.Instance.GetTotalStatBonus(ItemEffectType.ConditionalDamageUp);
+                        finalDamage *= (1f + precisionBonus);
+                    }
+
+                    float vamp = Inventory.Instance.GetTotalStatBonus(ItemEffectType.Vampirism);
+                    if (vamp > 0) Heal(finalDamage * vamp);
+                }
+
+                hit.GetComponent<IDamageable>()?.TakeDamage(finalDamage);
+            }
+        }
+
+        isHook = true;
+        hookTimer = hookDuration;
+        cooldownTimerHook = hookCooldown * (1f - GetTotalCooldownReduction());
+        mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        // ... (omitted)
     }
 
-    public void Boost() 
+    public void Boost()
     {
         isBoost = true;
+        boostTimer = boostDuration;
+
+        if (Inventory.Instance != null)
+        {
+            if (Inventory.Instance.GetStackCount(ItemEffectType.MoveSpeedUp) > 0)
+            {
+                PlayerCurrentShield += PlayerCurrentHp * 0.2f;
+                StartCoroutine(ScreenFlash(Color.cyan));
+            }
+        }
+
+        float reduction = 0f;
+        if (Inventory.Instance != null)
+            reduction = Inventory.Instance.GetTotalStatBonus(ItemEffectType.CooldownReduction);
+
+        cooldownTimerBoost = boostCooldown * (1f - reduction);
         // 부스트 소리는 매핑에 없으므로 일단 보류하거나 대쉬 소리 사용 가능
         // if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-4");
-// ... (omitted)
+        // ... (omitted)
     }
 
     public void Dash(Vector3 direction)
