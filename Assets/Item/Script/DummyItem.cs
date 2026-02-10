@@ -60,7 +60,7 @@ public class DummyItem : MonoBehaviour, IDamageable
     void ReturnAggro()
     {
         // 씬 내의 모든 활성화된 좀비를 찾아서 확인 (범위 제한 없이 확실하게 복구)
-        zombie[] allZombies = FindObjectsOfType<zombie>();
+        zombie[] allZombies = FindObjectsByType<zombie>(FindObjectsSortMode.None);
         foreach (var z in allZombies)
         {
             // 아직 살아있고, 나(Dummy)를 타겟팅하고 있는 경우에만 리셋

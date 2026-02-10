@@ -536,12 +536,6 @@ public class PlayerControler : MonoBehaviour, IDamageable
         StartCoroutine(AttackStopRoutine());
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-6"); // 레프트 훅
 
-        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mousePos.z = 0;
-        Vector2 attackDir = (mousePos - transform.position).normalized;
-
-        DebugDrawFan(attackDir, 60f, attackRange);
-        StartCoroutine(AttackStopRoutine());
 
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, attackRange, enemy);
         foreach (Collider2D hit in hits)
@@ -584,22 +578,6 @@ public class PlayerControler : MonoBehaviour, IDamageable
         // 부스트 소리는 매핑에 없으므로 일단 보류하거나 대쉬 소리 사용 가능
         // if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-4");
 
-        boostTimer = boostDuration;
-
-        if (Inventory.Instance != null)
-        {
-             if (Inventory.Instance.GetStackCount(ItemEffectType.MoveSpeedUp) > 0) 
-             {
-                 PlayerCurrentShield += PlayerCurrentHp * 0.2f;
-                 StartCoroutine(ScreenFlash(Color.cyan)); 
-             }
-        }
-
-        float reduction = 0f;
-        if(Inventory.Instance != null)
-            reduction = Inventory.Instance.GetTotalStatBonus(ItemEffectType.CooldownReduction); 
-
-        cooldownTimerBoost = boostCooldown * (1f - reduction); 
     }
 
     public void Dash(Vector3 direction)
@@ -692,7 +670,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
             if (Random.value < 0.1f)
             {
                  // DummyItem 찾기
-                 if (dummyPrefab != null && FindObjectOfType<DummyItem>() == null)
+                 if (dummyPrefab != null && FindFirstObjectByType<DummyItem>() == null)
                  {
                      GameObject dummyObj = Instantiate(dummyPrefab, transform.position, Quaternion.identity);
                      DummyItem dummyScript = dummyObj.GetComponent<DummyItem>();
