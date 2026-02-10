@@ -5,18 +5,22 @@ public class FirstBoss : MonoBehaviour, IDamageable
 {
     public enum State { Idle, Move, Attack, Skill, Die }
     public State currentState = State.Idle;
-    public float hp = 1000f;
-    public float damage = 100f;
-    public float moveSpeed = 3.0f;
-    public float attackRange = 2.0f;
+
+    public float maxHp = 1500f;
+    public float hp;
+    public float damage = 40f;
+    public float moveSpeed = 2.0f;
+    public float attackRange = 5.0f;
     public float attackCooldown = 3.0f;
     public int expDrop = 50;
+
     public float zonnahitDuration = 3.0f;
-    public float zonnahitDamageInterval = 0.3f;
+    public float zonnahitDamageInterval = 0.1f;
     public float zonnahitRadius = 4.0f;
     public float skillCooldown = 10.0f;
-    public ParticleSystem punchVFX;
-    public ParticleSystem zonnahitVFX;
+
+    public GameObject WindPunchPrefab;
+    public ParticleSystem zonnahitParticle;
 
     private Rigidbody2D rb;
     private float lastAttackTime;
@@ -26,6 +30,7 @@ public class FirstBoss : MonoBehaviour, IDamageable
 
     void Start()
     {
+        hp = maxHp;
         rb = GetComponent<Rigidbody2D>();
         
         if (rb != null) {
@@ -40,7 +45,6 @@ public class FirstBoss : MonoBehaviour, IDamageable
     void FindPlayerAutomatically()
     {
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-        
         if (playerObj != null)
         {
             playerControler = playerObj.GetComponent<PlayerControler>();
@@ -63,9 +67,6 @@ public class FirstBoss : MonoBehaviour, IDamageable
         {
             case State.Idle:   CheckNextAction(); break;
             case State.Move:   HandleMove();      break;
-            case State.Attack: break;
-            case State.Skill:  break;
-            case State.Die:    break;
         }
     }
 
@@ -73,7 +74,7 @@ public class FirstBoss : MonoBehaviour, IDamageable
     {
         float distance = Vector2.Distance(transform.position, playerControler.transform.position);
 
-        if (Time.time >= lastSkillTime + skillCooldown)
+        if (Time.time >= lastSkillTime + skillCooldown && distance <= zonnahitRadius + 1.0f)
         {
             StartCoroutine(zonnahitRoutine());
             return;
@@ -84,6 +85,10 @@ public class FirstBoss : MonoBehaviour, IDamageable
             if (Time.time >= lastAttackTime + attackCooldown)
             {
                 StartCoroutine(BasicAttackRoutine());
+            }
+            else
+            {
+                currentState = State.Idle; 
             }
         }
         else
@@ -112,12 +117,18 @@ public class FirstBoss : MonoBehaviour, IDamageable
         currentState = State.Attack;
         lastAttackTime = Time.time;
         
-        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-1"); // 1층 보스 기본 공격
-        if (punchVFX != null) punchVFX.Play();
+        yield return new WaitForSeconds(0.5f); 
 
-        if (Vector2.Distance(transform.position, playerControler.transform.position) <= attackRange)
+        if (WindPunchPrefab != null)
         {
-            playerControler.TakeDamage(damage);
+            GameObject projObj = Instantiate(WindPunchPrefab, transform.position, Quaternion.identity);
+            WindPunch projectile = projObj.GetComponent<WindPunch>();
+            
+            if (projectile != null && playerControler != null)
+            {
+                Vector2 dir = (playerControler.transform.position - transform.position).normalized;
+                projectile.Setup(dir, damage);
+            }
         }
 
         yield return new WaitForSeconds(1.0f);
@@ -126,27 +137,32 @@ public class FirstBoss : MonoBehaviour, IDamageable
 
     IEnumerator zonnahitRoutine()
     {
-        Debug.Log("Zonnahit Skill Activated");
         currentState = State.Skill;
         lastSkillTime = Time.time;
 
-        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-2"); // 1층 보스 난타
-        if (zonnahitVFX != null) zonnahitVFX.Play();
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-2");
+        if (zonnahitParticle != null) zonnahitParticle.Play();
 
         float timer = 0;
+
         while (timer < zonnahitDuration)
         {
-            Collider2D hit = Physics2D.OverlapCircle(transform.position, zonnahitRadius, LayerMask.GetMask("Player"));
+            Collider2D hit = Physics2D.OverlapCircle(transform.position, zonnahitRadius, LayerMask.GetMask("player"));
 
             if (hit != null)
             {
-                playerControler.TakeDamage(damage / 5);
+                if (playerControler != null) 
+                {
+                    playerControler.TakeDamage(damage * 0.5f);
+                }
             }
-            timer += zonnahitDamageInterval;
+
             yield return new WaitForSeconds(zonnahitDamageInterval);
+            timer += zonnahitDamageInterval;
         }
 
-        if (zonnahitVFX != null) zonnahitVFX.Stop();
+        if (zonnahitParticle != null) zonnahitParticle.Stop();
+        
         currentState = State.Idle;
     }
 
@@ -159,8 +175,8 @@ public class FirstBoss : MonoBehaviour, IDamageable
 
     public float GetHpRatio()
     {
-        if (hp <= 0) return 0f;
-        return hp / 1000f;
+        if (maxHp <= 0) return 1f;
+        return hp / maxHp;
     }
 
     IEnumerator DieRoutine()
@@ -168,10 +184,12 @@ public class FirstBoss : MonoBehaviour, IDamageable
         isDead = true;
         currentState = State.Die;
         
-        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-11"); // 보스 사망
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-11");
 
         Collider2D col = GetComponent<Collider2D>();
         if(col != null) col.enabled = false;
+
+        if (zonnahitParticle != null) zonnahitParticle.Stop();
 
         yield return new WaitForSeconds(2.0f);
         Destroy(gameObject);
