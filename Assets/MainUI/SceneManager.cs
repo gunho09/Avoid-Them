@@ -52,4 +52,12 @@ public class SceneManager : MonoBehaviour
 
 
 
+    private void Start()
+    {
+        // 메인 메뉴 진입 시 BGM 재생 (1-1: 복도/메인 테마)
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlayBGM("1-1");
+        }
+    }
 }

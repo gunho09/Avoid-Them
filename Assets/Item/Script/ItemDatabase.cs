@@ -38,15 +38,26 @@ public class ItemDatabase : MonoBehaviour
         return null; // 데이터가 하나도 없으면
     }
 
-    // 3개의 랜덤 아이템 뽑기 (독립 시행)
+    // 3개의 랜덤 아이템 뽑기 (중복 없음)
     public List<ItemData> GetRandomItems(int count)
     {
         List<ItemData> result = new List<ItemData>();
-        for(int i=0; i<count; i++)
+        
+        // 무한 루프 방지를 위한 최대 시도 횟수
+        int maxAttempts = count * 10;
+        int attempts = 0;
+
+        while (result.Count < count && attempts < maxAttempts)
         {
+            attempts++;
             ItemData item = GetRandomItem();
-            if (item != null) result.Add(item);
+            
+            if (item != null && !result.Contains(item))
+            {
+                result.Add(item);
+            }
         }
+        
         return result;
     }
 

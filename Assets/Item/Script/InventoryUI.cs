@@ -57,6 +57,7 @@ public class InventoryUI : MonoBehaviour
         storageSlots.Clear();
 
         // 2. 상단 5개 (Active) 생성
+        // 2. 상단 5개 (Active) 생성
         for (int i = 0; i < 5; i++)
         {
             if (slotPrefab != null && activeSlotsParent != null)
@@ -64,6 +65,10 @@ public class InventoryUI : MonoBehaviour
                 ItemSlotUI slot = Instantiate(slotPrefab, activeSlotsParent);
                 activeSlots.Add(slot);
                 slot.ClearSlot(); // 빈 상태로 초기화
+
+                // 개별 슬롯 색상은 원래대로 (너무 빨가면 안 예쁨)
+                UnityEngine.UI.Image bg = slot.GetComponent<UnityEngine.UI.Image>();
+                if (bg != null) bg.color = Color.white; 
             }
         }
 

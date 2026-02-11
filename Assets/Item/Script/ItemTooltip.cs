@@ -16,6 +16,14 @@ public class ItemTooltip : MonoBehaviour
         Instance = this;
         HideTooltip();
 
+        // 캔버스 정렬 순서를 높여서 다른 UI보미 위에 그려지게 함
+        Canvas parentCanvas = GetComponentInParent<Canvas>();
+        if (parentCanvas != null)
+        {
+             parentCanvas.sortingOrder = 100; // 높은 값으로 설정
+        }
+
+        // ... (layout setup code omitted for brevity) ...
         // 자동 레이아웃 설정 (글씨 겹침 방지)
         if (panel != null)
         {
@@ -43,13 +51,20 @@ public class ItemTooltip : MonoBehaviour
         {
             // 마우스 위치에 오프셋을 더해서 아이템을 가리지 않게 함
             transform.position = Input.mousePosition + (Vector3)tooltipOffset;
+            
+            // 화면 밖으로 나가지 않게 클램핑 로직 추가 가능 (선택 사항)
         }
     }
 
     public void ShowTooltip(string name, string desc, ItemRarity rarity)
     {
         panel.SetActive(true);
-        nameText.text = name;
+        // 맨 위에 그리기
+        transform.SetAsLastSibling();
+        if (panel.transform.parent != transform) panel.transform.SetAsLastSibling();
+
+        // 이름 옆에 등급 표시 (예: "아이템 이름 (Rare)")
+        nameText.text = $"{name} <size=70%>({rarity})</size>";
         descText.text = desc;
         
         // 등급별 색상

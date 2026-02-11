@@ -63,9 +63,15 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        // Debug.Log($"[ItemSlotUI] Pointer Enter: {(_itemData != null ? _itemData.itemName : "Empty")}");
+        
         if (_itemData != null && ItemTooltip.Instance != null && ghostIcon == null) // 드래그 중엔 툴팁 안 뜸
         {
             ItemTooltip.Instance.ShowTooltip(_itemData.itemName, _itemData.description, _itemData.rarity);
+        }
+        else if (ItemTooltip.Instance == null)
+        {
+             // Debug.LogError("[ItemSlotUI] ItemTooltip Instance is null!");
         }
     }
 
