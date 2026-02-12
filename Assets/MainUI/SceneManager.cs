@@ -54,10 +54,14 @@ public class SceneManager : MonoBehaviour
 
     private void Start()
     {
-        // 메인 메뉴 진입 시 BGM 재생 (1-1: 복도/메인 테마)
+        // 메인 메뉴 진입 시 BGM 재생 (1-4: 메인 테마)
         if (SoundManager.Instance != null)
         {
-            SoundManager.Instance.PlayBGM("1-1");
+            SoundManager.Instance.PlayBGM("1-4");
+        }
+        else
+        {
+            Debug.LogError("SceneManager: SoundManager.Instance가 NULL입니다! MainUI 씬에 SoundManager 프리팹이 있는지 확인하세요.");
         }
     }
 }

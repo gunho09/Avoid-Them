@@ -196,7 +196,7 @@ public class Door : MonoBehaviour
                 int current = MapManager.Instance.clearedRooms;
                 int targetCount = MapManager.Instance.totalRoomsPerFloor;
                 
-                string msg = $"보스방 진입 불가: 현재 {current}/{targetCount} 클리어";
+                string msg = $"보스방 진입 불가: 현재 {current}/{targetCount} 클리어 (MapManager.clearedRooms={current}, total={targetCount})";
                 Debug.Log(msg);
                 
                 // 경고 UI 표시

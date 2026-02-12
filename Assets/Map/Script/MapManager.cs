@@ -49,6 +49,9 @@ public class MapManager : MonoBehaviour
 
     private void Start()
     {
+        // [강제 설정] 인스펙터 실수 방지: 무조건 5개로 고정
+        totalRoomsPerFloor = 5;
+
         // 안전장치: 플레이어가 연결 안 되어 있으면 찾기
         if (player == null)
         {

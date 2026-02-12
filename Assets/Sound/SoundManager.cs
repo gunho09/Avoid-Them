@@ -62,6 +62,10 @@ public class SoundManager : MonoBehaviour
             if (bgmSource.clip == clip && bgmSource.isPlaying) return; 
             StartCoroutine(FadeBGM(clip));
         }
+        else
+        {
+            Debug.LogWarning($"SoundManager: BGM '{name}'을(를) 찾을 수 없습니다! Audio Clips 리스트를 확인하세요.");
+        }
     }
 
     IEnumerator FadeBGM(AudioClip newClip)
