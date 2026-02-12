@@ -1121,6 +1121,7 @@ MonoBehaviour:
   obstacleCountMin: 3
   obstacleCountMax: 6
   spawnRandomObstacles: 1
+  clearHealRatio: 0.3
 --- !u!1 &6184866671081722356
 GameObject:
   m_ObjectHideFlags: 0
@@ -2780,7 +2781,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1913655600147420542, guid: 6ab5f7fb23e5e4b41bd759b06df94d8b, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -15.117855
+      value: -1.55
       objectReference: {fileID: 0}
     - target: {fileID: 1913655600147420542, guid: 6ab5f7fb23e5e4b41bd759b06df94d8b, type: 3}
       propertyPath: m_LocalPosition.y

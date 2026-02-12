@@ -117,6 +117,9 @@ public class PlayerControler : MonoBehaviour, IDamageable
     private bool facingLeft = false;
     private bool lockFacing = false;
     private int num = 0;
+    
+    // [Fix] 쉴드 무한 회복 버그 수정용
+    private float lastShieldBonus = 0f;
 
     void Start()
     {
@@ -819,14 +822,23 @@ public class PlayerControler : MonoBehaviour, IDamageable
         if (Inventory.Instance != null)
         {
             float shieldBonus = Inventory.Instance.GetTotalStatBonus(ItemEffectType.MaxHpShield);
-            if (shieldBonus > 0)
+            
+            // [Fix] 쉴드가 계속 차는 오류 수정
+            // 단순 재계산일 때는 쉴드를 채우지 않고, '쉴드 보너스 비율'이 늘어났을 때만 그만큼 추가해줍니다.
+            if (shieldBonus > lastShieldBonus)
             {
-                float targetShield = PlayerMaxHp * shieldBonus;
-                if (PlayerCurrentShield < targetShield)
-                {
-                    PlayerCurrentShield = targetShield;
-                }
+                float diff = shieldBonus - lastShieldBonus;
+                PlayerCurrentShield += PlayerMaxHp * diff;
             }
+            
+            // 보너스가 줄어들었거나(아이템 버림) 그대로면 쉴드량 유지 (단, 최대치 캡 적용)
+            float maxPossibleshield = PlayerMaxHp * shieldBonus;
+            if (PlayerCurrentShield > maxPossibleshield) 
+            {
+                PlayerCurrentShield = maxPossibleshield;
+            }
+            
+            lastShieldBonus = shieldBonus;
         }
 
         UpdateHpUI();

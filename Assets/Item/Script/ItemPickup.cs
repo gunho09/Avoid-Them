@@ -59,38 +59,21 @@ public class ItemPickup : MonoBehaviour
 
     private bool isHovering = false;
 
-    private void Update()
+    private void OnMouseEnter()
     {
-        if (_collider == null) return;
-
-        // 1. 마우스 위치를 월드 좌표로 변환
-        Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        
-        // 2. 내 Collider 안에 마우스가 있는지 직접 확인 (다른 물체에 가려져도 인식됨)
-        bool hitMe = _collider.OverlapPoint(mousePos);
-
-        if (hitMe)
+        if (ItemTooltip.Instance != null && _data != null)
         {
-            if (!isHovering)
-            {
-                isHovering = true;
-                if (ItemTooltip.Instance != null && _data != null)
-                {
-                    Debug.Log($"[ItemPickup] Show Tooltip: {_data.itemName}");
-                    ItemTooltip.Instance.ShowTooltip(_data.itemName, _data.description, _data.rarity);
-                }
-            }
+            isHovering = true;
+            ItemTooltip.Instance.ShowTooltip(_data.itemName, _data.description, _data.rarity);
         }
-        else
+    }
+
+    private void OnMouseExit()
+    {
+        if (ItemTooltip.Instance != null)
         {
-            if (isHovering)
-            {
-                isHovering = false;
-                if (ItemTooltip.Instance != null)
-                {
-                    ItemTooltip.Instance.HideTooltip();
-                }
-            }
+            isHovering = false;
+            ItemTooltip.Instance.HideTooltip();
         }
     }
 

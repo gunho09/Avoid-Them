@@ -38,6 +38,10 @@ public class RoomControl : MonoBehaviour
     [Tooltip("체크하면 랜덤 생성, 끄면 직접 배치한 것만 사용")]
     public bool spawnRandomObstacles = true;
 
+    [Header("Clear Reward Settings")]
+    [Tooltip("방 클리어 시 잃은 체력의 몇 %를 회복할지 (0.3 = 30%)")]
+    public float clearHealRatio = 0.3f;
+
     void Start()
     {
         if (spawnRandomObstacles)
@@ -128,6 +132,21 @@ public class RoomControl : MonoBehaviour
         isCleared = true;
         Debug.Log("방 클리어! 보상 생성 & 문 열림");
 
+        // [변경] 방 클리어 시 잃은 체력 비례 회복
+        if (PlayerControler.Instance != null)
+        {
+            float max = PlayerControler.Instance.PlayerMaxHp;
+            float current = PlayerControler.Instance.PlayerCurrentHp;
+            float missing = max - current;
+            
+            if (missing > 0)
+            {
+                float healAmount = missing * clearHealRatio;
+                PlayerControler.Instance.Heal(healAmount);
+                Debug.Log($"[Room] Clear Heal: 잃은 체력 {missing}의 {clearHealRatio*100}%인 {healAmount:F1}만큼 회복했습니다.");
+            }
+        }
+
         // [변경] 물리 아이템 3개 드랍
         SpawnItemRewards();
 
@@ -182,8 +201,8 @@ public class RoomControl : MonoBehaviour
 
             Vector3 spawnPos = transform.position + offsets[i];
             
-            // 프리팹 생성
-            GameObject drop = Instantiate(itemDropPrefab, spawnPos, Quaternion.identity);
+            // 프리팹 생성 (방을 부모로 설정하여 방이 사라질 때 같이 사라지게 함)
+            GameObject drop = Instantiate(itemDropPrefab, spawnPos, Quaternion.identity, transform);
             
             // 데이터 설정 & 본인(RoomControl) 연결
             ItemPickup pickup = drop.GetComponent<ItemPickup>();
