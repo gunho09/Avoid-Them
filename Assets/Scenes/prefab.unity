@@ -1664,11 +1664,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 216977247184575565, guid: 91bbfc7b1358b1a4ebf790c9cca46cc8, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 3.44
+      value: 4.06
       objectReference: {fileID: 0}
     - target: {fileID: 216977247184575565, guid: 91bbfc7b1358b1a4ebf790c9cca46cc8, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -1.09
+      value: -0.1
       objectReference: {fileID: 0}
     - target: {fileID: 216977247184575565, guid: 91bbfc7b1358b1a4ebf790c9cca46cc8, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1705,6 +1705,10 @@ PrefabInstance:
     - target: {fileID: 1212309969744611737, guid: 91bbfc7b1358b1a4ebf790c9cca46cc8, type: 3}
       propertyPath: m_Name
       value: 2Boss
+      objectReference: {fileID: 0}
+    - target: {fileID: 6059433134584390927, guid: 91bbfc7b1358b1a4ebf790c9cca46cc8, type: 3}
+      propertyPath: m_Constraints
+      value: 4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
