@@ -4,7 +4,7 @@ public class WindPunch : MonoBehaviour
 {
     public float speed = 10f;
     public float damage = 40f;
-    public float lifeTime = 3f;
+    public float lifeTime = 5f;
 
     private Vector2 moveDirection;
 

@@ -4855,10 +4855,11 @@ GameObject:
   m_Component:
   - component: {fileID: 7276232062856214986}
   - component: {fileID: 5266900935723093826}
-  - component: {fileID: 8189433264015223184}
+  - component: {fileID: 5981986363638350178}
   - component: {fileID: 8274897540565327615}
   - component: {fileID: 3405607208983035816}
-  m_Layer: 0
+  - component: {fileID: 5163691678712778258}
+  m_Layer: 7
   m_Name: 1Boss
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4874,8 +4875,8 @@ Transform:
   m_GameObject: {fileID: 3855838896285307203}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.15, y: -0.21, z: 0}
-  m_LocalScale: {x: 2.096, y: 2.096, z: 2.096}
+  m_LocalPosition: {x: 4.1812, y: 0.2095, z: 0}
+  m_LocalScale: {x: 0.9394805, y: 0.9394805, z: 0.9394805}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1781348569326420168}
@@ -4930,7 +4931,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Sprite: {fileID: 5841510510503967261, guid: 02afd419cb0e19e4c910703c148be799, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -4940,8 +4941,8 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!61 &8189433264015223184
-BoxCollider2D:
+--- !u!70 &5981986363638350178
+CapsuleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -4975,17 +4976,8 @@ BoxCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 1, y: 1}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0
+  m_Size: {x: 3.19, y: 5.8303823}
+  m_Direction: 0
 --- !u!50 &8274897540565327615
 Rigidbody2D:
   serializedVersion: 5
@@ -5029,13 +5021,35 @@ MonoBehaviour:
   maxHp: 1500
   hp: 0
   damage: 40
-  moveSpeed: 2
-  attackRange: 2
+  moveSpeed: 4
+  attackRange: 3
   attackCooldown: 3
   expDrop: 50
   zonnahitDuration: 3
-  zonnahitDamageInterval: 2
+  zonnahitDamageInterval: 0.5
   zonnahitRadius: 4
   skillCooldown: 10
   WindPunchPrefab: {fileID: 5852722680809201381, guid: 63f7661a80c02164c89d616b878acae4, type: 3}
   zonnahitParticle: {fileID: 3749097855682342551}
+--- !u!95 &5163691678712778258
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3855838896285307203}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 521f86c1d2c4c694b985cc1e95da96c5, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

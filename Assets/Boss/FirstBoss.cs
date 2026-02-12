@@ -27,6 +27,7 @@ public class FirstBoss : MonoBehaviour, IDamageable
     private float lastSkillTime;
     private bool isDead = false;
     private PlayerControler playerControler;
+    private Animator anim;
 
     void Start()
     {
@@ -40,6 +41,8 @@ public class FirstBoss : MonoBehaviour, IDamageable
 
         FindPlayerAutomatically();
         lastSkillTime = Time.time;
+
+        anim = GetComponent<Animator>();
     }
 
     void FindPlayerAutomatically()
@@ -65,8 +68,14 @@ public class FirstBoss : MonoBehaviour, IDamageable
 
         switch (currentState)
         {
-            case State.Idle:   CheckNextAction(); break;
-            case State.Move:   HandleMove();      break;
+            case State.Idle:
+                CheckNextAction();
+                if (anim != null) anim.SetBool("isMoving", false);
+                break;
+            case State.Move:
+                HandleMove();
+                if (anim != null) anim.SetBool("isMoving", true);
+                break;
         }
     }
 
@@ -110,13 +119,19 @@ public class FirstBoss : MonoBehaviour, IDamageable
         }
         Vector2 direction = ((Vector2)playerControler.transform.position - (Vector2)transform.position).normalized;
         rb.MovePosition(rb.position + direction * moveSpeed * Time.deltaTime);
+
+        if (direction.x > 0) transform.localScale = new Vector3(1, 1, 1);
+        else if (direction.x < 0) transform.localScale = new Vector3(-1, 1, 1);
     }
 
     IEnumerator BasicAttackRoutine()
     {
         currentState = State.Attack;
         lastAttackTime = Time.time;
-        
+
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-1"); // 1층 보스 기본 공격
+        if (anim != null) anim.SetTrigger("Attack");
+
         yield return new WaitForSeconds(0.5f); 
 
         if (WindPunchPrefab != null)
@@ -140,7 +155,8 @@ public class FirstBoss : MonoBehaviour, IDamageable
         currentState = State.Skill;
         lastSkillTime = Time.time;
 
-        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-2");
+        if (anim != null) anim.SetTrigger("Skill");
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-2"); // 1층 보스 난타
         if (zonnahitParticle != null) zonnahitParticle.Play();
 
         float timer = 0;
@@ -153,7 +169,7 @@ public class FirstBoss : MonoBehaviour, IDamageable
             {
                 if (playerControler != null) 
                 {
-                    playerControler.TakeDamage(damage * 0.5f);
+                    playerControler.TakeDamage(damage * 1f);
                 }
             }
 
