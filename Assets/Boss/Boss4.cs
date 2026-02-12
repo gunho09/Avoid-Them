@@ -7,15 +7,16 @@ public class Boss4 : MonoBehaviour, IDamageable
      * Stats
      * ======================= */
     [Header("Stats")]
-    public int maxHealth = 100;
-    public int attackDamage = 10;
-    public float speed = 3f;
-    public float attackCooldown = 1.5f;
-    public float dodgeChance = 0.1f;
-    public int expDrop = 100;
+    public int maxHealth;
+    public int attackDamage;
+    public float speed;
+    public float globalCooldown;
+    public float dodgeChance;
+    public int expDrop;
 
     private float currentHealth;
-    private float lastAttackTime;
+    private Animator anim;
+    private Rigidbody2D rb;
 
     /* =======================
      * Player References
@@ -24,28 +25,40 @@ public class Boss4 : MonoBehaviour, IDamageable
     private PlayerControler playerController;
 
     /* =======================
-     * Movement
+     * Distance 판단
      * ======================= */
-    [Header("Movement")]
-    public float stopDistance = 1.5f;
-    private Rigidbody2D rb;
+    [Header("Ranges")]
+    public float meleeRange = 1.8f;     // 근접 공격 기준 거리
+    public float rangedMinRange = 2.2f; // 원거리 공격 최소 거리(너무 가까우면 쏘기 애매해서)
+    public float faceDeadzone = 0.05f;
+
+    [Header("Cooldowns")]
+    public float poisonCooldown = 6f;
+    public float spawnerCooldown = 8f;
+    private float nextPoisonTime = 0f;
+    private float nextSpawnerTime = 0f;
+
 
     /* =======================
-     * State
+     * Random Wander
      * ======================= */
-    private enum State { Idle, Combo1, Combo2, Combo3, Combo4, Dead }
-    private State currentState = State.Idle;
-    private bool canAct = false;
+    [Header("Wander")]
+    public float wanderDurationMin = 0.5f;
+    public float wanderDurationMax = 1.2f;
+    public float wanderPauseMin = 0.1f;
+    public float wanderPauseMax = 0.35f;
+    public float wanderSpeedMultiplier = 0.7f;
+    public float wanderRadius = 1.5f;   // 너무 멀리 튀지 않게
+
+    private Vector2 spawnPos;
 
     /* =======================
-     * Poison Skill
+     * Poison Cloud Prefab
      * ======================= */
-    [Header("Poison")]
-    public GameObject poison1;
-    public GameObject poison2;
-    public GameObject poison3;
-    public GameObject poison4;
-    public float poisonOffDelay = 5f;
+    [Header("Poison Cloud Prefab")]
+    public GameObject poisonCloudPrefab;
+    public Transform poisonN, poisonS, poisonE, poisonW;
+    public float poisonLifeTime = 5f;
 
     /* =======================
      * Spawner Skill
@@ -55,13 +68,20 @@ public class Boss4 : MonoBehaviour, IDamageable
     public float spawnerOffDelay = 5f;
 
     /* =======================
+     * Skill Chances
+     * ======================= */
+    [Header("Skill Chances")]
+    [Range(0f, 1f)] public float poisonChance = 0.25f;   // 사이클마다 독구름 시도 확률
+    [Range(0f, 1f)] public float spawnerChance = 0.20f;  // 사이클마다 스포너 시도 확률
+
+    /* =======================
      * Melee Attack
      * ======================= */
     [Header("Melee Attack")]
     public Vector2 boxCenter;
     public Vector2 boxSize = new Vector2(2f, 2f);
     public float angle = 0f;
-    public LayerMask playerLayer;
+    public LayerMask player;
     public float knockbackPower = 8f;
 
     /* =======================
@@ -73,18 +93,28 @@ public class Boss4 : MonoBehaviour, IDamageable
     private Transform firePoint;
 
     /* =======================
-     * Init
+     * State
      * ======================= */
+    private enum State { Idle, Acting, Dead }
+    private State currentState = State.Idle;
+    private bool canAct = false;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
         currentHealth = maxHealth;
 
-        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-        playerTransform = playerObj.transform;
-        playerController = playerObj.GetComponentInChildren<PlayerControler>();
+        spawnPos = transform.position;
 
-        firePoint = transform.Find("FirePoint"); // 보스 자식 빈 오브젝트
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+        {
+            playerTransform = playerObj.transform;
+            playerController = playerObj.GetComponentInChildren<PlayerControler>();
+        }
+
+        firePoint = transform.Find("FirePoint");
 
         StartCoroutine(SpawnDelay());
     }
@@ -93,70 +123,133 @@ public class Boss4 : MonoBehaviour, IDamageable
     {
         yield return new WaitForSeconds(0.5f);
         canAct = true;
+        StartCoroutine(AILoop());
+    }
+
+    IEnumerator AILoop()
+    {
+        while (currentState != State.Dead)
+        {
+            if (!canAct || playerTransform == null)
+            {
+                yield return null;
+                continue;
+            }
+
+            currentState = State.Acting;
+
+            // 1) 랜덤 이동
+            yield return StartCoroutine(WanderRandom());
+
+            // 2) 이번 턴에 할 "행동 하나" 결정
+            float dist = Vector2.Distance(transform.position, playerTransform.position);
+
+            bool canPoison = (Time.time >= nextPoisonTime) && (poisonCloudPrefab != null);
+            bool canSpawner = (Time.time >= nextSpawnerTime) && (spawner != null);
+
+            // 스킬 우선순위/확률 (원하는대로 조절 가능)
+            bool doPoison = canPoison && (Random.value < poisonChance);
+            bool doSpawner = !doPoison && canSpawner && (Random.value < spawnerChance);
+
+            if (doPoison)
+            {
+                nextPoisonTime = Time.time + poisonCooldown;
+                yield return StartCoroutine(DoPoisonCloud());
+            }
+            else if (doSpawner)
+            {
+                nextSpawnerTime = Time.time + spawnerCooldown;
+                yield return StartCoroutine(DoSpawner());
+            }
+            else
+            {
+                // 스킬 안 하는 턴이면 공격만
+                if (dist <= meleeRange)
+                    yield return StartCoroutine(DoMelee());
+                else
+                    yield return StartCoroutine(DoRanged());
+            }
+
+            currentState = State.Idle;
+            yield return new WaitForSeconds(globalCooldown);
+        }
     }
 
     /* =======================
-     * Update
-     * ======================= */
-    void Update()
+ * Wander (랜덤 이동)
+ * ======================= */
+    /* =======================
+  * Wander (랜덤 이동)
+  * ======================= */
+    IEnumerator WanderRandom()
     {
-        if (!canAct || currentState == State.Dead) return;
+        float moveTime = Random.Range(wanderDurationMin, wanderDurationMax);
+        float pauseTime = Random.Range(wanderPauseMin, wanderPauseMax);
 
-        if (Time.time - lastAttackTime < attackCooldown) return;
+        // 랜덤 목적지(스폰 위치 주변 제한)
+        Vector2 randDir = Random.insideUnitCircle.normalized;
+        Vector2 target = (Vector2)transform.position + randDir * Random.Range(0.5f, wanderRadius);
 
-        int r = Random.Range(1, 5);
-        currentState = (State)r;
+        // 스폰 주변으로 너무 멀리 가는 거 방지
+        Vector2 toSpawn = target - spawnPos;
+        if (toSpawn.magnitude > wanderRadius)
+            target = spawnPos + toSpawn.normalized * wanderRadius;
 
-        switch (currentState)
+        float end = Time.time + moveTime;
+
+        while (Time.time < end && currentState != State.Dead)
         {
-            case State.Idle:
-                rb.linearVelocity = Vector2.zero;
-                break;
-            case State.Combo1:
-                Combo1();
-                break;
-            case State.Combo2:
-                Combo2();
-                break;
-            case State.Combo3:
-                Combo3();
-                break;
-            case State.Combo4:
-                Combo4();
-                break;
+            if (playerTransform == null) break;
+
+            Vector2 pos = rb.position;
+            Vector2 dir = (target - pos);
+
+            if (dir.magnitude < 0.05f) break;
+
+            Vector2 vel = dir.normalized * (speed * wanderSpeedMultiplier);
+
+            // ⚠️ Unity 버전에 따라 linearVelocity가 없을 수 있음
+            // 에러 나면 아래 두 줄 중 "velocity" 버전으로 바꿔줘
+            rb.linearVelocity = vel;
+            // rb.velocity = vel;
+
+            yield return null;
         }
+
+        rb.linearVelocity = Vector2.zero;
+        // rb.velocity = Vector2.zero;
+
+        if (pauseTime > 0f)
+            yield return new WaitForSeconds(pauseTime);
     }
 
-    /* =======================
-     * Movement
-     * ======================= */
-    void MoveToPlayer()
-    {
-        float distance = Vector2.Distance(transform.position, playerTransform.position);
 
-        if (distance > stopDistance)
-        {
-            Vector2 dir =
-                ((Vector2)playerTransform.position - (Vector2)transform.position).normalized;
-            rb.linearVelocity = dir * speed;
-        }
-        else
-        {
-            rb.linearVelocity = Vector2.zero;
-        }
+
+    void StopMove()
+    {
+        if (rb != null) rb.linearVelocity = Vector2.zero;
     }
 
     /* =======================
      * Attacks
      * ======================= */
-    void MeleeAttack()
+    IEnumerator DoMelee()
     {
-        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-9"); // 4층 보스 밀치기
-        playerController.TakeDamage(attackDamage);
+        StopMove();
 
-        Collider2D[] hits =
-            Physics2D.OverlapBoxAll(boxCenter, boxSize, angle, playerLayer);
+        // (선택) 보스가 플레이어 방향으로 살짝 "확정"하고 치는 느낌
+        FaceToPlayer();
 
+        anim.SetTrigger("Attack1");
+
+        // 타격 프레임에 맞춰 조절
+        yield return new WaitForSeconds(0.25f);
+
+        // 데미지/넉백
+        if (playerController != null)
+            playerController.TakeDamage(attackDamage);
+
+        Collider2D[] hits = Physics2D.OverlapBoxAll(boxCenter, boxSize, angle, player);
         foreach (Collider2D hit in hits)
         {
             Rigidbody2D hitRb = hit.GetComponent<Rigidbody2D>();
@@ -169,76 +262,101 @@ public class Boss4 : MonoBehaviour, IDamageable
             hitRb.AddForce(dir * knockbackPower, ForceMode2D.Impulse);
         }
 
-        lastAttackTime = Time.time;
+        // 후딜
+        yield return new WaitForSeconds(0.15f);
     }
 
-    void RangedAttack()
+    IEnumerator DoRanged()
     {
-        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-10"); // 4층 보스 총
+        StopMove();
+        FaceToPlayer();
 
-        Vector2 dir =
-            ((Vector2)playerTransform.position - (Vector2)firePoint.position).normalized;
+        anim.SetTrigger("Attack2");
+        yield return new WaitForSeconds(0.15f);
 
-        GameObject bullet =
-            Instantiate(bulletPrefab, firePoint.position, Quaternion.identity);
+        if (bulletPrefab != null && firePoint != null && playerTransform != null)
+        {
+            Vector2 dir =
+                ((Vector2)playerTransform.position - (Vector2)firePoint.position).normalized;
 
-        Bullet b = bullet.GetComponent<Bullet>();
-        b.speed = bulletSpeed;
-        b.Init(dir);
+            GameObject bullet =
+                Instantiate(bulletPrefab, firePoint.position, Quaternion.identity);
 
-        lastAttackTime = Time.time;
+            Bullet b = bullet.GetComponent<Bullet>();
+            if (b != null)
+            {
+                b.speed = bulletSpeed;
+                b.Init(dir);
+            }
+        }
+
+        // 후딜
+        yield return new WaitForSeconds(0.1f);
+    }
+
+    void FaceToPlayer()
+    {
+        if (playerTransform == null) return;
+
+        // 2D 스프라이트 flip 예시 (너 프로젝트 방식에 맞게 수정)
+        float dx = playerTransform.position.x - transform.position.x;
+        if (Mathf.Abs(dx) < faceDeadzone) return;
+
+        Vector3 s = transform.localScale;
+        s.x = Mathf.Abs(s.x) * (dx >= 0 ? 1f : -1f);
+        transform.localScale = s;
     }
 
     /* =======================
-     * Skills
+     * Poison Cloud (프리팹 4방향)
      * ======================= */
-    void SkillPoison()
+    IEnumerator DoPoisonCloud()
     {
-        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-12"); // 4층 보스 초록 웅덩이
+        StopMove();
+        anim.SetTrigger("Skill2");
 
-        poison1.SetActive(true);
-        poison2.SetActive(true);
-        poison3.SetActive(true);
-        poison4.SetActive(true);
-        StartCoroutine(PoisonOff());
+        yield return new WaitForSeconds(0.1f);
+
+        SkillPoisonCloud4();
     }
 
-    void SkillSpawner()
+    void SkillPoisonCloud4()
     {
-        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-11"); // 4층 보스 아포칼립스
+        if (poisonCloudPrefab == null) return;
 
+        SpawnCloud(poisonN);
+        SpawnCloud(poisonS);
+        SpawnCloud(poisonE);
+        SpawnCloud(poisonW);
+    }
+
+    void SpawnCloud(Transform point)
+    {
+        if (point == null) return;
+
+        GameObject cloud = Instantiate(poisonCloudPrefab, point.position, Quaternion.identity);
+
+        PoisonCloud pc = cloud.GetComponent<PoisonCloud>();
+        if (pc != null) pc.lifeTime = poisonLifeTime;
+    }
+
+    /* =======================
+     * Spawner
+     * ======================= */
+    IEnumerator DoSpawner()
+    {
+        if (spawner.activeSelf) yield break;
+
+        StopMove();
+
+        // 애니 파라미터 이름 오타면 여기서 안 돌아가니 주의: "Skiil1" 그대로 유지
+        anim.SetBool("Skiil1", true);
         spawner.SetActive(true);
-        StartCoroutine(SpawnerOff());
-    }
 
-    /* =======================
-     * Combos
-     * ======================= */
-    void Combo1()
-    {
-        MoveToPlayer();
-        MeleeAttack();
-        SkillPoison();
-    }
+        yield return new WaitForSeconds(spawnerOffDelay);
 
-    void Combo2()
-    {
-        MoveToPlayer();
-        MeleeAttack();
-        RangedAttack();
-    }
-
-    void Combo3()
-    {
-        RangedAttack();
-        SkillSpawner();
-    }
-
-    void Combo4()
-    {
-        RangedAttack();
-        SkillPoison();
-        SkillSpawner();
+        anim.SetBool("Skiil1", false);
+        spawner.SetActive(false);
     }
 
     /* =======================
@@ -258,16 +376,16 @@ public class Boss4 : MonoBehaviour, IDamageable
     void Die()
     {
         currentState = State.Dead;
-        
-        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-11"); // 보스 사망
 
-        rb.linearVelocity = Vector2.zero;
+        StopMove();
 
         RoomControl room = GetComponentInParent<RoomControl>();
         if (room != null)
             room.OnEnemyKilled();
 
-        playerController.TakeExp(expDrop);
+        if (playerController != null)
+            playerController.TakeExp(expDrop);
+
         Destroy(gameObject, 1f);
     }
 
@@ -276,9 +394,6 @@ public class Boss4 : MonoBehaviour, IDamageable
         return currentHealth / maxHealth;
     }
 
-    /* =======================
-     * Coroutines
-     * ======================= */
     IEnumerator HitFlash()
     {
         SpriteRenderer sr = GetComponentInChildren<SpriteRenderer>();
@@ -291,18 +406,12 @@ public class Boss4 : MonoBehaviour, IDamageable
         }
     }
 
-    IEnumerator PoisonOff()
+    /* =======================
+     * Gizmos (근접 박스 확인용)
+     * ======================= */
+    void OnDrawGizmosSelected()
     {
-        yield return new WaitForSeconds(poisonOffDelay);
-        poison1.SetActive(false);
-        poison2.SetActive(false);
-        poison3.SetActive(false);
-        poison4.SetActive(false);
-    }
-
-    IEnumerator SpawnerOff()
-    {
-        yield return new WaitForSeconds(spawnerOffDelay);
-        spawner.SetActive(false);
+        Gizmos.matrix = Matrix4x4.TRS(boxCenter, Quaternion.Euler(0, 0, angle), Vector3.one);
+        Gizmos.DrawWireCube(Vector3.zero, boxSize);
     }
 }

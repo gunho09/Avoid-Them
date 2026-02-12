@@ -1249,8 +1249,12 @@ MonoBehaviour:
   cameraPoint: {fileID: 7251625844395048035}
   viewWidth: 18
   viewHeight: 15
-  rewardChest: {fileID: 0}
   returnDoor: {fileID: 3112673457066748461}
+  itemDropPrefab: {fileID: 0}
+  obstaclePrefabs: []
+  obstacleCountMin: 3
+  obstacleCountMax: 6
+  spawnRandomObstacles: 1
 --- !u!1 &4170908589934153159
 GameObject:
   m_ObjectHideFlags: 0
@@ -1419,7 +1423,7 @@ MonoBehaviour:
   expDrop: 2
   range: 0
   attackRange: 0
-  PlayerControler: {fileID: 0}
+  playerCtrl: {fileID: 0}
 --- !u!1 &8920048221446410899
 GameObject:
   m_ObjectHideFlags: 0
@@ -1493,6 +1497,14 @@ PrefabInstance:
     - target: {fileID: 2335068165099047026, guid: d080ae6efc45d23459e39d45c68ec1ca, type: 3}
       propertyPath: m_Name
       value: 4Boss
+      objectReference: {fileID: 0}
+    - target: {fileID: 4072531775095514415, guid: d080ae6efc45d23459e39d45c68ec1ca, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4072531775095514415, guid: d080ae6efc45d23459e39d45c68ec1ca, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.7
       objectReference: {fileID: 0}
     - target: {fileID: 4072531775095514415, guid: d080ae6efc45d23459e39d45c68ec1ca, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1572,7 +1584,7 @@ MonoBehaviour:
   expDrop: 2
   range: 100
   attackRange: 1
-  PlayerControler: {fileID: 0}
+  playerCtrl: {fileID: 0}
 --- !u!50 &9005897563808504834
 Rigidbody2D:
   serializedVersion: 5
@@ -1638,7 +1650,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    oldSize: {x: 3.75, y: 5.4976096}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
