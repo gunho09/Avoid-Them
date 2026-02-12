@@ -199,6 +199,8 @@ public class zombie : MonoBehaviour, IDamageable
         if (currentState == State.Dead) return;
         currentState = State.Dead;
 
+        playerCtrl.TakeExp(expDrop);
+
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-10"); // 좀비 사망
 
         rb.linearVelocity = Vector2.zero;

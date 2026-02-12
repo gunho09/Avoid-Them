@@ -1,10 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro; // TextMeshPro 사용
+using TMPro;
 using System.Collections;
 using System.Collections.Generic;
 
-// 주의: SceneManager 이름 충돌 방지를 위해 네임스페이스 명시적 사용
+
 
 public class PlayerControler : MonoBehaviour, IDamageable
 {
@@ -124,7 +124,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
         
         // [New Formula] Start시 경험치 테이블 초기화 (Lv 1 -> 100)
         // 공식: 100 + ((Lv-1) * 50)
-        MaxExp = 100f + (Mathf.Max(0, PlayerLvl - 1) * 50f);
+        MaxExp = 20f + (Mathf.Max(0, PlayerLvl - 1) * 1f);
         if (BoostTime != null) BoostTime.gameObject.SetActive(false);
     
     // 초기화 시점에는 Stats 계산 (이벤트 전)
@@ -881,7 +881,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
             PlayerLvl++;
 
             // [New Formula] Exp: 100 + ((Lv-1) * 50)
-            MaxExp = 100f + (Mathf.Max(0, PlayerLvl - 1) * 50f);
+            MaxExp = 20f + (Mathf.Max(0, PlayerLvl - 1) * 1f);
 
             // 스탯 재계산 (레벨 반영)
             RecalculateStats();
