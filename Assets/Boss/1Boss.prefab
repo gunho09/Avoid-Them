@@ -4931,12 +4931,12 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 5841510510503967261, guid: 02afd419cb0e19e4c910703c148be799, type: 3}
+  m_Sprite: {fileID: 5841510510503967261, guid: f6ca1f737e445204e85e4954b89afe73, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 3.19, y: 5.8303823}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -5026,7 +5026,7 @@ MonoBehaviour:
   attackCooldown: 3
   expDrop: 50
   zonnahitDuration: 3
-  zonnahitDamageInterval: 0.5
+  zonnahitDamageInterval: 0.33
   zonnahitRadius: 4
   skillCooldown: 10
   WindPunchPrefab: {fileID: 5852722680809201381, guid: 63f7661a80c02164c89d616b878acae4, type: 3}

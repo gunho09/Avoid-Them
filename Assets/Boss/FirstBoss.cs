@@ -169,7 +169,7 @@ public class FirstBoss : MonoBehaviour, IDamageable
             {
                 if (playerControler != null) 
                 {
-                    playerControler.TakeDamage(damage * 1f);
+                    playerControler.TakeDamage(damage * 0.7f);
                 }
             }
 
