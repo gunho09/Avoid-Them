@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 1014706599789285417}
   - component: {fileID: 4942847382462675136}
   - component: {fileID: 2533073671687007040}
+  - component: {fileID: -8679220032059999960}
   m_Layer: 7
   m_Name: miniZombie
   m_TagString: Untagged
@@ -187,3 +188,18 @@ MonoBehaviour:
   range: 100
   attackRange: 1
   playerCtrl: {fileID: 0}
+--- !u!114 &-8679220032059999960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1085508762034412920}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 914a75c6bb9859d46a88a7a692b97708, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HitFlashController
+  flashColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  flashDuration: 0.1
+  targets: []

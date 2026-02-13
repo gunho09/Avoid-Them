@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6609269165526006611}
   - component: {fileID: 6215378650872304060}
   - component: {fileID: 5248337146137290937}
+  - component: {fileID: -8739706937094444472}
   m_Layer: 7
   m_Name: roomleaderZombie
   m_TagString: Untagged
@@ -187,3 +188,18 @@ MonoBehaviour:
   range: 100
   attackRange: 1
   playerCtrl: {fileID: 0}
+--- !u!114 &-8739706937094444472
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3795302954219107411}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 914a75c6bb9859d46a88a7a692b97708, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HitFlashController
+  flashColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  flashDuration: 0.1
+  targets: []

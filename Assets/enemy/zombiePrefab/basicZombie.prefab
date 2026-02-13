@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 613524841082877143}
   - component: {fileID: 80925673544774025}
   - component: {fileID: 4405257180891413679}
+  - component: {fileID: -284718224670037185}
   m_Layer: 7
   m_Name: basicZombie
   m_TagString: Untagged
@@ -187,3 +188,18 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &-284718224670037185
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 952140892030920989}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 914a75c6bb9859d46a88a7a692b97708, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HitFlashController
+  flashColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  flashDuration: 0.1
+  targets: []

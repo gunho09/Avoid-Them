@@ -185,6 +185,7 @@ public class SecondBoss : MonoBehaviour, IDamageable
 
         float finalDamage = isMagneticActive ? amount * (1f - damageReductionPercent) : amount;
         hp -= finalDamage;
+        GetComponent<HitFlashController>()?.Flash();
 
         if (hp <= 0) Die();
     }

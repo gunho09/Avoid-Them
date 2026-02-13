@@ -28,12 +28,19 @@ public class FirstBoss : MonoBehaviour, IDamageable
     private bool isDead = false;
     private PlayerControler playerControler;
     private Animator anim;
+    [Header("Hit Flash")]
+    public float hitFlashDuration = 0.1f;
+    public Color hitFlashColor = Color.gray;
+
+    private SpriteRenderer hitSr;
+    private Coroutine hitFlashCo;
 
     void Start()
     {
         hp = maxHp;
         rb = GetComponent<Rigidbody2D>();
-        
+        hitSr = GetComponentInChildren<SpriteRenderer>();
+
         if (rb != null) {
             rb.gravityScale = 0;
             rb.freezeRotation = true;
@@ -185,9 +192,15 @@ public class FirstBoss : MonoBehaviour, IDamageable
     public void TakeDamage(float amount)
     {
         if (isDead) return;
+
         hp -= amount;
+
+        GetComponent<HitFlashController>()?.Flash();
+
+
         if (hp <= 0) StartCoroutine(DieRoutine());
     }
+
 
     public float GetHpRatio()
     {
@@ -209,6 +222,18 @@ public class FirstBoss : MonoBehaviour, IDamageable
 
         yield return new WaitForSeconds(2.0f);
         Destroy(gameObject);
+    }
+    IEnumerator HitFlash()
+    {
+        if (hitSr == null) yield break;
+
+        Color origin = hitSr.color;
+        hitSr.color = hitFlashColor;
+
+        yield return new WaitForSeconds(hitFlashDuration);
+
+        if (hitSr != null)
+            hitSr.color = origin;
     }
 
     private void OnDrawGizmosSelected()

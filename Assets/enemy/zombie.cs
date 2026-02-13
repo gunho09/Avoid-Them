@@ -185,7 +185,7 @@ public class zombie : MonoBehaviour, IDamageable
         if (currentState == State.Dead) return;
         
         currentHealth -= damage;
-        StartCoroutine(HitFlashRoutine());
+        GetComponent<HitFlashController>()?.Flash();
 
         if (currentHealth <= 0)
         {
