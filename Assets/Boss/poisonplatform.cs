@@ -32,6 +32,7 @@ public class poisonplatform : MonoBehaviour
         if (other.CompareTag("Player"))
         {       
             PlayerControler.TakeDamage(damage);
+            Debug.Log("플레이어가 공격을 받음");
             PlayerControler.Slow();
 
         }

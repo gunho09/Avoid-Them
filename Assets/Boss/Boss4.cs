@@ -103,6 +103,7 @@ public class Boss4 : MonoBehaviour, IDamageable
     {
         while (currentState != State.Dead)
         {
+            FaceToPlayer();
             if (!canAct || playerTransform == null)
             {
                 yield return null;
