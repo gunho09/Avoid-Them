@@ -178,7 +178,7 @@ MonoBehaviour:
   hp: 0
   damage: 60
   moveSpeed: 4
-  attackRange: 3
+  attackRange: 4
   attackCooldown: 2
   expDrop: 80
   magneticDuration: 5

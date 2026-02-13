@@ -34,6 +34,9 @@ public class zombie : MonoBehaviour, IDamageable
     private bool canAct = false; // 0.5초 경직 플래그
     private bool isStunned = false; // 스턴 상태 플래그
 
+    private Animator anim;
+    private Vector2 lastLookDirection = Vector2.down;
+
     public void ApplyCcKnockback(Vector2 force)
     {
         if (rb != null)
@@ -78,6 +81,7 @@ public class zombie : MonoBehaviour, IDamageable
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
 
         // [Golden Balance] 층별 성장 적용
         if (MapManager.Instance != null)
@@ -145,6 +149,8 @@ public class zombie : MonoBehaviour, IDamageable
             currentState = State.Idle;
         }
 
+        UpdateAnimations();
+
         switch (currentState)
         {
             case State.Idle:
@@ -158,6 +164,24 @@ public class zombie : MonoBehaviour, IDamageable
                 MoveToPlayer();
                 break;
         }
+    }
+
+    void UpdateAnimations()
+    {
+        if (anim == null) return;
+
+        if (currentState == State.Chase && rb.linearVelocity.sqrMagnitude > 0.01f)
+        {
+            lastLookDirection = rb.linearVelocity.normalized;
+            anim.SetBool("isMoving", true);
+        }
+        else
+        {
+            anim.SetBool("isMoving", false);
+        }
+
+        anim.SetFloat("InputX", lastLookDirection.x);
+        anim.SetFloat("InputY", lastLookDirection.y);
     }
 
     void MoveToPlayer()
@@ -176,6 +200,10 @@ public class zombie : MonoBehaviour, IDamageable
 
                 // 반사 데미지 구현을 위해 공격자(자신) 정보를 함께 전달
                 playerCtrl.TakeDamage(attackDamage, this.gameObject);
+                if (anim != null)
+                {
+                    anim.SetTrigger("Attack");
+                }
                 lastAttackTime = Time.time;
             }
         }
