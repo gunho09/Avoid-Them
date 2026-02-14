@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &3795302954219107411
+--- !u!1 &6658740444333094401
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,43 +8,43 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1517880300320716419}
-  - component: {fileID: 4076144264763489841}
-  - component: {fileID: 6215378650872304060}
-  - component: {fileID: 5248337146137290937}
-  - component: {fileID: -8739706937094444472}
-  - component: {fileID: 5600867964154616574}
-  - component: {fileID: 7956930233633870857}
+  - component: {fileID: 7745174010247000909}
+  - component: {fileID: 2082126755010756323}
+  - component: {fileID: 81474721681697249}
+  - component: {fileID: 5857134803932099198}
+  - component: {fileID: 41162638708842902}
+  - component: {fileID: -7536142262340593120}
+  - component: {fileID: 7275790077677322978}
   m_Layer: 7
-  m_Name: roomleaderZombie
+  m_Name: fastZombie
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1517880300320716419
+--- !u!4 &7745174010247000909
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3795302954219107411}
+  m_GameObject: {fileID: 6658740444333094401}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -7.243, y: 0.2664, z: 0}
-  m_LocalScale: {x: 0.95374674, y: 0.95374674, z: 0.95374674}
+  m_LocalPosition: {x: -2.9021, y: -2.0993, z: 0}
+  m_LocalScale: {x: 0.8991724, y: 0.8991724, z: 0.8991724}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &4076144264763489841
+--- !u!212 &2082126755010756323
 SpriteRenderer:
   serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3795302954219107411}
+  m_GameObject: {fileID: 6658740444333094401}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -86,8 +86,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -7828667705408843397, guid: 0ec182e1c77056b44920ee32cc9a00b0, type: 3}
-  m_Color: {r: 1, g: 0.61320746, b: 0.6571957, a: 1}
+  m_Sprite: {fileID: -4578567851938821569, guid: d55a8ff338bcac94faa9511c14fe182a, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -96,14 +96,34 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!50 &6215378650872304060
+--- !u!114 &81474721681697249
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6658740444333094401}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b053b2ed5a69eb94387952ac6ccb61cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::zombie
+  health: 70
+  attackDamage: 20
+  speed: 4
+  atackSpeed: 3
+  expDrop: 18
+  range: 100
+  attackRange: 1
+  playerCtrl: {fileID: 0}
+--- !u!50 &5857134803932099198
 Rigidbody2D:
   serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3795302954219107411}
+  m_GameObject: {fileID: 6658740444333094401}
   m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
@@ -123,33 +143,13 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 4
---- !u!114 &5248337146137290937
+--- !u!114 &41162638708842902
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3795302954219107411}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b053b2ed5a69eb94387952ac6ccb61cc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::zombie
-  health: 450
-  attackDamage: 50
-  speed: 2
-  atackSpeed: 3
-  expDrop: 70
-  range: 100
-  attackRange: 1
-  playerCtrl: {fileID: 0}
---- !u!114 &-8739706937094444472
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3795302954219107411}
+  m_GameObject: {fileID: 6658740444333094401}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 914a75c6bb9859d46a88a7a692b97708, type: 3}
@@ -158,14 +158,14 @@ MonoBehaviour:
   flashColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   flashDuration: 0.1
   targets: []
---- !u!95 &5600867964154616574
+--- !u!95 &-7536142262340593120
 Animator:
   serializedVersion: 7
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3795302954219107411}
+  m_GameObject: {fileID: 6658740444333094401}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 22100000, guid: 52dedb52ddf96c04eae763dd3806e9f9, type: 2}
@@ -180,13 +180,13 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!70 &7956930233633870857
+--- !u!70 &7275790077677322978
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3795302954219107411}
+  m_GameObject: {fileID: 6658740444333094401}
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1

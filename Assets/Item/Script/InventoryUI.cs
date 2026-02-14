@@ -43,7 +43,19 @@ public class InventoryUI : MonoBehaviour
                 bool isActive = !uiPanel.activeSelf;
                 uiPanel.SetActive(isActive);
                 
-                if (isActive) UpdateUI();
+                if (isActive) 
+                {
+                    UpdateUI();
+                    Time.timeScale = 0f; // [New] 인벤토리 열면 일시정지
+                }
+                else
+                {
+                    // [Bug Fix] 인벤토리를 닫을 때 툴팁도 같이 꺼줌
+                    if (ItemTooltip.Instance != null)
+                        ItemTooltip.Instance.HideTooltip();
+                    
+                    Time.timeScale = 1f; // [New] 인벤토리 닫으면재개
+                }
             }
         }
     }

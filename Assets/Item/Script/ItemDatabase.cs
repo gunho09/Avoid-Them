@@ -13,7 +13,7 @@ public class ItemDatabase : MonoBehaviour
         if (Instance == null) Instance = this;
     }
 
-    public ItemData GetRandomItem()
+    public ItemData GetRandomItem(List<ItemData> excludeList = null)
     {
         // 1. 등급 결정 (60 / 30 / 10)
         float rand = Random.Range(0f, 100f);
@@ -23,11 +23,30 @@ public class ItemDatabase : MonoBehaviour
         else if (rand < 40f) targetRarity = ItemRarity.Rare;
         else targetRarity = ItemRarity.Normal;
 
-        // 2. 해당 등급 아이템 풀 생성
+        // 2. 해당 등급 아이템 풀 생성 (인벤토리에 있는 아이템 제외)
         List<ItemData> pool = allItems.FindAll(x => x.rarity == targetRarity);
         
+        // [New] 인벤토리에 이미 있는 아이템 제외
+        if (Inventory.Instance != null)
+        {
+            pool = pool.FindAll(x => !Inventory.Instance.HasItem(x));
+        }
+
+        // [New] excludeList에 있는 아이템도 제외 (같은 보상 내 중복 방지)
+        if (excludeList != null)
+        {
+            pool = pool.FindAll(x => !excludeList.Contains(x));
+        }
+
         // (만약 해당 등급 아이템이 하나도 없으면 전체에서 랜덤)
-        if (pool.Count == 0) pool = allItems;
+        if (pool.Count == 0) 
+        {
+            pool = new List<ItemData>(allItems);
+            if (Inventory.Instance != null)
+                pool = pool.FindAll(x => !Inventory.Instance.HasItem(x));
+            if (excludeList != null)
+                pool = pool.FindAll(x => !excludeList.Contains(x));
+        }
 
         // 3. 랜덤 선택
         if (pool.Count > 0)
@@ -35,10 +54,10 @@ public class ItemDatabase : MonoBehaviour
             return pool[Random.Range(0, pool.Count)];
         }
         
-        return null; // 데이터가 하나도 없으면
+        return null; // 모든 아이템을 이미 보유 중
     }
 
-    // 3개의 랜덤 아이템 뽑기 (중복 없음)
+    // 3개의 랜덤 아이템 뽑기 (중복 없음 + 인벤토리 보유 아이템 제외)
     public List<ItemData> GetRandomItems(int count)
     {
         List<ItemData> result = new List<ItemData>();
@@ -50,7 +69,7 @@ public class ItemDatabase : MonoBehaviour
         while (result.Count < count && attempts < maxAttempts)
         {
             attempts++;
-            ItemData item = GetRandomItem();
+            ItemData item = GetRandomItem(result);
             
             if (item != null && !result.Contains(item))
             {

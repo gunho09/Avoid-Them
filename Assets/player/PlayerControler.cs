@@ -259,18 +259,66 @@ public class PlayerControler : MonoBehaviour, IDamageable
     {
         if (rb == null) return;
 
+        Vector2 desiredVelocity = Vector2.zero;
+
         if (isDashing)
         {
-            rb.linearVelocity = dashDirection * dashSpeed;
+            desiredVelocity = dashDirection * dashSpeed;
         }
         else if (isAttacking || isAttack)
         {
-            rb.linearVelocity = Vector2.zero;
+            desiredVelocity = Vector2.zero;
         }
         else
         {
-            rb.linearVelocity = inputMovement.normalized * (playerSpeed + driveSpeedBonus);
+            desiredVelocity = inputMovement.normalized * (playerSpeed + driveSpeedBonus);
         }
+
+        // [New] 벽 충돌 체크 (Is Trigger ON 상태에서도 벽을 못 뚫게)
+        if (desiredVelocity.sqrMagnitude > 0.01f)
+        {
+            float moveDistance = desiredVelocity.magnitude * Time.fixedDeltaTime;
+            Vector2 moveDir = desiredVelocity.normalized;
+
+            // 플레이어 크기에 맞는 BoxCast (콜라이더 크기 사용)
+            Collider2D col = GetComponent<Collider2D>();
+            Vector2 boxSize = col != null ? col.bounds.size : new Vector2(0.5f, 0.5f);
+            boxSize *= 0.9f; // 살짝 줄여서 끼임 방지
+
+            RaycastHit2D hit = Physics2D.BoxCast(
+                rb.position, boxSize, 0f, moveDir, moveDistance, wallLayer
+            );
+
+            if (hit.collider != null)
+            {
+                // 벽에 닿으면: 벽 바로 앞까지만 이동
+                float safeDistance = Mathf.Max(0, hit.distance - 0.02f);
+                
+                // 축별로 분리해서 벽을 타고 미끄러지게 처리
+                Vector2 velX = new Vector2(desiredVelocity.x, 0);
+                Vector2 velY = new Vector2(0, desiredVelocity.y);
+
+                // X축 체크
+                if (velX.sqrMagnitude > 0.01f)
+                {
+                    RaycastHit2D hitX = Physics2D.BoxCast(rb.position, boxSize, 0f, velX.normalized, 
+                        velX.magnitude * Time.fixedDeltaTime, wallLayer);
+                    if (hitX.collider != null) velX = Vector2.zero;
+                }
+
+                // Y축 체크
+                if (velY.sqrMagnitude > 0.01f)
+                {
+                    RaycastHit2D hitY = Physics2D.BoxCast(rb.position, boxSize, 0f, velY.normalized, 
+                        velY.magnitude * Time.fixedDeltaTime, wallLayer);
+                    if (hitY.collider != null) velY = Vector2.zero;
+                }
+
+                desiredVelocity = velX + velY;
+            }
+        }
+
+        rb.linearVelocity = desiredVelocity;
     }
 
     // --- [쿨타임 매니저] ---
@@ -583,9 +631,27 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     }
 
+    public LayerMask wallLayer; // [New] 벽 레이어 설정 필요
+
     public void Dash(Vector3 direction)
     {
         if (direction.sqrMagnitude < 0.01f) return;
+
+        // [New] 벽 뚫기 방지 (Raycast)
+        float dashDist = dashSpeed * dashDuration; // 예상 이동 거리
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, direction, dashDist, wallLayer);
+        
+        if (hit.collider != null)
+        {
+            // 벽이 있으면 벽 바로 앞까지만 이동하거나, 대시를 막음
+            // 여기서는 "벽에 부딪히면 멈춘다"는 느낌으로, 이동은 하되 벽에서 멈추게 처리하거나
+            // 단순히 물리 엔진에게 맡기되 Continuous 설정을 믿음.
+            // 하지만 확실히 하기 위해 거리를 제한할 수도 있음.
+            
+            // 일단은 경고 로그만 찍고, 물리 엔진(Rigidbody) 설정(Continuous)을 믿어봅니다.
+            // 만약 그래도 뚫리면 여기 코드를 'rb.MovePosition' 등으로 바꿔야 함.
+            Debug.DrawLine(transform.position, hit.point, Color.red, 1f);
+        }
         
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-4"); // 대쉬
 
@@ -681,7 +747,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
                      if (dummyScript != null)
                      {
                          // 플레이어 최대 체력의 50%로 설정
-                         dummyScript.Setup(PlayerMaxHp * 0.5f);
+                         dummyScript.Setup(PlayerMaxHp * 0.4f);
                      }
                  }
             }
@@ -844,6 +910,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
         UpdateHpUI();
 
        
+        // [New Formula] Atk: 기본 * (1 + (레벨-1)*0.05)
         extraAtkPercent += (Mathf.Max(0, PlayerLvl - 1) * 0.05f);
 
         float baseDamage = plusPW + numPW + playerStartPw;
@@ -880,9 +947,14 @@ public class PlayerControler : MonoBehaviour, IDamageable
          if (hpText != null) hpText.text = $"{Mathf.Ceil(PlayerCurrentHp)}{shieldStr} / {Mathf.Ceil(PlayerMaxHp)}";
     }
 
-    public void Quit() { Application.Quit(); }
+    public void Quit() 
+    { 
+        Time.timeScale = 1f; // 일시정지 해제 후 종료
+        Application.Quit(); 
+    }
     public void GoMain() 
     { 
+        Time.timeScale = 1f; // 일시정지 해제 후 메인으로
         UnityEngine.SceneManagement.SceneManager.LoadScene("MainUI"); 
     }
 
@@ -892,15 +964,15 @@ public class PlayerControler : MonoBehaviour, IDamageable
             currentExp -= MaxExp;
             PlayerLvl++;
 
-            // [New Formula] Exp: 100 + ((Lv-1) * 50)
-            MaxExp = 20f + (Mathf.Max(0, PlayerLvl - 1) * 1f);
+            // [New Formula] Exp: 100 + ((Lv) * 50)
+            MaxExp = 100f + (PlayerLvl * 50f);
 
             // 스탯 재계산 (레벨 반영)
             RecalculateStats();
 
-            // 체력 회복 (선택사항, 기존 유지)
-            PlayerCurrentHp += PlayerMaxHp * 0.2f;
-            if(PlayerCurrentHp > PlayerMaxHp) PlayerCurrentHp = PlayerMaxHp;
+            // [Change] 레벨업 시 체력 회복 제거
+            // PlayerCurrentHp += PlayerMaxHp * 0.2f;
+            // if(PlayerCurrentHp > PlayerMaxHp) PlayerCurrentHp = PlayerMaxHp;
         } 
         
         LvlText.text = $"{PlayerLvl}";

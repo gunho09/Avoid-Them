@@ -9,7 +9,7 @@ public class DummyItem : MonoBehaviour, IDamageable
     }
 
     private float maxHealth; 
-    public float lifeTime = 10f; // 10초 후 자동 파괴 
+    public float lifeTime = 3f; // 3초 후 자동 파괴 
     
     private float currentHealth;
 

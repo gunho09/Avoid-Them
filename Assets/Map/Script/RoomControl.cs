@@ -132,7 +132,7 @@ public class RoomControl : MonoBehaviour
         isCleared = true;
         Debug.Log("방 클리어! 보상 생성 & 문 열림");
 
-        // [변경] 방 클리어 시 잃은 체력 비례 회복
+        // [변경] 방 클리어 시 회복: 층별 차등 (1층 100%, 2층 90%, 3층 80%, 4층 70%)
         if (PlayerControler.Instance != null)
         {
             float max = PlayerControler.Instance.PlayerMaxHp;
@@ -141,9 +141,20 @@ public class RoomControl : MonoBehaviour
             
             if (missing > 0)
             {
-                float healAmount = missing * clearHealRatio;
+                int floor = (MapManager.Instance != null) ? MapManager.Instance.currentFloor : 1;
+                
+                // 층별 회복 비율: 1층=100%, 2층=90%, 3층=80%, 4층=70%
+                float healRatio = floor switch
+                {
+                    1 => 1.0f,
+                    2 => 0.9f,
+                    3 => 0.8f,
+                    _ => 0.7f  // 4층 이상
+                };
+                
+                float healAmount = missing * healRatio;
                 PlayerControler.Instance.Heal(healAmount);
-                Debug.Log($"[Room] Clear Heal: 잃은 체력 {missing}의 {clearHealRatio*100}%인 {healAmount:F1}만큼 회복했습니다.");
+                Debug.Log($"[Room] {floor}층 Clear Heal: 잃은 체력 {missing}의 {healRatio*100}%인 {healAmount:F1}만큼 회복");
             }
         }
 

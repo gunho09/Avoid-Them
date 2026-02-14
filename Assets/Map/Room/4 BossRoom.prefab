@@ -1255,6 +1255,7 @@ MonoBehaviour:
   obstacleCountMin: 3
   obstacleCountMax: 6
   spawnRandomObstacles: 1
+  clearHealRatio: 0.3
 --- !u!1 &4170908589934153159
 GameObject:
   m_ObjectHideFlags: 0
@@ -1372,7 +1373,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 427949546601062074}
-  - component: {fileID: 1784645663172538262}
   m_Layer: 0
   m_Name: 4 BossRoom
   m_TagString: Untagged
@@ -1404,26 +1404,6 @@ Transform:
   - {fileID: 7251625844395048035}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1784645663172538262
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6715539742507206156}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b053b2ed5a69eb94387952ac6ccb61cc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::zombie
-  health: 100
-  attackDamage: 2
-  speed: 2
-  atackSpeed: 2
-  expDrop: 2
-  range: 0
-  attackRange: 0
-  playerCtrl: {fileID: 0}
 --- !u!1 &8920048221446410899
 GameObject:
   m_ObjectHideFlags: 0
@@ -1545,6 +1525,10 @@ PrefabInstance:
     - target: {fileID: 4072531775095514415, guid: d080ae6efc45d23459e39d45c68ec1ca, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6351524565570960827, guid: d080ae6efc45d23459e39d45c68ec1ca, type: 3}
+      propertyPath: maxHealth
+      value: 6000
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

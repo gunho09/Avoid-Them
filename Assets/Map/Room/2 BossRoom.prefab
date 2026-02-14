@@ -42,7 +42,6 @@ GameObject:
   - component: {fileID: 6078270830846625460}
   - component: {fileID: 7724939188164121498}
   - component: {fileID: 6341184775705696934}
-  - component: {fileID: 1408264267923136907}
   - component: {fileID: 3817850011338985160}
   m_Layer: 0
   m_Name: Floor
@@ -544,44 +543,6 @@ TilemapRenderer:
   m_SortOrder: 0
   m_Mode: 0
   m_DetectChunkCullingBounds: 0
---- !u!19719996 &1408264267923136907
-TilemapCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2955319921839827979}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_MaximumTileChangeCount: 1000
-  m_ExtrusionFactor: 0
-  m_UseDelaunayMesh: 0
 --- !u!114 &3817850011338985160
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1404,6 +1365,7 @@ MonoBehaviour:
   obstacleCountMin: 3
   obstacleCountMax: 6
   spawnRandomObstacles: 1
+  clearHealRatio: 0.3
 --- !u!1 &7622538644797819959
 GameObject:
   m_ObjectHideFlags: 0
@@ -1549,6 +1511,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: 2Boss
       objectReference: {fileID: 0}
+    - target: {fileID: 4334505991751649876, guid: 91bbfc7b1358b1a4ebf790c9cca46cc8, type: 3}
+      propertyPath: maxHp
+      value: 2500
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1653,7 +1619,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    oldSize: {x: 4.14, y: 5.702307}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
