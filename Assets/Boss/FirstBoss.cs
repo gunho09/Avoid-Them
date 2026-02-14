@@ -34,6 +34,9 @@ public class FirstBoss : MonoBehaviour, IDamageable
 
     private SpriteRenderer hitSr;
     private Coroutine hitFlashCo;
+    private LineRenderer lineRenderer;
+    public int segmentCount = 50;
+    public float warningDuration = 1.0f;
 
     void Start()
     {
@@ -50,6 +53,13 @@ public class FirstBoss : MonoBehaviour, IDamageable
         lastSkillTime = Time.time;
 
         anim = GetComponent<Animator>();
+
+        lineRenderer = GetComponent<LineRenderer>();
+        if (lineRenderer != null)
+        {
+            lineRenderer.positionCount = segmentCount;
+            lineRenderer.enabled = false;
+        }
     }
 
     void FindPlayerAutomatically()
@@ -86,6 +96,17 @@ public class FirstBoss : MonoBehaviour, IDamageable
         }
     }
 
+    void DrawPolygon(int segments, float radius)
+    {
+        lineRenderer.positionCount = segments;
+        for (int i = 0; i < segments; i++)
+        {
+         float angle = i * 2 * Mathf.PI / segments;
+         float x = Mathf.Cos(angle) * radius;
+         float y = Mathf.Sin(angle) * radius;
+         lineRenderer.SetPosition(i, new Vector3(x, y, 0) + transform.position);
+        }
+    }
     void CheckNextAction()
     {
         float distance = Vector2.Distance(transform.position, playerControler.transform.position);
@@ -136,20 +157,20 @@ public class FirstBoss : MonoBehaviour, IDamageable
         currentState = State.Attack;
         lastAttackTime = Time.time;
 
-        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-1"); // 1층 보스 기본 공격
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-1"); 
         if (anim != null) anim.SetTrigger("Attack");
 
-        yield return new WaitForSeconds(0.5f); 
+        yield return new WaitForSeconds(0.7f); 
 
-        if (WindPunchPrefab != null)
+        Vector2 attackPos = (Vector2)transform.position + ((Vector2)playerControler.transform.position - (Vector2)transform.position).normalized * 1.0f;
+        
+        Collider2D hit = Physics2D.OverlapCircle(attackPos, 1.5f, LayerMask.GetMask("player"));
+
+        if (hit != null)
         {
-            GameObject projObj = Instantiate(WindPunchPrefab, transform.position, Quaternion.identity);
-            WindPunch projectile = projObj.GetComponent<WindPunch>();
-            
-            if (projectile != null && playerControler != null)
+            if (playerControler != null)
             {
-                Vector2 dir = (playerControler.transform.position - transform.position).normalized;
-                projectile.Setup(dir, damage);
+                playerControler.TakeDamage(damage);
             }
         }
 
@@ -162,9 +183,30 @@ public class FirstBoss : MonoBehaviour, IDamageable
         currentState = State.Skill;
         lastSkillTime = Time.time;
 
+        if (lineRenderer != null)
+        {
+            lineRenderer.enabled = true;
+            float t = 0;
+            while (t < warningDuration)
+            {
+                t += Time.deltaTime;
+                float progress = t / warningDuration;
+
+                DrawPolygon(segmentCount, zonnahitRadius);
+
+                Color color = Color.Lerp(new Color(1, 0, 0, 0), new Color(1, 0, 0, 1), progress);
+                lineRenderer.startColor = color;
+                lineRenderer.endColor = color;
+
+                yield return null;
+            }
+        }
+
         if (anim != null) anim.SetTrigger("Skill");
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-2"); // 1층 보스 난타
         if (zonnahitParticle != null) zonnahitParticle.Play();
+
+        if (lineRenderer != null) lineRenderer.enabled = false;
 
         float timer = 0;
 
