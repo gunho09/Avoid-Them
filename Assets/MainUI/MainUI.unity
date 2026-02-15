@@ -148,8 +148,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38a53e219f777d348b32ec1ae7ba8293, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SoundManager
-  bgmVolume: 0.75
-  sfxVolume: 0.75
   bgmSource: {fileID: 0}
   sfxSource: {fileID: 0}
   audioClips: []
@@ -587,6 +585,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ca60bd53c1037e4ab47097baa1076e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EscMenuManager
+  settingsPanel: {fileID: 0}
+  bgmSlider: {fileID: 0}
+  sfxSlider: {fileID: 0}
 --- !u!114 &525907953
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -599,6 +600,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c135818b455ca284f900dce2694e8675, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SettingsManager
+  settingsPanel: {fileID: 0}
 --- !u!4 &525907954
 Transform:
   m_ObjectHideFlags: 0
@@ -805,6 +807,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 152d349b7070fc84c84a532c4129e133, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneManager
+  SettingMenu: {fileID: 0}
 --- !u!1 &825283229
 GameObject:
   m_ObjectHideFlags: 0
@@ -1735,6 +1738,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1356848331}
+        m_TargetAssemblyTypeName: SettingsManager, Assembly-CSharp
+        m_MethodName: ToggleSettings
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1272190577
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1773,6 +1788,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1272190574}
   m_CullTransparentMesh: 1
+--- !u!1 &1356848330
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1356848332}
+  - component: {fileID: 1356848331}
+  m_Layer: 0
+  m_Name: UI_Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1356848331
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1356848330}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19bbb74e4e55a0d4290bc5422ee3c815, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SettingsManager
+  settingsPanel: {fileID: 2098024866}
+--- !u!4 &1356848332
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1356848330}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -129.75291, y: 160.34013, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1370468621
 GameObject:
   m_ObjectHideFlags: 0
@@ -2282,6 +2342,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1356848331}
+        m_TargetAssemblyTypeName: SettingsManager, Assembly-CSharp
+        m_MethodName: ToggleSettings
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &2058830071
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2447,3 +2519,4 @@ SceneRoots:
   - {fileID: 525907954}
   - {fileID: 247223347}
   - {fileID: 850341144}
+  - {fileID: 1356848332}

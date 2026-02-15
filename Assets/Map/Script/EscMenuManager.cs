@@ -77,7 +77,6 @@ public class EscMenuManager : MonoBehaviour
             {
                 btn.onClick.RemoveAllListeners();
                 btn.onClick.AddListener(ToggleMenu);
-                Debug.Log("톱니바퀴 버튼 연결 성공!");
             }
         }
         else
