@@ -203,8 +203,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 11.55
-  m_fontSizeBase: 11.55
+  m_fontSize: 30
+  m_fontSizeBase: 30
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -256,11 +256,73 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 142669283}
   m_CullTransparentMesh: 1
---- !u!1 &451347605 stripped
+--- !u!1 &230549795 stripped
 GameObject:
-  m_CorrespondingSourceObject: {fileID: 5686559575245109735, guid: 6e2b421f60d6d4b4ba7be64323f3db61, type: 3}
+  m_CorrespondingSourceObject: {fileID: 5012580903408425627, guid: 6e2b421f60d6d4b4ba7be64323f3db61, type: 3}
   m_PrefabInstance: {fileID: 1161656449183627432}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &691985028
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 691985030}
+  - component: {fileID: 691985029}
+  m_Layer: 0
+  m_Name: TutorialManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &691985029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 691985028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d732336aae54f204d8f44d71bc54699b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TutorialManager
+  tutorialText: {fileID: 1943789946}
+  tutorialSteps:
+  - "W A S D\uB97C \uB20C\uB7EC \uC774\uB3D9\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+  - "\uC88C\uD074\uB9AD\uD558\uC5EC \uB9C8\uC6B0\uC2A4 \uD3EC\uC778\uD130 \uCABD\uC744
+    \uACF5\uACA9\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+  - "\uC6B0\uD074\uB9AD\uD558\uC5EC \uC801\uC758 \uACF5\uACA9\uC744 \uBC29\uC5B4\uD560
+    \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+  - "E\uB97C \uB20C\uB7EC \uC2A4\uD0AC\uC744 \uC0AC\uC6A9\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+  - "Q\uB97C \uB20C\uB7EC \uAE08\uAC15\uBD88\uAD34\uB97C \uD65C\uC131\uD654 \uC2DC\uD0AC
+    \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+  - "\uC801\uC744 \uC8FD\uC5EC \uB808\uBCA8\uC5C5\uD558\uBA74 \uD50C\uB808\uC774\uC5B4\uAC00
+    \uAC15\uD574\uC9D1\uB2C8\uB2E4."
+  - "\uC544\uC774\uD15C\uC744 \uC5BB\uC5B4 \uAC15\uD574\uC9C8 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+  - "\uC55E\uC5D0 \uC788\uB294 \uC880\uBE44\uB97C \uC8FD\uC5EC\uC8FC\uC138\uC694."
+  typingSpeed: 0.05
+  zombies:
+  - {fileID: 2054918632}
+  - {fileID: 230549795}
+--- !u!4 &691985030
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 691985028}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -7.31933, y: 0.7503799, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1161656449183627433}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1100672420
 GameObject:
   m_ObjectHideFlags: 0
@@ -432,8 +494,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -47.914734, y: 630.65247}
-  m_SizeDelta: {x: 71.5873, y: 37.7553}
+  m_AnchoredPosition: {x: -42.3, y: 660.8}
+  m_SizeDelta: {x: 207.2775, y: 91.3694}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1534645023
 MonoBehaviour:
@@ -561,6 +623,10 @@ PrefabInstance:
       propertyPath: m_ReferenceResolution.y
       value: 600
       objectReference: {fileID: 0}
+    - target: {fileID: 5240155986128682844, guid: f5168eed14bfd714bb0dff12e973b699, type: 3}
+      propertyPath: m_IsTrigger
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6224386070297272547, guid: f5168eed14bfd714bb0dff12e973b699, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -611,10 +677,7 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5557983841079269071, guid: f5168eed14bfd714bb0dff12e973b699, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1943789945}
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 6865519403547124712, guid: f5168eed14bfd714bb0dff12e973b699, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1711072085}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f5168eed14bfd714bb0dff12e973b699, type: 3}
 --- !u!4 &1711072082 stripped
 Transform:
@@ -626,39 +689,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5557983841079269071, guid: f5168eed14bfd714bb0dff12e973b699, type: 3}
   m_PrefabInstance: {fileID: 1711072081}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1711072084 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6865519403547124712, guid: f5168eed14bfd714bb0dff12e973b699, type: 3}
-  m_PrefabInstance: {fileID: 1711072081}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1711072085
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1711072084}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d732336aae54f204d8f44d71bc54699b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TypewriterEffect
-  tutorialText: {fileID: 1943789946}
-  tutorialSteps:
-  - "W A S D\uB97C \uB20C\uB7EC \uC774\uB3D9\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
-  - "\uC88C\uD074\uB9AD\uD558\uC5EC \uB9C8\uC6B0\uC2A4 \uD3EC\uC778\uD130 \uCABD\uC744
-    \uACF5\uACA9\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
-  - "\uC6B0\uD074\uB9AD\uD558\uC5EC \uC801\uC758 \uACF5\uACA9\uC744 \uBC29\uC5B4\uD560
-    \uC218 \uC788\uC2B5\uB2C8\uB2E4."
-  - "E\uB97C \uB20C\uB7EC \uC2A4\uD0AC\uC744 \uC0AC\uC6A9\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
-  - "Q\uB97C \uB20C\uB7EC \uAE08\uAC15\uBD88\uAD34\uB97C \uD65C\uC131\uD654 \uC2DC\uD0AC
-    \uC218 \uC788\uC2B5\uB2C8\uB2E4."
-  - "\uC801\uC744 \uC8FD\uC5EC \uB808\uBCA8\uC5C5\uD558\uBA74 \uD50C\uB808\uC774\uC5B4\uAC00
-    \uAC15\uD574\uC9D1\uB2C8\uB2E4."
-  - "\uC544\uC774\uD15C\uC744 \uC5BB\uC5B4 \uAC15\uD574\uC9C8 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
-  - "\uC55E\uC5D0 \uC788\uB294 \uC880\uBE44\uB97C \uC8FD\uC5EC\uC8FC\uC138\uC694."
-  typingSpeed: 0.05
-  zombie: {fileID: 451347605}
 --- !u!1 &1943789944
 GameObject:
   m_ObjectHideFlags: 0
@@ -798,6 +828,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1943789944}
   m_CullTransparentMesh: 1
+--- !u!1 &2054918632 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5496869996721165095, guid: 6e2b421f60d6d4b4ba7be64323f3db61, type: 3}
+  m_PrefabInstance: {fileID: 1161656449183627432}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1161656449183627432
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -878,6 +913,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: -0.192
       objectReference: {fileID: 0}
+    - target: {fileID: 4174285966827619953, guid: 6e2b421f60d6d4b4ba7be64323f3db61, type: 3}
+      propertyPath: health
+      value: 350
+      objectReference: {fileID: 0}
     - target: {fileID: 4643683341095355480, guid: 6e2b421f60d6d4b4ba7be64323f3db61, type: 3}
       propertyPath: speed
       value: 2
@@ -948,6 +987,9 @@ PrefabInstance:
     - {fileID: 1906339218304354776, guid: 6e2b421f60d6d4b4ba7be64323f3db61, type: 3}
     - {fileID: 2940123043949457472, guid: 6e2b421f60d6d4b4ba7be64323f3db61, type: 3}
     m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 1464930629467108479, guid: 6e2b421f60d6d4b4ba7be64323f3db61, type: 3}
+      insertIndex: 0
+      addedObject: {fileID: 691985030}
     - targetCorrespondingSourceObject: {fileID: 1464930629467108479, guid: 6e2b421f60d6d4b4ba7be64323f3db61, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1711072082}

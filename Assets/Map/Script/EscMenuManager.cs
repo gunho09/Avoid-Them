@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-using System.Collections; // ÄÚ·çÆ¾À» À§ÇØ Ãß°¡
+using System.Collections; // ì½”ë£¨í‹´ì„ ìœ„í•´ ì¶”ê°€
 
 using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 
@@ -9,10 +9,10 @@ public class EscMenuManager : MonoBehaviour
 {
     public static EscMenuManager Instance;
 
-    [Header("¿¬°áÇÒ ¼³Á¤Ã¢ ÆĞ³Î")]
+    [Header("ì—°ê²°í•  ì„¤ì •ì°½ íŒ¨ë„")]
     public GameObject settingsPanel;
 
-    [Header("»ç¿îµå ½½¶óÀÌ´õ ¿¬°á")]
+    [Header("ì‚¬ìš´ë“œ ìŠ¬ë¼ì´ë” ì—°ê²°")]
     public Slider bgmSlider;
     public Slider sfxSlider;
 
@@ -28,7 +28,7 @@ public class EscMenuManager : MonoBehaviour
 
             UnitySceneManager.sceneLoaded += OnSceneLoaded;
 
-            // [¼öÁ¤] Áï½Ã Ã£Áö ¾Ê°í, 0.1ÃÊ µÚ¿¡ Ã£µµ·Ï ÄÚ·çÆ¾ ½ÇÇà
+            // [ìˆ˜ì •] ì¦‰ì‹œ ì°¾ì§€ ì•Šê³ , 0.1ì´ˆ ë’¤ì— ì°¾ë„ë¡ ì½”ë£¨í‹´ ì‹¤í–‰
             if (UnitySceneManager.GetActiveScene().buildIndex == 0)
             {
                 StartCoroutine(WaitAndConnectButton());
@@ -58,15 +58,15 @@ public class EscMenuManager : MonoBehaviour
     {
         if (scene.buildIndex == 0)
         {
-            // ¾ÀÀÌ ¹Ù²ğ ¶§µµ ¾ÈÀüÇÏ°Ô ÄÚ·çÆ¾À¸·Î ¿¬°á
+            // ì”¬ì´ ë°”ë€” ë•Œë„ ì•ˆì „í•˜ê²Œ ì½”ë£¨í‹´ìœ¼ë¡œ ì—°ê²°
             StartCoroutine(WaitAndConnectButton());
         }
     }
 
-    // 0.1ÃÊ ±â´Ù¸° ÈÄ ¹öÆ°À» Ã£´Â ÇÔ¼ö
+    // 0.1ì´ˆ ê¸°ë‹¤ë¦° í›„ ë²„íŠ¼ì„ ì°¾ëŠ” í•¨ìˆ˜
     IEnumerator WaitAndConnectButton()
     {
-        // ½Ã°£À» ¸ØÃá »óÅÂ¿¡¼­µµ ÀÛµ¿ÇÏµµ·Ï Realtime »ç¿ë
+        // ì‹œê°„ì„ ë©ˆì¶˜ ìƒíƒœì—ì„œë„ ì‘ë™í•˜ë„ë¡ Realtime ì‚¬ìš©
         yield return new WaitForSecondsRealtime(0.1f);
 
         GameObject settingBtnObj = GameObject.Find("Setting");
@@ -77,12 +77,12 @@ public class EscMenuManager : MonoBehaviour
             {
                 btn.onClick.RemoveAllListeners();
                 btn.onClick.AddListener(ToggleMenu);
-                Debug.Log("Åé´Ï¹ÙÄû ¹öÆ° ¿¬°á ¼º°ø!");
+                Debug.Log("í†±ë‹ˆë°”í€´ ë²„íŠ¼ ì—°ê²° ì„±ê³µ!");
             }
         }
         else
         {
-            Debug.LogWarning("Setting ¹öÆ°À» Ã£Áö ¸øÇß½À´Ï´Ù. ¿ÀºêÁ§Æ® ÀÌ¸§À» È®ÀÎÇÏ¼¼¿ä.");
+            Debug.LogWarning("Setting ë²„íŠ¼ì„ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤. ì˜¤ë¸Œì íŠ¸ ì´ë¦„ì„ í™•ì¸í•˜ì„¸ìš”.");
         }
     }
 

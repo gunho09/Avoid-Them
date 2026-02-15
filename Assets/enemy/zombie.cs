@@ -33,9 +33,20 @@ public class zombie : MonoBehaviour, IDamageable
 
     private bool canAct = false; // 0.5초 경직 플래그
     private bool isStunned = false; // 스턴 상태 플래그
+    private bool isFrozen = false; // 튜토리얼용 정지 플래그
 
     private Animator anim;
     private Vector2 lastLookDirection = Vector2.down;
+
+    // 튜토리얼에서 좀비 정지/해제
+    public void SetFrozen(bool frozen)
+    {
+        isFrozen = frozen;
+        if (frozen && rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+        }
+    }
 
     public void ApplyCcKnockback(Vector2 force)
     {
@@ -132,7 +143,7 @@ public class zombie : MonoBehaviour, IDamageable
             if(targetCharacter == null) return; // 여전히 없으면 리턴
         }
 
-        if (currentState == State.Dead || targetCharacter == null || !canAct || isStunned) return;
+        if (currentState == State.Dead || targetCharacter == null || !canAct || isStunned || isFrozen) return;
 
         float distToPlayer = Vector2.Distance(transform.position, targetCharacter.position);
 
