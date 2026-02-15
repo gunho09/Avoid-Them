@@ -307,6 +307,10 @@ public class Boss4 : MonoBehaviour, IDamageable
     void Die()
     {
         currentState = State.Dead;
+        if (MapManager.Instance != null)
+        {
+            MapManager.Instance.isBossDead = true;
+        }
         StopMove();
         GetComponentInParent<RoomControl>()?.OnEnemyKilled();
         playerController?.TakeExp(expDrop);

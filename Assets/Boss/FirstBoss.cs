@@ -254,6 +254,11 @@ public class FirstBoss : MonoBehaviour, IDamageable
     {
         isDead = true;
         currentState = State.Die;
+
+        if (MapManager.Instance != null)
+        {
+            MapManager.Instance.isBossDead = true;
+        }
         
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-11");
 

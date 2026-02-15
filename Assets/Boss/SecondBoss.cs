@@ -195,9 +195,15 @@ public class SecondBoss : MonoBehaviour, IDamageable
         isDead = true;
         currentState = State.Die;
 
+        if (MapManager.Instance != null)
+        {
+            MapManager.Instance.isBossDead = true;
+        }
+
         
         GetComponent<Collider2D>().enabled = false;
         Destroy(gameObject, 2.0f);
+        
     }
 
     void FindPlayer()

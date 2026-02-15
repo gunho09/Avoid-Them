@@ -21,15 +21,15 @@ public class Boss3 : MonoBehaviour, IDamageable
     [Header("Stats")]
     public int maxHealth ;
     public int attackDamage;
-    public float speed;                 // (ÇÊ¿äÇÏ¸é ³ªÁß¿¡ ÀÌµ¿¿¡ »ç¿ë)
-    public float globalCooldown;      // ÇÑ ÅÏ ³¡³ª°í ½¬´Â ½Ã°£
+    public float speed;                 // (ï¿½Ê¿ï¿½ï¿½Ï¸ï¿½ ï¿½ï¿½ï¿½ß¿ï¿½ ï¿½Ìµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½)
+    public float globalCooldown;      // ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½
     public float dodgeChance;
     public int expDrop;
 
     private float currentHealth;
     [Header("Flip")]
-    public bool facePlayer = true;       // ÇÊ¿äÇÏ¸é ²ø ¼ö ÀÖ°Ô
-    public bool flipWhenPlayerOnLeft = true; // ³× ½ºÇÁ¶óÀÌÆ® ±âº» ¹æÇâ¿¡ ¸ÂÃç Á¶Àý
+    public bool facePlayer = true;       // ï¿½Ê¿ï¿½ï¿½Ï¸ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö°ï¿½
+    public bool flipWhenPlayerOnLeft = true; // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½âº» ï¿½ï¿½ï¿½â¿¡ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     private SpriteRenderer sr;
     /* =======================
      * Player References
@@ -67,8 +67,8 @@ public class Boss3 : MonoBehaviour, IDamageable
      * Skills
      * ======================= */
     [Header("Skill Windows")]
-    public float reflectWindow = 5f;   // ÃÖ±Ù 5ÃÊ µ¥¹ÌÁö ¹Ý»ç
-    public float healWindow = 1f;      // ÃÖ±Ù 1ÃÊ µ¥¹ÌÁö·Î È¸º¹
+    public float reflectWindow = 5f;   // ï¿½Ö±ï¿½ 5ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ý»ï¿½
+    public float healWindow = 1f;      // ï¿½Ö±ï¿½ 1ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È¸ï¿½ï¿½
 
     [Header("Skill Chances")]
     [Range(0f, 1f)] public float reflectChance = 0.25f;
@@ -127,11 +127,11 @@ public class Boss3 : MonoBehaviour, IDamageable
 
             currentState = State.Acting;
 
-            // ÅÏ´ç 1Çàµ¿¸¸: (¹Ý»ç) or (Èú) or (È­»ì)
+            // ï¿½Ï´ï¿½ 1ï¿½àµ¿ï¿½ï¿½: (ï¿½Ý»ï¿½) or (ï¿½ï¿½) or (È­ï¿½ï¿½)
             bool canReflect = Time.time >= nextReflectTime;
             bool canHeal = Time.time >= nextHealTime;
 
-            // ½ºÅ³ ¿ì¼±¼øÀ§: ¹Ý»ç ¸ÕÀú, ±× ´ÙÀ½ Èú, ¾Æ´Ï¸é °ø°Ý
+            // ï¿½ï¿½Å³ ï¿½ì¼±ï¿½ï¿½ï¿½ï¿½: ï¿½Ý»ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½, ï¿½Æ´Ï¸ï¿½ ï¿½ï¿½ï¿½ï¿½
             bool doReflect = canReflect && (Random.value < reflectChance);
             bool doHeal = !doReflect && canHeal && (Random.value < healChance);
 
@@ -167,11 +167,11 @@ public class Boss3 : MonoBehaviour, IDamageable
 
         if (anim != null) anim.SetTrigger("Attack");
 
-        // ¾Ö´Ï¸ÞÀÌ¼ÇÀÌ Àý¹Ý Á¤µµ ÁøÇàµÉ ¶§±îÁö ±â´Ù¸² (¿¹: 0.5ÃÊ)
-        // ÀÌ ½Ã°£À» Á¶ÀýÇØ¼­ ¹ß»ç Å¸ÀÌ¹ÖÀ» ¸ÂÃß¼¼¿ä.
+        // ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ù¸ï¿½ (ï¿½ï¿½: 0.5ï¿½ï¿½)
+        // ï¿½ï¿½ ï¿½Ã°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ ï¿½ß»ï¿½ Å¸ï¿½Ì¹ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ß¼ï¿½ï¿½ï¿½.
         yield return new WaitForSeconds(0.5f);
 
-        // ¿©±â¼­ dirÀ» ¼±¾ðÇÕ´Ï´Ù. (À§¿¡ ´Ù¸¥ dir ¼±¾ðÀÌ ¾ø¾î¾ß ÇÔ)
+        // ï¿½ï¿½ï¿½â¼­ dirï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Õ´Ï´ï¿½. (ï¿½ï¿½ï¿½ï¿½ ï¿½Ù¸ï¿½ dir ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½)
         Vector2 dir = ((Vector2)playerTransform.position - (Vector2)firePoint.position).normalized;
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
 
@@ -208,19 +208,19 @@ public class Boss3 : MonoBehaviour, IDamageable
     {
         FaceToPlayer();
 
-        // ½ºÅ³ ¾Ö´Ï
+        // ï¿½ï¿½Å³ ï¿½Ö´ï¿½
         if (anim != null) anim.SetTrigger("Skill1");
 
-        // ¿¬Ãâ ÅÒ
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
         yield return new WaitForSeconds(0.1f);
 
         float damage = GetDamageLastSeconds(window);
 
-        // 0ÀÌ¸é ±»ÀÌ ¶§¸®Áö ¾Ê°Ô
+        // 0ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê°ï¿½
         if (damage > 0f)
             playerController.TakeDamage(damage);
 
-        // ÈÄµô
+        // ï¿½Äµï¿½
         yield return new WaitForSeconds(0.1f);
     }
 
@@ -283,6 +283,11 @@ public class Boss3 : MonoBehaviour, IDamageable
     void Die()
     {
         currentState = State.Dead;
+
+        if (MapManager.Instance != null)
+        {
+            MapManager.Instance.isBossDead = true;
+        }
 
         if (rb != null) rb.linearVelocity = Vector2.zero;
 

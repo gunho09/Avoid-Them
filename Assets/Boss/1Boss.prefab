@@ -5020,7 +5020,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FirstBoss
   currentState: 0
-  maxHp: 1500
+  maxHp: 1
   hp: 0
   damage: 40
   moveSpeed: 4

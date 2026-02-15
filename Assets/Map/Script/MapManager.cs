@@ -1,3 +1,4 @@
+using NUnit.Framework;
 using UnityEngine;
 
 public class MapManager : MonoBehaviour
@@ -9,6 +10,7 @@ public class MapManager : MonoBehaviour
     public int maxFloors = 4;            // 최대 층
     public int clearedRooms = 0;         // 현재 층에서 깬 방 개수
     public int totalRoomsPerFloor = 5;   // 층당 방 개수 (보스 방 진입 조건)
+    public bool isBossDead = false;     // 보스 처치 여부 (보스 방 진입 조건)
 
     [Header("Single Scene Settings")]
     public GameObject player;              
@@ -238,6 +240,7 @@ public class MapManager : MonoBehaviour
     public void ReturnToHallway()
     {
         Debug.Log($"[MapManager] ReturnToHallway called. Target Pos: {lastDoorPosition}");
+        Debug.Log($"[MapManager] 1. ReturnToHallway 호출됨! 현재 StageBoss 여부: {currentStageIsBoss}");
 
         if (currentRoomInstance != null)
         {
@@ -248,7 +251,10 @@ public class MapManager : MonoBehaviour
         // 보스 방에서 나왔다면 층 이동 처리
         if (currentStageIsBoss)
         {
+            Debug.Log("[MapManager] 2. 보스방 클리어 확인! 다음 층 이동 준비...");
             currentStageIsBoss = false; // 초기화
+            isBossDead = false;
+
             if (currentFloor < maxFloors)
             {
                 NextFloor(); // 다음 층으로 이동 (내부에서 ReturnToHallway 로직 일부 수행하지 않도록 주의하거나, 여기서 복도 생성)
@@ -265,11 +271,15 @@ public class MapManager : MonoBehaviour
             }
         }
 
+        Debug.Log("[MapManager] 3. 복도 생성 및 플레이어 이동 시작");
         
         if (hallwayPrefab != null)
         {
-            currentHallwayInstance = Instantiate(hallwayPrefab, hallwaySpawnPosition, Quaternion.identity);
+            if (currentHallwayInstance != null) Destroy(currentHallwayInstance);
             Debug.Log("복도 생성 완료");
+
+            currentHallwayInstance = Instantiate(hallwayPrefab, hallwaySpawnPosition, Quaternion.identity);
+            currentHallwayInstance.name = "CurrentHallway"; 
 
             // [Sound] 복도 BGM (돌아올 때)
             if (SoundManager.Instance != null) SoundManager.Instance.PlayBGM("1-1");
@@ -302,13 +312,13 @@ public class MapManager : MonoBehaviour
             player.SetActive(true);
             
             Debug.Log($"Player returned to {player.transform.position}");
+            Debug.Log($"[MapManager] 4. 플레이어 이동 완료! 위치: {player.transform.position}");
 
             // 혹시 대시 중이면 멈추게 가속도 초기화
             Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
                 rb.linearVelocity = Vector2.zero;
-                rb.angularVelocity = 0f;
             }
         }
         else
@@ -330,6 +340,8 @@ public class MapManager : MonoBehaviour
         {
             FloorUI.Instance.UpdateFloor(currentFloor);
         }
+
+        lastDoorPosition = hallwaySpawnPosition;
         
         // 층 이동 시 복도로 돌아가는 로직 실행
         // 주의: ReturnToHallway를 직접 호출하면 위에서 currentStageIsBoss 체크 로직과 꼬일 수 있음.

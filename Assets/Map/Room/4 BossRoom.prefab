@@ -1148,7 +1148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d4c3508a1e3cb2489aa04892101c724, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Door
-  type: 1
+  type: 3
   spriteRenderer: {fileID: 761947309326772535}
   openSprite: {fileID: 0}
   closedSprite: {fileID: 2306424487704905126, guid: 5fa69022468a8a842a6413a82cc09b89, type: 3}

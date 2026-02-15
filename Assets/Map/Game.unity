@@ -167,6 +167,7 @@ MonoBehaviour:
   maxFloors: 4
   clearedRooms: 0
   totalRoomsPerFloor: 6
+  isBossDead: 0
   player: {fileID: 110500584}
   hallwayPrefab: {fileID: 386739740436760217, guid: 291f9bd9bf3c5704b8d1ea9adc7e209a, type: 3}
   roomPositionCorrection: {x: 8.63, y: -2.4, z: 0}
@@ -3138,6 +3139,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c135818b455ca284f900dce2694e8675, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SettingsManager
+  settingsPanel: {fileID: 0}
 --- !u!4 &1862086432
 Transform:
   m_ObjectHideFlags: 0

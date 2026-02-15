@@ -660,7 +660,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d4c3508a1e3cb2489aa04892101c724, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Door
-  type: 1
+  type: 3
   spriteRenderer: {fileID: 6227482184146325252}
   openSprite: {fileID: 0}
   closedSprite: {fileID: 2306424487704905126, guid: 5fa69022468a8a842a6413a82cc09b89, type: 3}
@@ -1393,7 +1393,7 @@ Transform:
   m_GameObject: {fileID: 7622538644797819959}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -8.63, y: 2.48, z: 0}
+  m_LocalPosition: {x: -8.55, y: 0.13, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1469,11 +1469,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 216977247184575565, guid: 91bbfc7b1358b1a4ebf790c9cca46cc8, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -8.582631
+      value: -9.38
       objectReference: {fileID: 0}
     - target: {fileID: 216977247184575565, guid: 91bbfc7b1358b1a4ebf790c9cca46cc8, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.8578371
+      value: 0.34
       objectReference: {fileID: 0}
     - target: {fileID: 216977247184575565, guid: 91bbfc7b1358b1a4ebf790c9cca46cc8, type: 3}
       propertyPath: m_LocalPosition.z

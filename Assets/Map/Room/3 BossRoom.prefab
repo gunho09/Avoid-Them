@@ -48,8 +48,13 @@ MonoBehaviour:
   cameraPoint: {fileID: 0}
   viewWidth: 18
   viewHeight: 15
-  rewardChest: {fileID: 4011205124818814958}
   returnDoor: {fileID: 7860265261877169233}
+  itemDropPrefab: {fileID: 0}
+  obstaclePrefabs: []
+  obstacleCountMin: 3
+  obstacleCountMax: 6
+  spawnRandomObstacles: 1
+  clearHealRatio: 0.3
 --- !u!1 &2301217709827028507
 GameObject:
   m_ObjectHideFlags: 0
@@ -1346,7 +1351,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d4c3508a1e3cb2489aa04892101c724, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Door
-  type: 1
+  type: 3
   spriteRenderer: {fileID: 1506802514819109039}
   openSprite: {fileID: 0}
   closedSprite: {fileID: 2306424487704905126, guid: 5fa69022468a8a842a6413a82cc09b89, type: 3}
@@ -1575,7 +1580,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    oldSize: {x: 3.3625832, y: 5.8599997}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -1629,4 +1634,4 @@ MonoBehaviour:
   expDrop: 2
   range: 100
   attackRange: 1
-  PlayerControler: {fileID: 0}
+  playerCtrl: {fileID: 0}
