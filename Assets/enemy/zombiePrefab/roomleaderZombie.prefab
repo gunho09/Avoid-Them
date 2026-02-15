@@ -87,7 +87,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: -7828667705408843397, guid: 0ec182e1c77056b44920ee32cc9a00b0, type: 3}
-  m_Color: {r: 1, g: 0.61320746, b: 0.6571957, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -135,7 +135,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b053b2ed5a69eb94387952ac6ccb61cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::zombie
-  health: 1
+  health: 300
   attackDamage: 50
   speed: 2
   atackSpeed: 3
