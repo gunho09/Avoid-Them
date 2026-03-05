@@ -231,6 +231,7 @@ public class Boss3 : MonoBehaviour, IDamageable
         if (anim != null) anim.SetTrigger("Skill2");
 
         yield return new WaitForSeconds(0.1f);
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-8"); // 3층 보스 NOT (힐)
 
         float heal = GetDamageLastSeconds(window);
         if (heal > 0f)
@@ -256,7 +257,10 @@ public class Boss3 : MonoBehaviour, IDamageable
         GetComponent<HitFlashController>()?.Flash();
 
         if (currentHealth <= 0)
+        {
+            StopAllCoroutines();
             Die();
+        }
     }
 
     void RecordDamage(float damage)
@@ -282,12 +286,14 @@ public class Boss3 : MonoBehaviour, IDamageable
      * ======================= */
     void Die()
     {
+        StartCoroutine(DieRoutine());
+    }
+
+    IEnumerator DieRoutine()
+    {
         currentState = State.Dead;
 
-        if (MapManager.Instance != null)
-        {
-            MapManager.Instance.isBossDead = true;
-        }
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-11"); // 보스 사망
 
         if (rb != null) rb.linearVelocity = Vector2.zero;
 
@@ -298,7 +304,14 @@ public class Boss3 : MonoBehaviour, IDamageable
         if (playerController != null)
             playerController.TakeExp(expDrop);
 
-        Destroy(gameObject, 1f);
+        yield return new WaitForSeconds(1f);
+
+        if (MapManager.Instance != null)
+        {
+            MapManager.Instance.isBossDead = true;
+        }
+
+        Destroy(gameObject);
     }
 
     public float GetHpRatio()

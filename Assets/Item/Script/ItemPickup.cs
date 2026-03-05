@@ -14,8 +14,8 @@ public class ItemPickup : MonoBehaviour
         _collider = GetComponent<Collider2D>();
     }
 
-    [Tooltip("아이템 생성 시 크기 조절 (기본: 0.5)")]
-    public float pickupScale = 0.5f;
+    [Tooltip("아이템 생성 시 크기 조절 (기본: 0.35)")]
+    public float pickupScale = 0.35f;
 
     // 방 컨트롤러가 이 함수를 호출해서 "너는 '흡혈' 아이템이야!"라고 정해줍니다.
     public void Setup(ItemData data, RoomControl roomControl)
@@ -81,26 +81,37 @@ public class ItemPickup : MonoBehaviour
     {
         Debug.Log($"[ItemPickup] {_data.itemName} 획득 시도!");
 
-        // 1. 인벤토리에 추가
+        // 1. 인벤토리에 추가 시도
         if (Inventory.Instance != null)
         {
-            Inventory.Instance.AddItem(_data);
-            if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-7"); // 아이템 획득
-            Debug.Log($"[ItemPickup] 인벤토리에 추가 요청 보냄");
+            if (Inventory.Instance.AddItem(_data))
+            {
+                if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-7"); // 아이템 획득
+                Debug.Log($"[ItemPickup] 인벤토리에 추가 완료");
+
+                // 2. 방 컨트롤러에게 "나 먹혔어!"라고 알림
+                if (_roomControl != null)
+                {
+                    _roomControl.OnItemPicked();
+                }
+
+                // 3. 나 자신 삭제
+                Destroy(gameObject);
+            }
+            else
+            {
+                // 인벤토리 가득 참 (CanAcquire failure)
+                Debug.Log("[ItemPickup] 인벤토리가 가득 차서 획득 불가!");
+                if (WarningUI.Instance != null)
+                {
+                    WarningUI.Instance.ShowWarning("인벤토리가 가득 찼습니다! (최대 10개)");
+                }
+            }
         }
         else
         {
              Debug.LogError("[ItemPickup] Inventory.Instance가 null입니다!");
         }
-
-        // 2. 방 컨트롤러에게 "나 먹혔어!"라고 알림 (나머지 2개 삭제 + 문 열기 위해)
-        if (_roomControl != null)
-        {
-            _roomControl.OnItemPicked();
-        }
-
-        // 3. 나 자신 삭제
-        Destroy(gameObject);
     }
 
     private void OnDisable()

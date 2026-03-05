@@ -122,6 +122,7 @@ public class SecondBoss : MonoBehaviour, IDamageable
         lastAttackTime = Time.time;
 
         anim?.SetTrigger("Attack");
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-3"); // 2층 보스 기본 공격
         yield return new WaitForSeconds(0.4f);
 
         if (Vector2.Distance(transform.position, player.transform.position) <= attackRange)
@@ -139,7 +140,7 @@ public class SecondBoss : MonoBehaviour, IDamageable
         currentState = State.Skill1;
         lastMagneticTime = Time.time;
         isMagneticActive = true;
-
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-4"); // 2층 보스 자기장
         anim?.SetBool("isMagnetic", true); 
 
         yield return new WaitForSeconds(magneticDuration);
@@ -155,6 +156,7 @@ public class SecondBoss : MonoBehaviour, IDamageable
         lastGasTime = Time.time;
 
         if (gasParticle) gasParticle.Play();
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-5"); // 2층 보스 뿜기
         anim?.SetTrigger("Skill2");
 
         float timer = 0;
@@ -187,23 +189,35 @@ public class SecondBoss : MonoBehaviour, IDamageable
         hp -= finalDamage;
         GetComponent<HitFlashController>()?.Flash();
 
-        if (hp <= 0) Die();
+        if (hp <= 0)
+        {
+            StopAllCoroutines();
+            Die();
+        }
     }
 
     void Die()
     {
+        StartCoroutine(DieRoutine());
+    }
+
+    IEnumerator DieRoutine()
+    {
         isDead = true;
         currentState = State.Die;
+
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-11"); // 보스 사망
+        
+        GetComponent<Collider2D>().enabled = false;
+        
+        yield return new WaitForSeconds(2.0f);
 
         if (MapManager.Instance != null)
         {
             MapManager.Instance.isBossDead = true;
         }
 
-        
-        GetComponent<Collider2D>().enabled = false;
-        Destroy(gameObject, 2.0f);
-        
+        Destroy(gameObject);
     }
 
     void FindPlayer()

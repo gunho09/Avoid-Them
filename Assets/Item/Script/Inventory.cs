@@ -68,9 +68,9 @@ public class Inventory : MonoBehaviour
     // 아이템 변경 알림 이벤트
     public event System.Action OnInventoryChanged;
 
-    public void AddItem(ItemData newItem)
+    public bool AddItem(ItemData newItem)
     {
-        if (!CanAcquire(newItem)) return;
+        if (!CanAcquire(newItem)) return false;
 
         // 1. 기존에 있는 아이템인지 확인 (Null이 아닌 것 중에서)
         ItemSlot existingSlot = slots.Find(s => s != null && s.itemData == newItem);
@@ -91,6 +91,7 @@ public class Inventory : MonoBehaviour
         
         // 변경 알림
         OnInventoryChanged?.Invoke();
+        return true;
     }
 
     public bool HasItem(ItemData item)
@@ -132,11 +133,27 @@ public class Inventory : MonoBehaviour
         OnInventoryChanged?.Invoke();
     }
 
-    public int GetStackCount(ItemEffectType effectType)
+    public int GetStackCount(ItemEffectType effectType, bool activeOnly = false)
     {
-        // 전체 검색 (Null 제외)
-        ItemSlot slot = slots.Find(s => s != null && s.itemData.effectType == effectType);
-        return slot != null ? slot.stackCount : 0;
+        if (activeOnly)
+        {
+            // 앞의 MaxActiveSlots (5개) 슬롯만 검사
+            float count = 0;
+            for (int i = 0; i < MaxActiveSlots; i++)
+            {
+                if (i < slots.Count && slots[i] != null && slots[i].itemData.effectType == effectType)
+                {
+                    count += slots[i].stackCount;
+                }
+            }
+            return (int)count;
+        }
+        else
+        {
+            // 전체 검색 (Null 제외)
+            ItemSlot slot = slots.Find(s => s != null && s.itemData.effectType == effectType);
+            return slot != null ? slot.stackCount : 0;
+        }
     }
 
     // 아이템 소모 (비상식량, 밴드 등)
@@ -147,6 +164,7 @@ public class Inventory : MonoBehaviour
         
         if (index != -1)
         {
+            if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-8"); // 아이템 사용
             slots[index].stackCount--;
             Debug.Log($"[Inventory] Used {slots[index].itemData.itemName}. Remaining: {slots[index].stackCount}");
             

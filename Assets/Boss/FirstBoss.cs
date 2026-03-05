@@ -203,7 +203,11 @@ public class FirstBoss : MonoBehaviour, IDamageable
         }
 
         if (anim != null) anim.SetTrigger("Skill");
-        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-2"); // 1층 보스 난타
+        if (SoundManager.Instance != null)
+        {
+            // 0.1초 간격으로 3번 재생하여 난타 느낌 강화
+            StartCoroutine(PlayFlurrySounds());
+        }
         if (zonnahitParticle != null) zonnahitParticle.Play();
 
         if (lineRenderer != null) lineRenderer.enabled = false;
@@ -240,7 +244,20 @@ public class FirstBoss : MonoBehaviour, IDamageable
         GetComponent<HitFlashController>()?.Flash();
 
 
-        if (hp <= 0) StartCoroutine(DieRoutine());
+        if (hp <= 0) 
+        {
+            StopAllCoroutines(); // 진행 중인 난타 등 중단
+            StartCoroutine(DieRoutine());
+        }
+    }
+
+    IEnumerator PlayFlurrySounds()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-1");
+            yield return new WaitForSeconds(0.1f);
+        }
     }
 
 
@@ -255,11 +272,6 @@ public class FirstBoss : MonoBehaviour, IDamageable
         isDead = true;
         currentState = State.Die;
 
-        if (MapManager.Instance != null)
-        {
-            MapManager.Instance.isBossDead = true;
-        }
-        
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-11");
 
         Collider2D col = GetComponent<Collider2D>();
@@ -268,6 +280,12 @@ public class FirstBoss : MonoBehaviour, IDamageable
         if (zonnahitParticle != null) zonnahitParticle.Stop();
 
         yield return new WaitForSeconds(2.0f);
+        
+        if (MapManager.Instance != null)
+        {
+            MapManager.Instance.isBossDead = true;
+        }
+
         Destroy(gameObject);
     }
     IEnumerator HitFlash()

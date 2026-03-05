@@ -41,20 +41,20 @@ public class WarningUI : MonoBehaviour
         float elapsed = 0f;
         while (elapsed < 0.2f)
         {
-            elapsed += Time.deltaTime;
+            elapsed += Time.unscaledDeltaTime;
             warningText.alpha = Mathf.Lerp(0f, 1f, elapsed / 0.2f);
             yield return null;
         }
         warningText.alpha = 1f;
 
         // 2. 유지하기
-        yield return new WaitForSeconds(displayDuration);
+        yield return new WaitForSecondsRealtime(displayDuration);
 
         // 3. 사라지기 (0.5초)
         elapsed = 0f;
         while (elapsed < 0.5f)
         {
-            elapsed += Time.deltaTime;
+            elapsed += Time.unscaledDeltaTime;
             warningText.alpha = Mathf.Lerp(1f, 0f, elapsed / 0.5f);
             yield return null;
         }

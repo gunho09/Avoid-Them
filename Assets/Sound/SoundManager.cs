@@ -10,6 +10,34 @@ public class SoundManager : MonoBehaviour
     public AudioSource bgmSource;
     public AudioSource sfxSource;
 
+    [Header("Volume Settings")]
+    [Range(0f, 1f)]
+    [SerializeField] private float bgmVolume = 0.3f;
+    [Range(0f, 1f)]
+    [SerializeField] private float sfxVolume = 1.0f;
+
+    public float BGMVolume
+    {
+        get => bgmVolume;
+        set
+        {
+            bgmVolume = Mathf.Clamp01(value);
+            if (bgmSource != null) bgmSource.volume = bgmVolume;
+            SaveVolumes();
+        }
+    }
+
+    public float SFXVolume
+    {
+        get => sfxVolume;
+        set
+        {
+            sfxVolume = Mathf.Clamp01(value);
+            if (sfxSource != null) sfxSource.volume = sfxVolume;
+            SaveVolumes();
+        }
+    }
+
     [Header("Audio Clips List (Auto Loaded)")]
     public List<AudioClip> audioClips = new List<AudioClip>();
 
@@ -22,6 +50,7 @@ public class SoundManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject); // 씬 전환해도 유지
+            LoadVolumes(); // 볼륨 로드 추가
         }
         else
         {
@@ -53,6 +82,23 @@ public class SoundManager : MonoBehaviour
             sfxObj.transform.parent = transform;
             sfxSource = sfxObj.AddComponent<AudioSource>();
         }
+
+        // 현재 볼륨 적용
+        bgmSource.volume = bgmVolume;
+        sfxSource.volume = sfxVolume;
+    }
+
+    private void LoadVolumes()
+    {
+        bgmVolume = PlayerPrefs.GetFloat("BGMVolume", 0.3f);
+        sfxVolume = PlayerPrefs.GetFloat("SFXVolume", 0.5f);
+    }
+
+    public void SaveVolumes()
+    {
+        PlayerPrefs.SetFloat("BGMVolume", bgmVolume);
+        PlayerPrefs.SetFloat("SFXVolume", sfxVolume);
+        PlayerPrefs.Save();
     }
 
     public void PlayBGM(string name)
@@ -86,13 +132,13 @@ public class SoundManager : MonoBehaviour
         bgmSource.clip = newClip;
         bgmSource.Play();
 
-        // Fade In
+        // Fade In (현재 설정된 bgmVolume으로 복구)
         for (float t = 0; t < fadeDuration; t += Time.deltaTime)
         {
-            bgmSource.volume = Mathf.Lerp(0f, 1f, t / fadeDuration);
+            bgmSource.volume = Mathf.Lerp(0f, bgmVolume, t / fadeDuration);
             yield return null;
         }
-        bgmSource.volume = 1f;
+        bgmSource.volume = bgmVolume;
     }
 
     public void StopBGM()
@@ -105,14 +151,12 @@ public class SoundManager : MonoBehaviour
         if (clipDict.TryGetValue(name, out AudioClip clip))
         {
             sfxSource.pitch = Random.Range(0.9f, 1.1f); // 피치 랜덤 (0.9 ~ 1.1)
-            sfxSource.PlayOneShot(clip, volume);
-            // 다음 소리를 위해 피치 초기화는 선택사항이지만 OneShot은 영향 안받음
-            // 하지만 연속 재생 시 source.pitch가 계속 바뀌어 있을 수 있으므로 reset 추천
-            // sfxSource.pitch = 1.0f; (PlayOneShot은 source pitch 영향을 받으므로 랜덤하게 두면 됨)
+            // 인자로 받은 volume과 글로벌 sfxVolume을 곱하여 재생
+            sfxSource.PlayOneShot(clip, volume * sfxVolume);
         }
         else
         {
-            // Debug.LogWarning($"[SoundManager] SFX Not Found: {name}"); 
+            Debug.LogWarning($"[SoundManager] SFX Not Found: {name}"); 
         }
     }
 

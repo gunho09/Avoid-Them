@@ -90,7 +90,13 @@ public class EscMenuManager : MonoBehaviour
         if (settingsPanel == null) return;
 
         isOpened = !isOpened;
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-12"); // 버튼 누르는 소리
         settingsPanel.SetActive(isOpened);
+
+        if (isOpened)
+        {
+            UpdateSliderValues(); // 메뉴 열 때 슬라이더 값 동기화
+        }
 
         if (UnitySceneManager.GetActiveScene().buildIndex != 0)
         {
@@ -124,6 +130,7 @@ public class EscMenuManager : MonoBehaviour
     public void GoToMainMenu()
     {
         if (settingsPanel != null) settingsPanel.SetActive(false);
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-12"); // 버튼 누르는 소리
         isOpened = false;
         Time.timeScale = 1f;
         Cursor.visible = true;
@@ -131,7 +138,38 @@ public class EscMenuManager : MonoBehaviour
         UnitySceneManager.LoadScene("MainUI");
     }
 
-    private void UpdateSliderValues() { }
-    public void SetBGMVolume(float volume) { }
-    public void SetSFXVolume(float volume) { }
+    private void UpdateSliderValues()
+    {
+        if (SoundManager.Instance == null) return;
+
+        if (bgmSlider != null)
+        {
+            bgmSlider.value = SoundManager.Instance.BGMVolume;
+            bgmSlider.onValueChanged.RemoveAllListeners();
+            bgmSlider.onValueChanged.AddListener(SetBGMVolume);
+        }
+
+        if (sfxSlider != null)
+        {
+            sfxSlider.value = SoundManager.Instance.SFXVolume;
+            sfxSlider.onValueChanged.RemoveAllListeners();
+            sfxSlider.onValueChanged.AddListener(SetSFXVolume);
+        }
+    }
+
+    public void SetBGMVolume(float volume)
+    {
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.BGMVolume = volume;
+        }
+    }
+
+    public void SetSFXVolume(float volume)
+    {
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.SFXVolume = volume;
+        }
+    }
 }

@@ -1,5 +1,6 @@
-using NUnit.Framework;
 using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 
 public class MapManager : MonoBehaviour
 {
@@ -36,6 +37,11 @@ public class MapManager : MonoBehaviour
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+
+        if (ScreenFader.Instance == null)
+        {
+            Debug.LogWarning("[MapManager] ScreenFader Instance is missing. Transitions will be instantaneous.");
+        }
 
         // 카메라 자동 할당
         if (mainCamera == null)
@@ -128,20 +134,28 @@ public class MapManager : MonoBehaviour
 
     public void EnterRoom(Vector3 doorPos, bool forceBoss = false)
     {
-        // [방문 기록 저장] - 실제 문 위치는 doorPos - returnOffset 이지만, 
-        // Door.cs에서 safeReturnPos = transform.position + returnOffset 으로 보냈음.
-        // 역산해서 원래 위치를 추정하거나, safeReturnPos 자체를 키로 써도 됨 (복귀 위치니까 고유함).
-        // 여기서는 간단히 lastDoorPosition(== doorPos)을 저장.
+        StartCoroutine(EnterRoomRoutine(doorPos, forceBoss));
+    }
+
+    private IEnumerator EnterRoomRoutine(Vector3 doorPos, bool forceBoss)
+    {
+        PlayerControler pc = player != null ? player.GetComponent<PlayerControler>() : null;
+        if (pc != null) pc.canMove = false;
+
+        bool fadeCompleted = false;
+        if (ScreenFader.Instance != null)
+        {
+            ScreenFader.Instance.FadeOut(() => fadeCompleted = true);
+            while (!fadeCompleted) yield return null;
+        }
+
         lastDoorPosition = doorPos;
         
-        // 문 위치가 겹칠 일은 거의 없으므로, 현재 층에서 방문한 곳으로 등록
-        // (단, 보스방 입장은 제외할 수도 있지만, 일단 다 저장)
         if (!visitedDoors.Contains(doorPos))
         {
             visitedDoors.Add(doorPos);
         }
 
-        
         if (currentHallwayInstance != null)
         {
             Destroy(currentHallwayInstance);
@@ -157,6 +171,13 @@ public class MapManager : MonoBehaviour
 
         if (forceBoss || clearedRooms >= totalRoomsPerFloor) SpawnRoom(true);
         else SpawnRoom(false);
+
+        if (ScreenFader.Instance != null)
+        {
+            ScreenFader.Instance.FadeIn();
+        }
+
+        if (pc != null) pc.canMove = true;
     }
 
     private void SpawnRoom(bool isBoss)
@@ -239,8 +260,22 @@ public class MapManager : MonoBehaviour
 
     public void ReturnToHallway()
     {
+        StartCoroutine(ReturnToHallwayRoutine());
+    }
+
+    private IEnumerator ReturnToHallwayRoutine()
+    {
+        PlayerControler pc = player != null ? player.GetComponent<PlayerControler>() : null;
+        if (pc != null) pc.canMove = false;
+
+        bool fadeCompleted = false;
+        if (ScreenFader.Instance != null)
+        {
+            ScreenFader.Instance.FadeOut(() => fadeCompleted = true);
+            while (!fadeCompleted) yield return null;
+        }
+
         Debug.Log($"[MapManager] ReturnToHallway called. Target Pos: {lastDoorPosition}");
-        Debug.Log($"[MapManager] 1. ReturnToHallway 호출됨! 현재 StageBoss 여부: {currentStageIsBoss}");
 
         if (currentRoomInstance != null)
         {
@@ -251,80 +286,63 @@ public class MapManager : MonoBehaviour
         // 보스 방에서 나왔다면 층 이동 처리
         if (currentStageIsBoss)
         {
-            Debug.Log("[MapManager] 2. 보스방 클리어 확인! 다음 층 이동 준비...");
-            currentStageIsBoss = false; // 초기화
-            isBossDead = false;
-
-            if (currentFloor < maxFloors)
+            if (!isBossDead)
             {
-                NextFloor(); // 다음 층으로 이동 (내부에서 ReturnToHallway 로직 일부 수행하지 않도록 주의하거나, 여기서 복도 생성)
-                // NextFloor 함수가 아래에 있으니, 여기서 복도를 또 생성하면 중복될 수 있음.
-                // NextFloor -> ReturnToHallway 호출 구조이므로, 
-                // 여기서 NextFloor를 부르면 -> 다시 ReturnToHallway가 불림 -> currentStageIsBoss가 false이므로 일반 복도 생성 루틴으로 감.
-                // 괜찮음. 하지만 NextFloor 호출 후 바로 리턴해야 함.
-                return;
+                currentStageIsBoss = false; 
             }
             else
             {
-                GameClear();
-                return;
+                currentStageIsBoss = false; 
+                isBossDead = false;
+
+                if (currentFloor < maxFloors)
+                {
+                    NextFloor();
+                    if (ScreenFader.Instance != null) ScreenFader.Instance.FadeIn();
+                    yield break;
+                }
+                else
+                {
+                    GameClear();
+                    if (ScreenFader.Instance != null) ScreenFader.Instance.FadeIn();
+                    yield break;
+                }
             }
         }
 
-        Debug.Log("[MapManager] 3. 복도 생성 및 플레이어 이동 시작");
-        
         if (hallwayPrefab != null)
         {
             if (currentHallwayInstance != null) Destroy(currentHallwayInstance);
-            Debug.Log("복도 생성 완료");
-
             currentHallwayInstance = Instantiate(hallwayPrefab, hallwaySpawnPosition, Quaternion.identity);
             currentHallwayInstance.name = "CurrentHallway"; 
 
-            // [Sound] 복도 BGM (돌아올 때)
             if (SoundManager.Instance != null) SoundManager.Instance.PlayBGM("1-1");
             
-            // [이미 들어갔던 문 끄기]
             DisableVisitedDoors();
             
-            // [복도 귀환 시 카메라 크기 초기화] (기본값: 가로 18, 세로 10)
             if (mainCamera != null)
             {
-                // [카메라 타겟 해제]
                 mainCamera.target = null;
-
-                // [카메라 위치 이동] - 복도 중앙(SpawnPosition)으로 이동
                 mainCamera.MoveCamera(hallwaySpawnPosition);
-                
-                // [카메라 크기 초기화] (18x10)
                 mainCamera.ResetCamera();
             }
-        }
-        else
-        {
-            Debug.LogError("MapManager Error: HallwayPrefab이 할당되지 않았습니다!");
         }
 
         if (player != null)
         {
-           
             player.transform.position = new Vector3(lastDoorPosition.x, lastDoorPosition.y, -1f);
             player.SetActive(true);
             
-            Debug.Log($"Player returned to {player.transform.position}");
-            Debug.Log($"[MapManager] 4. 플레이어 이동 완료! 위치: {player.transform.position}");
-
-            // 혹시 대시 중이면 멈추게 가속도 초기화
             Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
-            if (rb != null)
-            {
-                rb.linearVelocity = Vector2.zero;
-            }
+            if (rb != null) rb.linearVelocity = Vector2.zero;
         }
-        else
+
+        if (ScreenFader.Instance != null)
         {
-            Debug.LogError("MapManager Error: Player is missing!");
+            ScreenFader.Instance.FadeIn();
         }
+
+        if (pc != null) pc.canMove = true;
     }
 
    

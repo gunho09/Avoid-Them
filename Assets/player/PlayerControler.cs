@@ -25,6 +25,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
     public float attackDistance = 2.0f; 
     public float attackWidth = 0.8f;    
     public float attackDamage = 10f;
+    public bool canMove = true; 
     public int attackNum = 2;
     public LayerMask enemy;             
     private bool isAttacking = false;
@@ -125,9 +126,8 @@ public class PlayerControler : MonoBehaviour, IDamageable
     {
         if (Instance == null) Instance = this;
         
-        // [New Formula] Start시 경험치 테이블 초기화 (Lv 1 -> 100)
-        // 공식: 100 + ((Lv-1) * 50)
-        MaxExp = 20f + (Mathf.Max(0, PlayerLvl - 1) * 1f);
+        // [Fix] Lv 1부터 일관된 공식 적용
+        MaxExp = 100f + (PlayerLvl * 50f);
         if (BoostTime != null) BoostTime.gameObject.SetActive(false);
     
     // 초기화 시점에는 Stats 계산 (이벤트 전)
@@ -271,7 +271,14 @@ public class PlayerControler : MonoBehaviour, IDamageable
         }
         else
         {
-            desiredVelocity = inputMovement.normalized * (playerSpeed + driveSpeedBonus);
+            if (canMove) // Check canMove here for general movement
+            {
+                desiredVelocity = inputMovement.normalized * (playerSpeed + driveSpeedBonus);
+            }
+            else
+            {
+                desiredVelocity = Vector2.zero;
+            }
         }
 
         // [New] 벽 충돌 체크 (Is Trigger ON 상태에서도 벽을 못 뚫게)
@@ -391,8 +398,8 @@ public class PlayerControler : MonoBehaviour, IDamageable
     {
         if (Inventory.Instance == null) return;
 
-        // 1. 반사 
-        if (Inventory.Instance.GetStackCount(ItemEffectType.Reflection) > 0)
+        // 1. 반사 (Active 슬롯 1~5번에서만 발동)
+        if (Inventory.Instance.GetStackCount(ItemEffectType.Reflection, true) > 0)
         {
             if (isReflecting)
             {
@@ -414,9 +421,13 @@ public class PlayerControler : MonoBehaviour, IDamageable
                 }
             }
         }
+        else
+        {
+            isReflecting = false;
+        }
 
-        // 2. 자기장
-        if (Inventory.Instance.GetStackCount(ItemEffectType.DamageReduction) > 0)
+        // 2. 자기장 (Active 슬롯 1~5번에서만 발동)
+        if (Inventory.Instance.GetStackCount(ItemEffectType.DamageReduction, true) > 0)
         {
             if (isMagnetic)
             {
@@ -444,11 +455,12 @@ public class PlayerControler : MonoBehaviour, IDamageable
         }
         else
         {
-             if (magneticFieldVisual != null) magneticFieldVisual.SetActive(false);
+            isMagnetic = false;
+            if (magneticFieldVisual != null) magneticFieldVisual.SetActive(false);
         }
 
-        // 3. 충격파
-        if (Inventory.Instance.GetStackCount(ItemEffectType.Knockback) > 0)
+        // 3. 충격파 (Active 슬롯 1~5번에서만 발동)
+        if (Inventory.Instance.GetStackCount(ItemEffectType.Knockback, true) > 0)
         {
             shockwaveTimer -= dt;
             if (shockwaveTimer <= 0)
@@ -532,7 +544,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
                 }
             }
 
-            if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.InstantKill) > 0)
+            if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.InstantKill, true) > 0)
             {
                 if (Random.value < 0.05f) finalDamage = 9999f;
             }
@@ -612,6 +624,8 @@ public class PlayerControler : MonoBehaviour, IDamageable
         isBoost = true;
         boostTimer = boostDuration;
 
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-5"); // 금강불괴 (부스트)
+
         if (Inventory.Instance != null)
         {
             if (Inventory.Instance.GetStackCount(ItemEffectType.MoveSpeedUp) > 0)
@@ -635,30 +649,31 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     public void Dash(Vector3 direction)
     {
-        if (direction.sqrMagnitude < 0.01f) return;
+        if (!canMove || direction.sqrMagnitude < 0.01f) return;
 
-        // [New] 벽 뚫기 방지 (Raycast)
-        float dashDist = dashSpeed * dashDuration; // 예상 이동 거리
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, direction, dashDist, wallLayer);
-        
-        if (hit.collider != null)
-        {
-            // 벽이 있으면 벽 바로 앞까지만 이동하거나, 대시를 막음
-            // 여기서는 "벽에 부딪히면 멈춘다"는 느낌으로, 이동은 하되 벽에서 멈추게 처리하거나
-            // 단순히 물리 엔진에게 맡기되 Continuous 설정을 믿음.
-            // 하지만 확실히 하기 위해 거리를 제한할 수도 있음.
-            
-            // 일단은 경고 로그만 찍고, 물리 엔진(Rigidbody) 설정(Continuous)을 믿어봅니다.
-            // 만약 그래도 뚫리면 여기 코드를 'rb.MovePosition' 등으로 바꿔야 함.
-            Debug.DrawLine(transform.position, hit.point, Color.red, 1f);
-        }
-        
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-4"); // 대쉬
 
         isDashing = true;
-        dashTimer = dashDuration;
-        cooldownTimerDashDash = dashCooldown * (1f - GetTotalCooldownReduction()); 
         dashDirection = direction.normalized;
+
+        // [Fix] 벽 뚫기 방지: 대시 경로에 벽이 있는지 미리 체크
+        float dashDist = dashSpeed * dashDuration;
+        float playerRadius = 0.3f; // 콜라이더 반지름 대략치
+        RaycastHit2D hit = Physics2D.CircleCast(transform.position, playerRadius, dashDirection, dashDist, wallLayer);
+        
+        if (hit.collider != null)
+        {
+            // 벽이 있으면 거리 단축 (벽 바로 앞까지)
+            float safeDist = Mathf.Max(0, hit.distance - 0.05f);
+            dashTimer = safeDist / dashSpeed;
+            Debug.Log($"[Dash] Wall detected. Shortening dash: {dashDist} -> {safeDist}");
+        }
+        else
+        {
+            dashTimer = dashDuration;
+        }
+
+        cooldownTimerDashDash = dashCooldown * (1f - GetTotalCooldownReduction()); 
     }
 
     float GetTotalCooldownReduction()
@@ -734,7 +749,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
         if (isMagnetic) reduction = 0.5f; 
         float finalDamage = damage * Guard() * reduction;
 
-        if (finalDamage > 0 && Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.AggroDistribution) > 0)
+        if (finalDamage > 0 && Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.AggroDistribution, true) > 0)
         {
             if (Random.value < 0.1f)
             {
@@ -924,23 +939,25 @@ public class PlayerControler : MonoBehaviour, IDamageable
     {
          if (hpSlider != null) 
          {
+             // [Fix] UI 안정화: HP 바 MaxValue는 항상 PlayerMaxHp로 고정
              hpSlider.maxValue = PlayerMaxHp;
              hpSlider.value = PlayerCurrentHp; 
          }
 
          if (shieldSlider != null)
          {
-             // 쉴드가 체력을 초과할 경우를 대비해 MaxValue 조정 (선택사항이나, 일단 기본 MaxHp 기준)
+             // [Fix] 쉴드 바는 HP 바 배경색(회색)처럼 보이게 하되, 
+             // hpSlider와 동일한 크기에서 쉴드량이 삐져나오는 형태가 아닌 중첩 형태로 표시
+             shieldSlider.maxValue = PlayerMaxHp; // 기본은 MaxHp 기준
+             
              float totalValue = PlayerCurrentHp + PlayerCurrentShield;
              
-             // 만약 전체 양(체력+쉴드)이 MaxHp보다 크면 슬라이더 Max를 늘려줌 (그래야 쉴드가 보임)
+             // 쉴드가 MaxHp를 넘어가면 그만큼 슬라이더 확장
              float displayMax = Mathf.Max(PlayerMaxHp, totalValue);
-
              shieldSlider.maxValue = displayMax;
+             hpSlider.maxValue = displayMax; // 비율 유지를 위해 같이 조정
+             
              shieldSlider.value = totalValue;
-
-             // HP 슬라이더도 비율을 맞추려면 같이 늘려줘야 함
-             if (hpSlider != null) hpSlider.maxValue = displayMax;
          }
          
          string shieldStr = PlayerCurrentShield > 0 ? $" (+{Mathf.Ceil(PlayerCurrentShield)})" : "";
@@ -1013,12 +1030,23 @@ public class PlayerControler : MonoBehaviour, IDamageable
         Debug.DrawLine(transform.position, transform.position + left, Color.cyan);
         Debug.DrawLine(transform.position, transform.position + right, Color.cyan);
     }
+    private Coroutine flashRoutine;
     IEnumerator ScreenFlash(Color c)
     {
         if(bloodOverlay == null) yield break;
+        
+        if (flashRoutine != null) StopCoroutine(flashRoutine);
+        
+        flashRoutine = StartCoroutine(DoScreenFlash(c));
+        yield break;
+    }
+
+    IEnumerator DoScreenFlash(Color c)
+    {
         bloodOverlay.color = new Color(c.r,c.g,c.b, 0.6f);
         yield return new WaitForSeconds(0.3f);
         bloodOverlay.color = Color.clear;
+        flashRoutine = null;
     }
     
     // [NEW] 인터페이스 구현

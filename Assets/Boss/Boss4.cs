@@ -209,6 +209,7 @@ public class Boss4 : MonoBehaviour, IDamageable
     {
         if (spawner.activeSelf) yield break;
         StopMove();
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-11"); // 4층 보스 아포칼립스
         anim.SetBool("Skiil1", true);
         spawner.SetActive(true);
         yield return new WaitForSeconds(spawnerOffDelay);
@@ -231,7 +232,11 @@ public class Boss4 : MonoBehaviour, IDamageable
             foreach (Collider2D hit in hits)
             {
                 IDamageable dmg = hit.GetComponentInParent<IDamageable>();
-                dmg?.TakeDamage(attackDamage);
+                if (dmg != null)
+                {
+                    if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-9"); // 4층 보스 기본 공격 밀치기
+                    dmg.TakeDamage(attackDamage);
+                }
 
                 Rigidbody2D hitRb = hit.GetComponent<Rigidbody2D>();
                 if (hitRb != null)
@@ -253,6 +258,7 @@ public class Boss4 : MonoBehaviour, IDamageable
             Quaternion rot = Quaternion.Euler(0, 0, rotAngle);
 
             GameObject bullet = Instantiate(bulletPrefab, firePoint.position, rot);
+            if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-10"); // 4층 보스 기본 공격 총
             Bullet b = bullet.GetComponent<Bullet>();
             if (b != null)
             {
@@ -285,6 +291,7 @@ public class Boss4 : MonoBehaviour, IDamageable
     void SkillPoisonCloud4()
     {
         if (poisonCloudPrefab == null) return;
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-12"); // 4층 보스 초록 웅덩이
         SpawnCloud(poisonN); SpawnCloud(poisonS); SpawnCloud(poisonE); SpawnCloud(poisonW);
     }
 
@@ -301,20 +308,34 @@ public class Boss4 : MonoBehaviour, IDamageable
         if (Random.value < dodgeChance) return;
         currentHealth -= damage;
         GetComponent<HitFlashController>()?.Flash();
-        if (currentHealth <= 0) Die();
+        if (currentHealth <= 0)
+        {
+            StopAllCoroutines();
+            Die();
+        }
     }
 
     void Die()
     {
+        StartCoroutine(DieRoutine());
+    }
+
+    IEnumerator DieRoutine()
+    {
         currentState = State.Dead;
+        StopMove();
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-11"); // 보스 사망
+        GetComponentInParent<RoomControl>()?.OnEnemyKilled();
+        playerController?.TakeExp(expDrop);
+        
+        yield return new WaitForSeconds(1f);
+
         if (MapManager.Instance != null)
         {
             MapManager.Instance.isBossDead = true;
         }
-        StopMove();
-        GetComponentInParent<RoomControl>()?.OnEnemyKilled();
-        playerController?.TakeExp(expDrop);
-        Destroy(gameObject, 1f);
+        
+        Destroy(gameObject);
     }
 
     public float GetHpRatio() => currentHealth / maxHealth;
