@@ -94,8 +94,11 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
         // 1. Ghost Icon 생성 (Canvas 최상단에 그려지도록)
         ghostIcon = new GameObject("GhostIcon");
-        ghostIcon.transform.SetParent(this.transform.root); // Canvas(Root) 밑으로 이동
-        ghostIcon.transform.SetAsLastSibling(); // 맨 위에 그리기
+        Canvas rootCanvas = GetComponentInParent<Canvas>();
+        if (rootCanvas != null) ghostIcon.transform.SetParent(rootCanvas.transform); 
+        else ghostIcon.transform.SetParent(this.transform.root);
+
+        ghostIcon.transform.SetAsLastSibling(); 
         
         Image ghostImg = ghostIcon.AddComponent<Image>();
         ghostImg.sprite = iconImage.sprite;

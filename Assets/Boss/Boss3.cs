@@ -217,7 +217,7 @@ public class Boss3 : MonoBehaviour, IDamageable
         float damage = GetDamageLastSeconds(window);
 
         // 0�̸� ���� ������ �ʰ�
-        if (damage > 0f)
+        if (damage > 0f && playerController != null)
             playerController.TakeDamage(damage);
 
         // �ĵ�

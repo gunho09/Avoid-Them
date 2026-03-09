@@ -45,12 +45,12 @@ public class PlayerControler : MonoBehaviour, IDamageable
     public TextMeshProUGUI LvlText;
     public TextMeshProUGUI hpText;   
     public TextMeshProUGUI expText;
-    public TextMeshProUGUI CoolDownText1; // 평타
-    public TextMeshProUGUI CoolDownText2; // 훅
-    public TextMeshProUGUI CoolDownText3; // 대시
-    public TextMeshProUGUI CoolDownText4; // 부스트
-    public Image boostIconOverlay;
-    public Image hookIconOverlay;
+    
+    [Header("New Skill UI")]
+    public SkillSlot dashSlot;   // Shift
+    public SkillSlot hookSlot;   // E
+    public SkillSlot boostSlot;  // Q
+
     public Image bloodOverlay;
     public TextMeshProUGUI AttackDamageText;
 
@@ -134,7 +134,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
     RecalculateStats();
         PlayerCurrentHp = PlayerMaxHp; 
         
-        LvlText.text = $"{PlayerLvl}";
+        if (LvlText != null) LvlText.text = $"{PlayerLvl}";
         if (expText != null) expText.text = $"{currentExp} / {MaxExp}";
         UpdateHpUI();
 
@@ -244,7 +244,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
         if (Input.GetKeyDown(KeyCode.Q) && cooldownTimerBoost <= 0) Boost();
 
         // 8) flip 적용은 여기 한 줄만
-        sr.flipX = facingLeft;
+        if (sr != null) sr.flipX = facingLeft;
 
         // 9) 쿨타임/사운드/디버그
         CoolDownMananger();
@@ -333,26 +333,19 @@ public class PlayerControler : MonoBehaviour, IDamageable
     {
         float dt = Time.deltaTime;
 
-        // 1. 공격 (Attack)
+        // 1. 공격 (Attack) - 평타는 보통 텍스트로 안보여줌 (필요시 추가)
         if (cooldownTimerAttack > 0) cooldownTimerAttack -= dt;
         if (AttackTimer > 0) AttackTimer -= dt;
         else if(isAttack) isAttack = false;
-
-        if (CoolDownText1 != null)
-        {
-            if (cooldownTimerAttack > 0) CoolDownText1.text = $"{cooldownTimerAttack}";
-            else CoolDownText1.text = "";
-        }
 
         // 2. 훅 (Hook E)
         if (cooldownTimerHook > 0) cooldownTimerHook -= dt;
         if (hookTimer > 0) hookTimer -= dt;
         else if(isHook) isHook = false;
 
-        if (CoolDownText2 != null)
+        if (hookSlot != null)
         {
-            if (cooldownTimerHook > 0) CoolDownText2.text = $"훅/ {(int)cooldownTimerHook}";
-            else CoolDownText2.text = "";
+            hookSlot.UpdateUI(cooldownTimerHook, hookCooldown, isHook);
         }
 
         // 3. 대시 (Shift)
@@ -360,10 +353,9 @@ public class PlayerControler : MonoBehaviour, IDamageable
         if (dashTimer > 0) dashTimer -= dt;
         else if(isDashing) isDashing = false;
 
-        if (CoolDownText3 != null)
+        if (dashSlot != null)
         {
-            if (cooldownTimerDashDash > 0) CoolDownText3.text = $"{cooldownTimerDashDash}";
-            else CoolDownText3.text = "";
+            dashSlot.UpdateUI(cooldownTimerDashDash, dashCooldown, isDashing);
         }
 
         // 4. 부스트 (Boost Q)
@@ -371,12 +363,9 @@ public class PlayerControler : MonoBehaviour, IDamageable
         if (boostTimer > 0) boostTimer -= dt;
         else if(isBoost) isBoost = false;
 
-        if (CoolDownText4 != null)
+        if (boostSlot != null)
         {
-            if (cooldownTimerBoost > 0) {
-                CoolDownText4.text = $"금강불괴/{(int)cooldownTimerBoost}";
-            }
-            else CoolDownText4.text = "";
+            boostSlot.UpdateUI(cooldownTimerBoost, boostCooldown, isBoost);
         }
 
         // 부스트 지속시간 바
@@ -738,7 +727,6 @@ public class PlayerControler : MonoBehaviour, IDamageable
                  var target = attacker.GetComponent<IDamageable>();
                  if (target != null)
                  {
-                     // 반사 데미지: 받은 데미지를 그대로 돌려줌 (또는 증폭 가능)
                      target.TakeDamage(damage);
                  }
              }
@@ -930,7 +918,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
         float baseDamage = plusPW + numPW + playerStartPw;
         PlayerDamage = baseDamage * (1f + extraAtkPercent);
-        AttackDamageText.text = $"공격력 : {Mathf.Ceil(PlayerDamage)}";
+        if (AttackDamageText != null) AttackDamageText.text = $"공격력 : {Mathf.Ceil(PlayerDamage)}";
         
         if (ExpSlider != null) ExpSlider.value = currentExp;
     }
@@ -992,8 +980,8 @@ public class PlayerControler : MonoBehaviour, IDamageable
             // if(PlayerCurrentHp > PlayerMaxHp) PlayerCurrentHp = PlayerMaxHp;
         } 
         
-        LvlText.text = $"{PlayerLvl}";
-        AttackDamageText.text = $"공격력 : {Mathf.Ceil(PlayerDamage)}";
+        if (LvlText != null) LvlText.text = $"{PlayerLvl}";
+        if (AttackDamageText != null) AttackDamageText.text = $"공격력 : {Mathf.Ceil(PlayerDamage)}";
         if (expText != null) expText.text = $"{currentExp} / {MaxExp}";
         if (ExpSlider != null) 
         {
