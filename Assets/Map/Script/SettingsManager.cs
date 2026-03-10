@@ -1,13 +1,39 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class SettingsManager : MonoBehaviour
 {
     public GameObject settingsPanel;
+    public Toggle fullscreenToggle; // 에디터에서 Toggle UI 연결
 
     void Start()
     {
         Time.timeScale = 1f;
+
+        // 게임 시작 시 현재 전체화면 상태를 Toggle에 반영
+        if (fullscreenToggle != null)
+        {
+            fullscreenToggle.isOn = Screen.fullScreen;
+
+            // 리스너 등록
+            fullscreenToggle.onValueChanged.AddListener(SetFullscreenMode);
+        }
+    }
+
+    // Toggle이 바뀔 때 자동 호출
+    public void SetFullscreenMode(bool isFullscreen)
+    {
+        if (isFullscreen)
+        {
+            Screen.fullScreenMode = FullScreenMode.FullScreenWindow;
+            Screen.fullScreen = true;
+        }
+        else
+        {
+            Screen.fullScreenMode = FullScreenMode.Windowed;
+            Screen.fullScreen = false;
+        }
     }
 
     public void ToggleSettings()
@@ -29,8 +55,6 @@ public class SettingsManager : MonoBehaviour
     public void RestartAndClose()
     {
         Time.timeScale = 1f;
-
-        // 시스템 경로를 직접 다 적어줘서 에러를 원천 봉쇄합니다.
         string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
         UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
     }
@@ -40,7 +64,16 @@ public class SettingsManager : MonoBehaviour
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
-            Application.Quit();
+        Application.Quit();
 #endif
+    }
+
+    void OnDestroy()
+    {
+        // 리스너 메모리 누수 방지
+        if (fullscreenToggle != null)
+        {
+            fullscreenToggle.onValueChanged.RemoveListener(SetFullscreenMode);
+        }
     }
 }
