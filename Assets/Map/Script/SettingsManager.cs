@@ -18,6 +18,14 @@ public class SettingsManager : MonoBehaviour
         }
     }
 
+    public void SettingFalse()
+    {
+        if (settingsPanel != null)
+        {
+            settingsPanel.SetActive(false);
+        }
+    }
+
     public void RestartAndClose()
     {
         Time.timeScale = 1f;
