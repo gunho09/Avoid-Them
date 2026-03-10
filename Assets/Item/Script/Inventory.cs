@@ -133,6 +133,19 @@ public class Inventory : MonoBehaviour
         OnInventoryChanged?.Invoke();
     }
 
+    // 아이템 삭제 (버리기)
+    public void RemoveItem(int index)
+    {
+        if (index < 0 || index >= slots.Count) return;
+        
+        if (slots[index] != null)
+        {
+            Debug.Log($"[Inventory] Removed {slots[index].itemData.itemName} from slot {index}");
+            slots[index] = null;
+            OnInventoryChanged?.Invoke();
+        }
+    }
+
     public int GetStackCount(ItemEffectType effectType, bool activeOnly = false)
     {
         if (activeOnly)

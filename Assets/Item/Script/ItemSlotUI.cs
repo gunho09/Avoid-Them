@@ -131,6 +131,31 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
         // 2. 원본 복구
         if (iconImage != null) iconImage.color = Color.white;
+
+        // 3. UI 밖으로 드래그했는지 확인 (버리기 기능)
+        bool isOutside = false;
+
+        if (eventData.pointerEnter == null)
+        {
+            isOutside = true;
+        }
+        else if (InventoryUI.Instance != null && InventoryUI.Instance.uiPanel != null)
+        {
+            RectTransform panelRect = InventoryUI.Instance.uiPanel.GetComponent<RectTransform>();
+            if (!RectTransformUtility.RectangleContainsScreenPoint(panelRect, eventData.position, eventData.pressEventCamera))
+            {
+                isOutside = true;
+            }
+        }
+
+        if (isOutside)
+        {
+            Debug.Log($"[ItemSlotUI] Discarding item from slot {slotIndex}");
+            if (Inventory.Instance != null)
+            {
+                Inventory.Instance.RemoveItem(slotIndex);
+            }
+        }
     }
 
     public void OnDrop(PointerEventData eventData)

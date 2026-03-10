@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 public class InventoryUI : MonoBehaviour
 {
+    public static InventoryUI Instance;
+
     [Header("UI References")]
     public GameObject uiPanel; // 인벤토리 전체 패널
     public Transform activeSlotsParent; // 상단 5개 슬롯 부모
@@ -11,6 +13,12 @@ public class InventoryUI : MonoBehaviour
 
     private List<ItemSlotUI> activeSlots = new List<ItemSlotUI>();
     private List<ItemSlotUI> storageSlots = new List<ItemSlotUI>();
+
+    private void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+    }
 
     private void Start()
     {
