@@ -223,7 +223,15 @@ public class SecondBoss : MonoBehaviour, IDamageable
     void FindPlayer()
     {
         GameObject obj = GameObject.FindGameObjectWithTag("Player");
-        if (obj) player = obj.GetComponent<PlayerControler>();
+        if (obj != null) 
+        {
+            player = obj.GetComponent<PlayerControler>();
+            
+            if (player == null)
+            {
+                player = obj.GetComponentInChildren<PlayerControler>();
+            }
+        }
     }
 
     public float GetHpRatio()
