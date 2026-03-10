@@ -14,7 +14,7 @@ public class SettingsManager : MonoBehaviour
     {
         if (settingsPanel != null)
         {
-            settingsPanel.SetActive(!settingsPanel.activeSelf);
+            settingsPanel.SetActive(true);
         }
     }
 
