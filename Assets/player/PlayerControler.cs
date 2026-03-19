@@ -40,6 +40,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
     public Slider hpSlider;
     public Slider shieldSlider; // [New] 쉴드 슬라이더 (회색)
     public GameObject deathUI;
+    public GameObject targetUI;
     public Slider ExpSlider;
     public Slider BoostTime;
     public TextMeshProUGUI LvlText;
@@ -180,6 +181,21 @@ public class PlayerControler : MonoBehaviour, IDamageable
         // 2) 마우스 / 바라보는 방향(애니메이터용)
         Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector2 lookDir = ((Vector2)mousePos - (Vector2)transform.position).normalized;
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (targetUI != null)
+            {
+                bool isActive = targetUI.activeSelf;
+                targetUI.SetActive(!isActive);
+
+                // 마우스 커서도 같이 제어하고 싶다면 아래 주석을 해제하세요.
+                // Cursor.visible = !isActive;
+                // Cursor.lockState = !isActive ? CursorLockMode.None : CursorLockMode.Locked;
+            }
+        }
+
+
         if (anim != null)
         {
             anim.SetFloat("hInput", h);

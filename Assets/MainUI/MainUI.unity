@@ -155,7 +155,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: -0.000015259, y: 113}
+  m_AnchoredPosition: {x: 0.000015258556, y: 173.03705}
   m_SizeDelta: {x: 295.8354, y: 71.88699}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &207285696
@@ -394,7 +394,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &506849292
 RectTransform:
   m_ObjectHideFlags: 0
@@ -647,7 +647,7 @@ RectTransform:
   m_Father: {fileID: 846372651}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1855,8 +1855,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1119975958}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 63.3443, y: 21.2374}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -2190,10 +2190,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 2098024869}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 470.94, y: 43.538}
-  m_SizeDelta: {x: 300.0122, y: 87.07541}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: 5.047119, y: 58.864426}
+  m_SizeDelta: {x: 619.6196, y: 188.1126}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1612305023
 MonoBehaviour:
@@ -2325,7 +2325,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 86, y: -63.68}
+  m_AnchoredPosition: {x: 893.04895, y: -40.385254}
   m_SizeDelta: {x: 50, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1629268906
@@ -2706,7 +2706,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.0043757795, g: 0.29559743, b: 0, a: 0.9490196}
+  m_Color: {r: 0.0043757795, g: 0.29559743, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2813,8 +2813,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: X
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 5488daa1e495a1f4e9e8b50e5ce1b16d, type: 2}
+  m_sharedMaterial: {fileID: 6199448320380299533, guid: 5488daa1e495a1f4e9e8b50e5ce1b16d, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
