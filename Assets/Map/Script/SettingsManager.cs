@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -38,6 +38,7 @@ public class SettingsManager : MonoBehaviour
 
     public void ToggleSettings()
     {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-12");
         if (settingsPanel != null)
         {
             settingsPanel.SetActive(true);
@@ -46,6 +47,7 @@ public class SettingsManager : MonoBehaviour
 
     public void SettingFalse()
     {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-12");
         if (settingsPanel != null)
         {
             settingsPanel.SetActive(false);
@@ -54,6 +56,7 @@ public class SettingsManager : MonoBehaviour
 
     public void RestartAndClose()
     {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-12");
         Time.timeScale = 1f;
         string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
         UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
@@ -61,6 +64,7 @@ public class SettingsManager : MonoBehaviour
 
     public void QuitGame()
     {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-12");
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else

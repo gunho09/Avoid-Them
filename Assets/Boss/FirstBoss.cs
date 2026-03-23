@@ -255,7 +255,7 @@ public class FirstBoss : MonoBehaviour, IDamageable
     {
         for (int i = 0; i < 3; i++)
         {
-            if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-1");
+            if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-2");
             yield return new WaitForSeconds(0.1f);
         }
     }

@@ -221,8 +221,8 @@ public class PlayerControler : MonoBehaviour, IDamageable
         }
 
         // 5) 방향 결정: 공격/훅 입력이 있으면 "마우스 방향" 우선 + 잠금
-        bool attackPressed = Input.GetMouseButtonDown(0) && cooldownTimerAttack <= 0;
-        bool hookPressed = Input.GetKeyDown(KeyCode.E) && cooldownTimerHook <= 0;
+        bool attackPressed = Input.GetMouseButtonDown(0) && cooldownTimerAttack <= 0 && !Guarding;
+        bool hookPressed = Input.GetKeyDown(KeyCode.E) && cooldownTimerHook <= 0 && !Guarding;
 
         if (attackPressed || hookPressed)
         {

@@ -166,6 +166,7 @@ public class Boss3 : MonoBehaviour, IDamageable
         FaceToPlayer();
 
         if (anim != null) anim.SetTrigger("Attack");
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-6"); // 3층 보스 기본 공격
 
         // �ִϸ��̼��� ���� ���� ����� ������ ��ٸ� (��: 0.5��)
         // �� �ð��� �����ؼ� �߻� Ÿ�̹��� ���߼���.
@@ -210,6 +211,7 @@ public class Boss3 : MonoBehaviour, IDamageable
 
         // ��ų �ִ�
         if (anim != null) anim.SetTrigger("Skill1");
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-7"); // 3층 보스 MOD (반사)
 
         // ���� ��
         yield return new WaitForSeconds(0.1f);

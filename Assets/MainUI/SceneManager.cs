@@ -10,16 +10,19 @@ public class SceneManager : MonoBehaviour
     
     public void Setting()
     {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-12");
         SettingMenu.SetActive(true);
     }
 
     public void SettingClose()
     {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-12");
         SettingMenu.SetActive(false);
     }
 
     public void GameStart()
     {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-12");
         // 씬 전환 시 시간 정지가 유지될 수 있으므로 초기화
         Time.timeScale = 1f;
 
@@ -37,6 +40,7 @@ public class SceneManager : MonoBehaviour
     
     public void GameExit()
     {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-12");
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
@@ -46,6 +50,7 @@ public class SceneManager : MonoBehaviour
 
     public void PracticeRoom()
     {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-12");
         Time.timeScale = 1f;
         UnityEngine.SceneManagement.SceneManager.LoadScene("practiceRoom");
     }

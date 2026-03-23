@@ -49,6 +49,7 @@ public class ItemSelectUI : MonoBehaviour
 
     public void OnSelectItem(ItemData item)
     {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-12");
         // 인벤토리에 추가
         Inventory.Instance.AddItem(item);
 
