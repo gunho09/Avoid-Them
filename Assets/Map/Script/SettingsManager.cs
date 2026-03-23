@@ -52,6 +52,10 @@ public class SettingsManager : MonoBehaviour
         {
             settingsPanel.SetActive(false);
         }
+        if (EscMenuManager.Instance != null)
+        {
+            EscMenuManager.Instance.ForceCloseMenu();
+        }
     }
 
     public void RestartAndClose()

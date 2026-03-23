@@ -182,20 +182,22 @@ public class PlayerControler : MonoBehaviour, IDamageable
         Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector2 lookDir = ((Vector2)mousePos - (Vector2)transform.position).normalized;
 
+        // [수정] 게임 씬에서는 EscMenuManager가 꺼져있으면 입력을 못받으므로,
+        // 이 스크립트(항상 활성화된 플레이어)가 ESC를 낚아채서 MenuManager를 깨워줍니다!
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (targetUI != null)
+            if (targetUI != null && EscMenuManager.Instance != null)
             {
-                bool isActive = targetUI.activeSelf;
-                targetUI.SetActive(!isActive);
-
-                // 마우스 커서도 같이 제어하고 싶다면 아래 주석을 해제하세요.
-                // Cursor.visible = !isActive;
-                // Cursor.lockState = !isActive ? CursorLockMode.None : CursorLockMode.Locked;
+                // 꺼져있다면 강제로 켭니다 (EscMenuManager 스크립트 작동 시작)
+                if (!targetUI.activeSelf) 
+                {
+                    targetUI.SetActive(true);
+                }
+                
+                // ToggleMenu를 딱 한 번 호출하여 상태를 완벽하게 동기화시킵니다.
+                EscMenuManager.Instance.ToggleMenu();
             }
         }
-
-
         if (anim != null)
         {
             anim.SetFloat("hInput", h);

@@ -152,7 +152,8 @@ public class SoundManager : MonoBehaviour
         {
             sfxSource.pitch = Random.Range(0.9f, 1.1f); // 피치 랜덤 (0.9 ~ 1.1)
             // 인자로 받은 volume과 글로벌 sfxVolume을 곱하여 재생
-            sfxSource.PlayOneShot(clip, volume * sfxVolume);
+            // (수정) AudioSource의 기본 볼륨에 이미 sfxVolume이 적용되어 있으므로 이중으로 곱하지 않습니다.
+            sfxSource.PlayOneShot(clip, volume);
         }
         else
         {

@@ -36,6 +36,17 @@ public class EscMenuManager : MonoBehaviour
         }
         else
         {
+            // [중요] 메인메뉴에서 넘어온 기존 Instance가 있다면, 
+            // 현재 씬(Game 등)에 새로 생성된 EscMenuManager의 UI 연결 정보들을 기존 Instance에 넘겨줍니다.
+            // 안 그러면 기존 Instance의 settingsPanel이 파괴된 객체를 가리켜 작동하지 않습니다.
+            if (this.settingsPanel != null) Instance.settingsPanel = this.settingsPanel;
+            if (this.bgmSlider != null) Instance.bgmSlider = this.bgmSlider;
+            if (this.sfxSlider != null) Instance.sfxSlider = this.sfxSlider;
+            
+            Instance.isOpened = false;
+            // 게임 씬 시작 시 패널이 떠있지 않도록 확실히 닫음 처리
+            if (Instance.settingsPanel != null) Instance.settingsPanel.SetActive(false);
+
             Destroy(gameObject);
             return;
         }
@@ -48,9 +59,14 @@ public class EscMenuManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        // 게임 도중(buildIndex != 0)일 때는 PlayerControler가 ESC를 대신 감지해주므로
+        // 메인 로비(buildIndex == 0)에서 설정창이 열려있을 때 닫는 용도로만 사용합니다.
+        if (UnitySceneManager.GetActiveScene().buildIndex == 0)
         {
-            ToggleMenu();
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                ToggleMenu();
+            }
         }
     }
 
@@ -170,6 +186,25 @@ public class EscMenuManager : MonoBehaviour
         if (SoundManager.Instance != null)
         {
             SoundManager.Instance.SFXVolume = volume;
+        }
+    }
+
+    public void ForceCloseMenu()
+    {
+        isOpened = false;
+        if (settingsPanel != null) settingsPanel.SetActive(false);
+
+        if (UnitySceneManager.GetActiveScene().buildIndex != 0)
+        {
+            Time.timeScale = 1f;
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+        else
+        {
+            Time.timeScale = 1f;
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
         }
     }
 }

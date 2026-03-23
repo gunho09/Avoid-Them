@@ -17,7 +17,14 @@ public class SceneManager : MonoBehaviour
     public void SettingClose()
     {
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-12");
-        SettingMenu.SetActive(false);
+        if (SettingMenu != null)
+        {
+            SettingMenu.SetActive(false);
+        }
+        if (EscMenuManager.Instance != null)
+        {
+            EscMenuManager.Instance.ForceCloseMenu();
+        }
     }
 
     public void GameStart()
