@@ -193,6 +193,10 @@ public class PlayerControler : MonoBehaviour, IDamageable
                 {
                     targetUI.SetActive(true);
                 }
+                else
+                {
+                    targetUI.SetActive(false);
+                }
                 
                 // ToggleMenu를 딱 한 번 호출하여 상태를 완벽하게 동기화시킵니다.
                 EscMenuManager.Instance.ToggleMenu();

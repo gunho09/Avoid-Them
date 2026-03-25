@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-using System.Collections; // 코루틴을 위해 추가
+using System.Collections;
 
 using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
 
@@ -16,6 +16,7 @@ public class EscMenuManager : MonoBehaviour
     public Slider bgmSlider;
     public Slider sfxSlider;
 
+    // isOpened는 항상 SetPanelState()를 통해서만 변경
     private bool isOpened = false;
 
     void Awake()
@@ -28,7 +29,6 @@ public class EscMenuManager : MonoBehaviour
 
             UnitySceneManager.sceneLoaded += OnSceneLoaded;
 
-            // [수정] 즉시 찾지 않고, 0.1초 뒤에 찾도록 코루틴 실행
             if (UnitySceneManager.GetActiveScene().buildIndex == 0)
             {
                 StartCoroutine(WaitAndConnectButton());
@@ -36,31 +36,43 @@ public class EscMenuManager : MonoBehaviour
         }
         else
         {
-            // [중요] 메인메뉴에서 넘어온 기존 Instance가 있다면, 
-            // 현재 씬(Game 등)에 새로 생성된 EscMenuManager의 UI 연결 정보들을 기존 Instance에 넘겨줍니다.
-            // 안 그러면 기존 Instance의 settingsPanel이 파괴된 객체를 가리켜 작동하지 않습니다.
-            if (this.settingsPanel != null) Instance.settingsPanel = this.settingsPanel;
-            if (this.bgmSlider != null) Instance.bgmSlider = this.bgmSlider;
-            if (this.sfxSlider != null) Instance.sfxSlider = this.sfxSlider;
-            
-            Instance.isOpened = false;
-            // 게임 씬 시작 시 패널이 떠있지 않도록 확실히 닫음 처리
-            if (Instance.settingsPanel != null) Instance.settingsPanel.SetActive(false);
+            // [수정 3] settingsPanel이 this의 자식이면 Destroy 시 참조가 끊기므로
+            // DontDestroyOnLoad된 Instance 쪽으로 부모를 옮겨서 살려둠
+            if (this.settingsPanel != null)
+            {
+                this.settingsPanel.transform.SetParent(Instance.transform);
+                Instance.settingsPanel = this.settingsPanel;
+            }
+            if (this.bgmSlider != null)
+            {
+                this.bgmSlider.transform.SetParent(Instance.transform);
+                Instance.bgmSlider = this.bgmSlider;
+            }
+            if (this.sfxSlider != null)
+            {
+                this.sfxSlider.transform.SetParent(Instance.transform);
+                Instance.sfxSlider = this.sfxSlider;
+            }
+
+            // [수정 5] 상태를 SetPanelState로 통일해서 닫기
+            Instance.SetPanelState(false);
 
             Destroy(gameObject);
             return;
         }
 
-        if (settingsPanel != null)
-        {
-            settingsPanel.SetActive(false);
-        }
+        // 첫 생성 시에도 SetPanelState로 초기화
+        SetPanelState(false);
+    }
+
+    void OnDestroy()
+    {
+        // [수정 2] 이벤트 구독 해제
+        UnitySceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     void Update()
     {
-        // 게임 도중(buildIndex != 0)일 때는 PlayerControler가 ESC를 대신 감지해주므로
-        // 메인 로비(buildIndex == 0)에서 설정창이 열려있을 때 닫는 용도로만 사용합니다.
         if (UnitySceneManager.GetActiveScene().buildIndex == 0)
         {
             if (Input.GetKeyDown(KeyCode.Escape))
@@ -70,48 +82,68 @@ public class EscMenuManager : MonoBehaviour
         }
     }
 
+    // [수정 1] OnSceneLoaded는 Instance에서만 실행되도록 보장
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        if (this != Instance) return; // Duplicate가 호출하는 경우 차단
+
         if (scene.buildIndex == 0)
         {
-            // 씬이 바뀔 때도 안전하게 코루틴으로 연결
             StartCoroutine(WaitAndConnectButton());
         }
     }
 
-    // 0.1초 기다린 후 버튼을 찾는 함수
+    // [수정 4] 재시도 루프 + 타임아웃 적용
     IEnumerator WaitAndConnectButton()
     {
-        // 시간을 멈춘 상태에서도 작동하도록 Realtime 사용
-        yield return new WaitForSecondsRealtime(0.1f);
+        GameObject settingBtnObj = null;
+        float timeout = 3f;
+        float elapsed = 0f;
 
-        GameObject settingBtnObj = GameObject.Find("Setting");
-        if (settingBtnObj != null)
+        while (settingBtnObj == null && elapsed < timeout)
         {
-            Button btn = settingBtnObj.GetComponent<Button>();
-            if (btn != null)
+            settingBtnObj = GameObject.Find("Setting");
+            if (settingBtnObj == null)
             {
-                btn.onClick.RemoveAllListeners();
-                btn.onClick.AddListener(ToggleMenu);
+                elapsed += 0.1f;
+                yield return new WaitForSecondsRealtime(0.1f);
             }
         }
-        else
+
+        if (settingBtnObj == null)
         {
             Debug.LogWarning("Setting 버튼을 찾지 못했습니다. 오브젝트 이름을 확인하세요.");
+            yield break;
         }
+
+        Button btn = settingBtnObj.GetComponent<Button>();
+        if (btn != null)
+        {
+            btn.onClick.RemoveAllListeners();
+            btn.onClick.AddListener(ToggleMenu);
+        }
+    }
+
+    // [수정 5] 패널 상태를 isOpened와 항상 동기화하는 단일 메서드
+    private void SetPanelState(bool open)
+    {
+        isOpened = open;
+        if (settingsPanel != null)
+            settingsPanel.SetActive(isOpened);
     }
 
     public void ToggleMenu()
     {
         if (settingsPanel == null) return;
 
-        isOpened = !isOpened;
-        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-12"); // 버튼 누르는 소리
-        settingsPanel.SetActive(isOpened);
+        if (SoundManager.Instance != null)
+            SoundManager.Instance.PlaySFX("2-12");
+
+        SetPanelState(!isOpened); // [수정 5] SetPanelState로 통일
 
         if (isOpened)
         {
-            UpdateSliderValues(); // 메뉴 열 때 슬라이더 값 동기화
+            UpdateSliderValues();
         }
 
         if (UnitySceneManager.GetActiveScene().buildIndex != 0)
@@ -145,9 +177,10 @@ public class EscMenuManager : MonoBehaviour
 
     public void GoToMainMenu()
     {
-        if (settingsPanel != null) settingsPanel.SetActive(false);
-        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-12"); // 버튼 누르는 소리
-        isOpened = false;
+        if (SoundManager.Instance != null)
+            SoundManager.Instance.PlaySFX("2-12");
+
+        SetPanelState(false); // [수정 5]
         Time.timeScale = 1f;
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
@@ -156,18 +189,25 @@ public class EscMenuManager : MonoBehaviour
 
     private void UpdateSliderValues()
     {
-        if (SoundManager.Instance == null) return;
+        // [수정 6] SoundManager가 없으면 PlayerPrefs로 fallback
+        float bgmVol = SoundManager.Instance != null
+            ? SoundManager.Instance.BGMVolume
+            : PlayerPrefs.GetFloat("BGM_Save", 0.75f);
+
+        float sfxVol = SoundManager.Instance != null
+            ? SoundManager.Instance.SFXVolume
+            : PlayerPrefs.GetFloat("SFX_Save", 0.75f);
 
         if (bgmSlider != null)
         {
-            bgmSlider.value = SoundManager.Instance.BGMVolume;
+            bgmSlider.value = bgmVol;
             bgmSlider.onValueChanged.RemoveAllListeners();
             bgmSlider.onValueChanged.AddListener(SetBGMVolume);
         }
 
         if (sfxSlider != null)
         {
-            sfxSlider.value = SoundManager.Instance.SFXVolume;
+            sfxSlider.value = sfxVol;
             sfxSlider.onValueChanged.RemoveAllListeners();
             sfxSlider.onValueChanged.AddListener(SetSFXVolume);
         }
@@ -176,23 +216,18 @@ public class EscMenuManager : MonoBehaviour
     public void SetBGMVolume(float volume)
     {
         if (SoundManager.Instance != null)
-        {
             SoundManager.Instance.BGMVolume = volume;
-        }
     }
 
     public void SetSFXVolume(float volume)
     {
         if (SoundManager.Instance != null)
-        {
             SoundManager.Instance.SFXVolume = volume;
-        }
     }
 
     public void ForceCloseMenu()
     {
-        isOpened = false;
-        if (settingsPanel != null) settingsPanel.SetActive(false);
+        SetPanelState(false); // [수정 5]
 
         if (UnitySceneManager.GetActiveScene().buildIndex != 0)
         {
