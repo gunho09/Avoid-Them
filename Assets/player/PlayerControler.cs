@@ -314,25 +314,23 @@ public class PlayerControler : MonoBehaviour, IDamageable
             // 플레이어 크기에 맞는 BoxCast (콜라이더 크기 사용)
             Collider2D col = GetComponent<Collider2D>();
             Vector2 boxSize = col != null ? col.bounds.size : new Vector2(0.5f, 0.5f);
-            boxSize *= 0.9f; // 살짝 줄여서 끼임 방지
+            Vector2 castOrigin = col != null ? (Vector2)col.bounds.center : rb.position;
+            boxSize *= 0.95f; // [Fix] 너무 많이 줄이면 벽을 뚫음 (0.9 -> 0.95)
 
             RaycastHit2D hit = Physics2D.BoxCast(
-                rb.position, boxSize, 0f, moveDir, moveDistance, wallLayer
+                castOrigin, boxSize, 0f, moveDir, moveDistance, wallLayer
             );
 
             if (hit.collider != null)
             {
-                // 벽에 닿으면: 벽 바로 앞까지만 이동
-                float safeDistance = Mathf.Max(0, hit.distance - 0.02f);
-                
-                // 축별로 분리해서 벽을 타고 미끄러지게 처리
+                // 벽에 닿으면: 벽 바로 앞까지만 이동 (미끄러짐 처리를 위해 수동 계산)
                 Vector2 velX = new Vector2(desiredVelocity.x, 0);
                 Vector2 velY = new Vector2(0, desiredVelocity.y);
 
                 // X축 체크
                 if (velX.sqrMagnitude > 0.01f)
                 {
-                    RaycastHit2D hitX = Physics2D.BoxCast(rb.position, boxSize, 0f, velX.normalized, 
+                    RaycastHit2D hitX = Physics2D.BoxCast(castOrigin, boxSize, 0f, velX.normalized, 
                         velX.magnitude * Time.fixedDeltaTime, wallLayer);
                     if (hitX.collider != null) velX = Vector2.zero;
                 }
@@ -340,7 +338,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
                 // Y축 체크
                 if (velY.sqrMagnitude > 0.01f)
                 {
-                    RaycastHit2D hitY = Physics2D.BoxCast(rb.position, boxSize, 0f, velY.normalized, 
+                    RaycastHit2D hitY = Physics2D.BoxCast(castOrigin, boxSize, 0f, velY.normalized, 
                         velY.magnitude * Time.fixedDeltaTime, wallLayer);
                     if (hitY.collider != null) velY = Vector2.zero;
                 }
@@ -674,7 +672,11 @@ public class PlayerControler : MonoBehaviour, IDamageable
         // [Fix] 벽 뚫기 방지: 대시 경로에 벽이 있는지 미리 체크
         float dashDist = dashSpeed * dashDuration;
         float playerRadius = 0.3f; // 콜라이더 반지름 대략치
-        RaycastHit2D hit = Physics2D.CircleCast(transform.position, playerRadius, dashDirection, dashDist, wallLayer);
+        
+        Collider2D col = GetComponent<Collider2D>();
+        Vector2 castOrigin = col != null ? (Vector2)col.bounds.center : (Vector2)transform.position;
+        
+        RaycastHit2D hit = Physics2D.CircleCast(castOrigin, playerRadius, dashDirection, dashDist, wallLayer);
         
         if (hit.collider != null)
         {
