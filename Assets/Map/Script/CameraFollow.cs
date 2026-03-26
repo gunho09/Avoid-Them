@@ -1,71 +1,105 @@
 using UnityEngine;
+using System.Collections;
 
 public class CameraFollow : MonoBehaviour
 {
     public Transform target;
     public float smoothSpeed = 0.125f;
-    public Vector3 offset; // 필요 시 사용
+    public Vector3 offset;
 
-    [Header("Background Settings")]
-    public Sprite backgroundSprite; // 인스펙터에서 '벽 타일' 이미지를 넣어주세요
-    public Color backgroundColor = new Color(0.2f, 0.2f, 0.2f, 1f); // 어두운 회색
+    private Camera cam;
+    private Vector3 shakeOffset = Vector3.zero;
+    private Coroutine shakeCoroutine;
 
-    // [단순 이동용] 카메라를 특정 위치로 즉시 이동 (Z값은 -10 유지)
-    public void MoveCamera(Vector3 targetPosition)
+    // 흔들림 없는 "진짜 카메라 위치"
+    private Vector3 basePosition;
+
+    private void Awake()
     {
-        transform.position = new Vector3(targetPosition.x, targetPosition.y, -10f);
-        // Debug.Log($"Camera Moved to: {transform.position}");
+        cam = GetComponent<Camera>();
+        if (cam != null)
+        {
+            cam.backgroundColor = Color.black;
+        }
+
+        basePosition = transform.position;
     }
 
     private void LateUpdate()
     {
         if (target != null)
         {
-            // 부드러운 이동 (Smooth Damp 또는 Lerp)
             Vector3 desiredPosition = new Vector3(target.position.x, target.position.y, -10f) + offset;
-            Vector3 smoothedPosition = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed);
-            transform.position = smoothedPosition;
-        }
-    }
 
-    private void Awake()
-    {
-        Camera cam = GetComponent<Camera>();
-        if (cam != null)
+            // 흔들림 없는 위치끼리만 보간
+            basePosition = Vector3.Lerp(basePosition, desiredPosition, smoothSpeed);
+        }
+        else
         {
-            cam.backgroundColor = Color.black; // 기본은 검은색
+            // target이 없으면 현재 basePosition 유지
+            basePosition = new Vector3(basePosition.x, basePosition.y, -10f);
         }
+
+        // 마지막에만 흔들림 추가
+        transform.position = basePosition + shakeOffset;
     }
 
-    // [카메라 크기 조절]
+    public void MoveCamera(Vector3 targetPosition)
+    {
+        basePosition = new Vector3(targetPosition.x, targetPosition.y, -10f);
+        transform.position = basePosition + shakeOffset;
+    }
+
     public void SetCameraSize(float size)
     {
-        Camera cam = GetComponent<Camera>();
         if (cam != null)
         {
             cam.orthographicSize = size;
         }
     }
 
-    // [가로/세로 길이에 맞춰 카메라 크기 자동 조절]
     public void SetCameraToFit(float width, float height)
     {
-        Camera cam = GetComponent<Camera>();
         if (cam != null)
         {
             float screenAspect = cam.aspect;
             float sizeBasedOnHeight = height / 2f;
             float sizeBasedOnWidth = width / screenAspect / 2f;
-
-            // 둘 중 더 큰 값을 선택해야 잘리지 않음
             cam.orthographicSize = Mathf.Max(sizeBasedOnHeight, sizeBasedOnWidth);
         }
     }
 
-    // [카메라 초기화] - 복도로 돌아갈 때 호출
     public void ResetCamera()
     {
-        // 복도 기본 사이즈 (가로 18, 세로 10)에 맞춤
         SetCameraToFit(18f, 10f);
+    }
+
+    public void Shake(float duration, float magnitude)
+    {
+        if (shakeCoroutine != null)
+        {
+            StopCoroutine(shakeCoroutine);
+        }
+        shakeCoroutine = StartCoroutine(ShakeRoutine(duration, magnitude));
+    }
+
+    private IEnumerator ShakeRoutine(float duration, float magnitude)
+    {
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            float damper = 1f - Mathf.Clamp01(elapsed / duration);
+
+            float x = Random.Range(-1f, 1f) * magnitude * damper;
+            float y = Random.Range(-1f, 1f) * magnitude * damper;
+            shakeOffset = new Vector3(x, y, 0f);
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        shakeOffset = Vector3.zero;
+        shakeCoroutine = null;
     }
 }

@@ -46,7 +46,8 @@ public class PlayerControler : MonoBehaviour, IDamageable
     public TextMeshProUGUI LvlText;
     public TextMeshProUGUI hpText;   
     public TextMeshProUGUI expText;
-    
+    private CameraFollow cameraFollow;
+
     [Header("New Skill UI")]
     public SkillSlot dashSlot;   // Shift
     public SkillSlot hookSlot;   // E
@@ -138,6 +139,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
         if (LvlText != null) LvlText.text = $"{PlayerLvl}";
         if (expText != null) expText.text = $"{currentExp} / {MaxExp}";
         UpdateHpUI();
+        cameraFollow = FindObjectOfType<CameraFollow>();
 
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
@@ -513,6 +515,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
     public void Attack1()
     {
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-3", 1.0f); // 기본 공격
+        cameraFollow?.Shake(0.1f, 0.1f);
 
         attackNum++;
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -603,6 +606,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
         Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mousePos.z = 0;
         Vector2 attackDir = (mousePos - transform.position).normalized;
+        cameraFollow?.Shake(0.2f, 0.2f);    
 
         DebugDrawFan(attackDir, 60f, attackRange);
         StartCoroutine(AttackStopRoutine());
@@ -743,6 +747,10 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     public void TakeDamage(float damage, GameObject attacker)
     {
+
+        cameraFollow?.Shake(0.1f, 0.05f);
+
+
         if (isReflecting) 
         {
              Debug.Log("반사!");
