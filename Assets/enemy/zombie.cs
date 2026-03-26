@@ -38,6 +38,9 @@ public class zombie : MonoBehaviour, IDamageable
     private Animator anim;
     private Vector2 lastLookDirection = Vector2.down;
 
+    public GameObject bloodVFXPrefab;
+
+
     // 튜토리얼에서 좀비 정지/해제
     public void SetFrozen(bool frozen)
     {
@@ -241,6 +244,9 @@ public class zombie : MonoBehaviour, IDamageable
         if (playerCtrl != null) playerCtrl.TakeExp(expDrop);
 
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-10"); // 좀비 사망
+
+        GameObject vfx = Instantiate(bloodVFXPrefab, transform.position, Quaternion.identity);
+        Destroy(vfx, 1.2f);
 
         rb.linearVelocity = Vector2.zero;
 // ...

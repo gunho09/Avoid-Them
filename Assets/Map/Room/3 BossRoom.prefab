@@ -1635,3 +1635,4 @@ MonoBehaviour:
   range: 100
   attackRange: 1
   playerCtrl: {fileID: 0}
+  bloodVFXPrefab: {fileID: 0}

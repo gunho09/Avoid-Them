@@ -1551,6 +1551,7 @@ MonoBehaviour:
   range: 1
   attackRange: 1
   playerCtrl: {fileID: 0}
+  bloodVFXPrefab: {fileID: 0}
 --- !u!50 &5420919342640063634
 Rigidbody2D:
   serializedVersion: 5
