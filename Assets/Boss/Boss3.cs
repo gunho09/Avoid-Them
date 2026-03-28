@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class Boss3 : MonoBehaviour, IDamageable
 {
@@ -25,6 +26,9 @@ public class Boss3 : MonoBehaviour, IDamageable
     public float globalCooldown;      // �� �� ������ ���� �ð�
     public float dodgeChance;
     public int expDrop;
+    
+    [Header("UI")]
+    public Slider HpBar;
 
     private float currentHealth;
     [Header("Flip")]
@@ -101,6 +105,20 @@ public class Boss3 : MonoBehaviour, IDamageable
         firePoint = transform.Find("FirePoint");
 
         StartCoroutine(SpawnDelay());
+
+        if (HpBar != null)
+        {
+            HpBar.maxValue = maxHealth;
+            HpBar.value = currentHealth;
+        }
+    }
+
+    void Update()
+    {
+        if (HpBar != null)
+        {
+            HpBar.value = currentHealth;
+        }
     }
 
     IEnumerator SpawnDelay()

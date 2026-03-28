@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class Boss4 : MonoBehaviour, IDamageable
 {
@@ -17,6 +18,9 @@ public class Boss4 : MonoBehaviour, IDamageable
     private float currentHealth;
     private Animator anim;
     private Rigidbody2D rb;
+
+    [Header("UI")]
+    public Slider HpBar;
 
     /* =======================
      * Player References
@@ -90,6 +94,20 @@ public class Boss4 : MonoBehaviour, IDamageable
 
         firePoint = transform.Find("FirePoint");
         StartCoroutine(SpawnDelay());
+
+        if (HpBar != null)
+        {
+            HpBar.maxValue = maxHealth;
+            HpBar.value = currentHealth;
+        }
+    }
+
+    void Update()
+    {
+        if (HpBar != null)
+        {
+            HpBar.value = currentHealth;
+        }
     }
 
     IEnumerator SpawnDelay()

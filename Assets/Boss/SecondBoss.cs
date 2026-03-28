@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class SecondBoss : MonoBehaviour, IDamageable
@@ -13,6 +14,8 @@ public class SecondBoss : MonoBehaviour, IDamageable
     public float attackRange = 2.5f;
     public float attackCooldown = 2.0f;
     public int expDrop = 80;
+
+    public Slider HpBar;
 
     public float magneticDuration = 5.0f;
     public float damageReductionPercent = 0.5f;
@@ -40,6 +43,12 @@ public class SecondBoss : MonoBehaviour, IDamageable
         hp = maxHp;
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
+
+        if (HpBar != null)
+        {
+            HpBar.maxValue = maxHp;
+            HpBar.value = hp;
+        }
         
         if (rb != null) {
             rb.gravityScale = 0;
@@ -53,6 +62,11 @@ public class SecondBoss : MonoBehaviour, IDamageable
 
     void Update()
     {
+        if (HpBar != null)
+        {
+            HpBar.value = hp;
+        }
+
         if (isDead || player == null) {
             FindPlayer();
             return;
@@ -111,10 +125,8 @@ public class SecondBoss : MonoBehaviour, IDamageable
         Vector2 direction = ((Vector2)player.transform.position - (Vector2)transform.position).normalized;
         rb.MovePosition(rb.position + direction * moveSpeed * Time.deltaTime);
 
-
         transform.localScale = new Vector3(direction.x > 0 ? 1 : -1, 1, 1);
     }
-
 
     IEnumerator StabAttackRoutine()
     {
@@ -122,7 +134,7 @@ public class SecondBoss : MonoBehaviour, IDamageable
         lastAttackTime = Time.time;
 
         anim?.SetTrigger("Attack");
-        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-3"); // 2층 보스 기본 공격
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-3");
         yield return new WaitForSeconds(0.4f);
 
         if (Vector2.Distance(transform.position, player.transform.position) <= attackRange)
@@ -134,29 +146,28 @@ public class SecondBoss : MonoBehaviour, IDamageable
         currentState = State.Idle;
     }
 
-
     IEnumerator MagneticFieldRoutine()
     {
         currentState = State.Skill1;
         lastMagneticTime = Time.time;
         isMagneticActive = true;
-        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-4"); // 2층 보스 자기장
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-4");
         anim?.SetBool("isMagnetic", true); 
 
         yield return new WaitForSeconds(magneticDuration);
 
         anim?.SetBool("isMagnetic", false); 
-        
         isMagneticActive = false;
         currentState = State.Idle;
     }
+
     IEnumerator PoisonGasRoutine()
     {
         currentState = State.Skill2;
         lastGasTime = Time.time;
 
         if (gasParticle) gasParticle.Play();
-        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-5"); // 2층 보스 뿜기
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-5");
         anim?.SetTrigger("Skill2");
 
         float timer = 0;
@@ -166,13 +177,10 @@ public class SecondBoss : MonoBehaviour, IDamageable
         while (timer < gasDuration)
         {
             float dist = Vector2.Distance(transform.position, player.transform.position);
-            
             if (dist <= gasRadius)
             {
                 player.TakeDamage(damagePerTick);
             }
-
-
             yield return new WaitForSeconds(damageInterval);
             timer += damageInterval;
         }
@@ -206,10 +214,8 @@ public class SecondBoss : MonoBehaviour, IDamageable
         isDead = true;
         currentState = State.Die;
 
-        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-11"); // 보스 사망
-        
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-11");
         GetComponent<Collider2D>().enabled = false;
-        
         yield return new WaitForSeconds(2.0f);
 
         if (MapManager.Instance != null)
@@ -226,18 +232,13 @@ public class SecondBoss : MonoBehaviour, IDamageable
         if (obj != null) 
         {
             player = obj.GetComponent<PlayerControler>();
-            
-            if (player == null)
-            {
-                player = obj.GetComponentInChildren<PlayerControler>();
-            }
+            if (player == null) player = obj.GetComponentInChildren<PlayerControler>();
         }
     }
 
     public float GetHpRatio()
     {
-        if (maxHp <= 0) return 1f;
-        return hp / maxHp;
+        return maxHp <= 0 ? 1f : hp / maxHp;
     }
 
     private void OnDrawGizmosSelected()
