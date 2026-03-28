@@ -36,6 +36,8 @@ public class SecondBoss : MonoBehaviour, IDamageable
     private float lastGasTime;
     private bool isDead = false;
 
+    private bool isAttacking = false;
+
     public ParticleSystem gasParticle;
 
     void Start()
@@ -83,6 +85,8 @@ public class SecondBoss : MonoBehaviour, IDamageable
                 anim?.SetBool("isMoving", true);
                 break;
         }
+
+        if (isDead || player == null || isAttacking) return;
     }
 
     void CheckNextAction()
@@ -130,19 +134,23 @@ public class SecondBoss : MonoBehaviour, IDamageable
 
     IEnumerator StabAttackRoutine()
     {
+        isAttacking = true; // 공격 시작!
         currentState = State.Attack;
         lastAttackTime = Time.time;
 
         anim?.SetTrigger("Attack");
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-3");
+        
         yield return new WaitForSeconds(0.4f);
 
-        if (Vector2.Distance(transform.position, player.transform.position) <= attackRange)
+        if (player != null && Vector2.Distance(transform.position, player.transform.position) <= attackRange)
         {
             player.TakeDamage(damage);
         }
 
         yield return new WaitForSeconds(0.6f);
+        
+        isAttacking = false;
         currentState = State.Idle;
     }
 
