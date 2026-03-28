@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class FirstBoss : MonoBehaviour, IDamageable
@@ -22,6 +23,12 @@ public class FirstBoss : MonoBehaviour, IDamageable
     public GameObject WindPunchPrefab;
     public ParticleSystem zonnahitParticle;
 
+    private CameraFollow cameraFollow;
+
+    public GameObject bloodVFXPrefab;
+
+    public Slider HpBar;
+
     private Rigidbody2D rb;
     private float lastAttackTime;
     private float lastSkillTime;
@@ -43,6 +50,12 @@ public class FirstBoss : MonoBehaviour, IDamageable
         hp = maxHp;
         rb = GetComponent<Rigidbody2D>();
         hitSr = GetComponentInChildren<SpriteRenderer>();
+        cameraFollow = FindObjectOfType<CameraFollow>();
+        
+
+        HpBar.maxValue = maxHp;
+        HpBar.value = hp;
+
 
         if (rb != null) {
             rb.gravityScale = 0;
@@ -60,6 +73,8 @@ public class FirstBoss : MonoBehaviour, IDamageable
             lineRenderer.positionCount = segmentCount;
             lineRenderer.enabled = false;
         }
+                HpBar.value = hp;
+
     }
 
     void FindPlayerAutomatically()
@@ -75,6 +90,8 @@ public class FirstBoss : MonoBehaviour, IDamageable
 
     void Update()
     {
+        HpBar.value = hp;
+
         if (isDead) return;
 
         if (playerControler == null)
@@ -160,7 +177,10 @@ public class FirstBoss : MonoBehaviour, IDamageable
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("3-1"); 
         if (anim != null) anim.SetTrigger("Attack");
 
-        yield return new WaitForSeconds(0.7f); 
+        yield return new WaitForSeconds(0.7f);
+
+        cameraFollow?.Shake(0.3f, 0.4f);
+
 
         Vector2 attackPos = (Vector2)transform.position + ((Vector2)playerControler.transform.position - (Vector2)transform.position).normalized * 1.0f;
         
@@ -226,6 +246,9 @@ public class FirstBoss : MonoBehaviour, IDamageable
                 }
             }
 
+            cameraFollow?.Shake(0.1f, 0.1f);
+
+
             yield return new WaitForSeconds(zonnahitDamageInterval);
             timer += zonnahitDamageInterval;
         }
@@ -239,7 +262,9 @@ public class FirstBoss : MonoBehaviour, IDamageable
     {
         if (isDead) return;
 
+
         hp -= amount;
+
 
         GetComponent<HitFlashController>()?.Flash();
 
@@ -272,7 +297,14 @@ public class FirstBoss : MonoBehaviour, IDamageable
         isDead = true;
         currentState = State.Die;
 
+
+
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-11");
+
+        GameObject vfx = Instantiate(bloodVFXPrefab, transform.position, Quaternion.identity);
+        Destroy(vfx, 2.0f);
+
+        cameraFollow?.Shake(5.0f, 5.0f);
 
         Collider2D col = GetComponent<Collider2D>();
         if(col != null) col.enabled = false;

@@ -515,7 +515,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
     public void Attack1()
     {
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-3", 1.0f); // 기본 공격
-        cameraFollow?.Shake(0.05f, 0.1f);
+        cameraFollow?.Shake(0.07f, 0.1f);
 
         attackNum++;
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
