@@ -4856,6 +4856,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7276232062856214986}
   - component: {fileID: 5266900935723093826}
+  - component: {fileID: 1249886674728567171}
   - component: {fileID: 5981986363638350178}
   - component: {fileID: 8274897540565327615}
   - component: {fileID: 3405607208983035816}
@@ -4946,6 +4947,43 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!70 &1249886674728567171
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3855838896285307203}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: -0.14448898, y: 1.9209585}
+  m_Size: {x: 1.8667921, y: 1.9884654}
+  m_Direction: 0
 --- !u!70 &5981986363638350178
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -4980,8 +5018,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_Size: {x: 3.19, y: 5.8303823}
+  m_Offset: {x: -0.08290008, y: -1.085055}
+  m_Size: {x: 3.0241997, y: 4.4082446}
   m_Direction: 0
 --- !u!50 &8274897540565327615
 Rigidbody2D:
@@ -5007,7 +5045,7 @@ Rigidbody2D:
     serializedVersion: 2
     m_Bits: 0
   m_Interpolate: 0
-  m_SleepingMode: 1
+  m_SleepingMode: 0
   m_CollisionDetection: 0
   m_Constraints: 0
 --- !u!114 &3405607208983035816
@@ -5023,7 +5061,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FirstBoss
   currentState: 0
-  maxHp: 1
+  maxHp: 1500
   hp: 0
   damage: 40
   moveSpeed: 4
