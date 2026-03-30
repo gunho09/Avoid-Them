@@ -24,9 +24,7 @@ public class FirstBoss : MonoBehaviour, IDamageable
     public ParticleSystem zonnahitParticle;
 
     private CameraFollow cameraFollow;
-
     public GameObject bloodVFXPrefab;
-
     public Slider HpBar;
 
     private Rigidbody2D rb;
@@ -35,6 +33,7 @@ public class FirstBoss : MonoBehaviour, IDamageable
     private bool isDead = false;
     private PlayerControler playerControler;
     private Animator anim;
+
     [Header("Hit Flash")]
     public float hitFlashDuration = 0.1f;
     public Color hitFlashColor = Color.gray;
@@ -50,20 +49,23 @@ public class FirstBoss : MonoBehaviour, IDamageable
         hp = maxHp;
         rb = GetComponent<Rigidbody2D>();
         hitSr = GetComponentInChildren<SpriteRenderer>();
-        cameraFollow = FindObjectOfType<CameraFollow>();
         
+        // 노란 줄(경고) 해결 및 중복 할당 제거
+        cameraFollow = Object.FindAnyObjectByType<CameraFollow>();
 
-        HpBar.maxValue = maxHp;
-        HpBar.value = hp;
-
-
-        if (rb != null) {
-            rb.gravityScale = 0;
-            rb.freezeRotation = true;
+        if (HpBar != null)
+        {
+            HpBar.maxValue = maxHp;
+            HpBar.value = hp;
         }
 
-        FindPlayerAutomatically();
-        lastSkillTime = Time.time;
+        if (rb != null) 
+        {
+            rb.gravityScale = 0;
+            rb.freezeRotation = true;
+            // 클론 소환 시 물리 엔진이 잠드는 현상 방지
+            rb.sleepMode = RigidbodySleepMode2D.NeverSleep; 
+        }
 
         anim = GetComponent<Animator>();
 
@@ -73,8 +75,9 @@ public class FirstBoss : MonoBehaviour, IDamageable
             lineRenderer.positionCount = segmentCount;
             lineRenderer.enabled = false;
         }
-                HpBar.value = hp;
 
+        FindPlayerAutomatically();
+        lastSkillTime = Time.time;
     }
 
     void FindPlayerAutomatically()
@@ -90,9 +93,13 @@ public class FirstBoss : MonoBehaviour, IDamageable
 
     void Update()
     {
-        HpBar.value = hp;
+        if (HpBar != null) HpBar.value = hp;
 
         if (isDead) return;
+
+        // [핵심 해결 포인트]
+        // 클론 소환 시 플레이어를 아직 못 찾았더라도 애니메이션은 무조건 갱신되도록 순서를 바꿨습니다.
+        UpdateAnimation(); 
 
         if (playerControler == null)
         {
@@ -104,13 +111,25 @@ public class FirstBoss : MonoBehaviour, IDamageable
         {
             case State.Idle:
                 CheckNextAction();
-                if (anim != null) anim.SetBool("isMoving", false);
                 break;
             case State.Move:
                 HandleMove();
-                if (anim != null) anim.SetBool("isMoving", true);
+                break;
+            case State.Attack:
+            case State.Skill:
                 break;
         }
+    }
+
+    void UpdateAnimation()
+    {
+        if (anim == null) return;
+
+        // 현재 상태가 Move 이거나, 물리적으로 밀리는 속도가 있으면 무조건 true
+        bool isMovingState = (currentState == State.Move);
+        bool isPhysicsMoving = (rb != null && rb.linearVelocity.magnitude > 0.1f);
+
+        anim.SetBool("isMoving", isMovingState || isPhysicsMoving);
     }
 
     void DrawPolygon(int segments, float radius)
@@ -118,12 +137,13 @@ public class FirstBoss : MonoBehaviour, IDamageable
         lineRenderer.positionCount = segments;
         for (int i = 0; i < segments; i++)
         {
-         float angle = i * 2 * Mathf.PI / segments;
-         float x = Mathf.Cos(angle) * radius;
-         float y = Mathf.Sin(angle) * radius;
-         lineRenderer.SetPosition(i, new Vector3(x, y, 0) + transform.position);
+            float angle = i * 2 * Mathf.PI / segments;
+            float x = Mathf.Cos(angle) * radius;
+            float y = Mathf.Sin(angle) * radius;
+            lineRenderer.SetPosition(i, new Vector3(x, y, 0) + transform.position);
         }
     }
+
     void CheckNextAction()
     {
         float distance = Vector2.Distance(transform.position, playerControler.transform.position);
@@ -142,7 +162,7 @@ public class FirstBoss : MonoBehaviour, IDamageable
             }
             else
             {
-                currentState = State.Idle; 
+                currentState = State.Idle;
             }
         }
         else
@@ -162,6 +182,7 @@ public class FirstBoss : MonoBehaviour, IDamageable
             currentState = State.Idle;
             return;
         }
+        
         Vector2 direction = ((Vector2)playerControler.transform.position - (Vector2)transform.position).normalized;
         rb.MovePosition(rb.position + direction * moveSpeed * Time.deltaTime);
 
@@ -181,17 +202,13 @@ public class FirstBoss : MonoBehaviour, IDamageable
 
         cameraFollow?.Shake(0.3f, 0.4f);
 
-
         Vector2 attackPos = (Vector2)transform.position + ((Vector2)playerControler.transform.position - (Vector2)transform.position).normalized * 1.0f;
         
         Collider2D hit = Physics2D.OverlapCircle(attackPos, 1.5f, LayerMask.GetMask("player"));
 
-        if (hit != null)
+        if (hit != null && playerControler != null)
         {
-            if (playerControler != null)
-            {
-                playerControler.TakeDamage(damage);
-            }
+            playerControler.TakeDamage(damage);
         }
 
         yield return new WaitForSeconds(1.0f);
@@ -225,7 +242,6 @@ public class FirstBoss : MonoBehaviour, IDamageable
         if (anim != null) anim.SetTrigger("Skill");
         if (SoundManager.Instance != null)
         {
-            // 0.1초 간격으로 3번 재생하여 난타 느낌 강화
             StartCoroutine(PlayFlurrySounds());
         }
         if (zonnahitParticle != null) zonnahitParticle.Play();
@@ -238,16 +254,12 @@ public class FirstBoss : MonoBehaviour, IDamageable
         {
             Collider2D hit = Physics2D.OverlapCircle(transform.position, zonnahitRadius, LayerMask.GetMask("player"));
 
-            if (hit != null)
+            if (hit != null && playerControler != null)
             {
-                if (playerControler != null) 
-                {
-                    playerControler.TakeDamage(damage * 0.7f);
-                }
+                playerControler.TakeDamage(damage * 0.7f);
             }
 
             cameraFollow?.Shake(0.1f, 0.1f);
-
 
             yield return new WaitForSeconds(zonnahitDamageInterval);
             timer += zonnahitDamageInterval;
@@ -261,17 +273,16 @@ public class FirstBoss : MonoBehaviour, IDamageable
     public void TakeDamage(float amount)
     {
         if (isDead) return;
-
-
         hp -= amount;
 
-
-        GetComponent<HitFlashController>()?.Flash();
-
+        if (hitFlashCo != null) StopCoroutine(hitFlashCo);
+        hitFlashCo = StartCoroutine(HitFlash());
 
         if (hp <= 0) 
         {
-            StopAllCoroutines(); // 진행 중인 난타 등 중단
+            StopAllCoroutines();
+            if (lineRenderer != null) lineRenderer.enabled = false;
+            if (zonnahitParticle != null) zonnahitParticle.Stop();
             StartCoroutine(DieRoutine());
         }
     }
@@ -285,7 +296,6 @@ public class FirstBoss : MonoBehaviour, IDamageable
         }
     }
 
-
     public float GetHpRatio()
     {
         if (maxHp <= 0) return 1f;
@@ -296,8 +306,6 @@ public class FirstBoss : MonoBehaviour, IDamageable
     {
         isDead = true;
         currentState = State.Die;
-
-
 
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-11");
 
@@ -320,6 +328,7 @@ public class FirstBoss : MonoBehaviour, IDamageable
 
         Destroy(gameObject);
     }
+
     IEnumerator HitFlash()
     {
         if (hitSr == null) yield break;
@@ -329,8 +338,7 @@ public class FirstBoss : MonoBehaviour, IDamageable
 
         yield return new WaitForSeconds(hitFlashDuration);
 
-        if (hitSr != null)
-            hitSr.color = origin;
+        if (hitSr != null) hitSr.color = origin;
     }
 
     private void OnDrawGizmosSelected()
