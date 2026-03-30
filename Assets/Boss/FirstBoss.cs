@@ -312,8 +312,6 @@ public class FirstBoss : MonoBehaviour, IDamageable
         GameObject vfx = Instantiate(bloodVFXPrefab, transform.position, Quaternion.identity);
         Destroy(vfx, 2.0f);
 
-        cameraFollow?.Shake(5.0f, 5.0f);
-
         Collider2D col = GetComponent<Collider2D>();
         if(col != null) col.enabled = false;
 
