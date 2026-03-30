@@ -104,7 +104,7 @@ public class ItemPickup : MonoBehaviour
                 Debug.Log("[ItemPickup] 인벤토리가 가득 차서 획득 불가!");
                 if (WarningUI.Instance != null)
                 {
-                    WarningUI.Instance.ShowWarning("인벤토리가 가득 찼습니다! (최대 10개)");
+                    WarningUI.Instance.ShowWarning($"인벤토리가 가득 찼습니다! (최대 {Inventory.Instance.MaxAcquisitionCount}개)");
                 }
             }
         }
