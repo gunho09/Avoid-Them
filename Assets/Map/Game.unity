@@ -2310,7 +2310,7 @@ PrefabInstance:
     - target: {fileID: 6477009639273144782, guid: f5168eed14bfd714bb0dff12e973b699, type: 3}
       propertyPath: damageReductionVFX
       value: 
-      objectReference: {fileID: 1873925290}
+      objectReference: {fileID: 2762478560445393436, guid: 0d89cfaaf789c5847bbbe780e55edfe0, type: 3}
     - target: {fileID: 6477009639273144782, guid: f5168eed14bfd714bb0dff12e973b699, type: 3}
       propertyPath: magneticFieldVisual
       value: 
@@ -3949,11 +3949,6 @@ Transform:
   - {fileID: 1080216997}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1873925290 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4638986445088062995, guid: 012a5fdaed4473f43ba797caba7289eb, type: 3}
-  m_PrefabInstance: {fileID: 1198796437}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1873925293 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8230065631998060686, guid: 012a5fdaed4473f43ba797caba7289eb, type: 3}
