@@ -529,7 +529,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
         StartCoroutine(AttackStopRoutine());
 
         float dashBonus = 0f;
-        bool hasQuickAttack = Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.DashAttackUp) > 0;
+        bool hasQuickAttack = Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.DashAttackUp, true) > 0;
         if (hasQuickAttack && (isDashing || dashTimer > 0 || cooldownTimerDashDash > (dashCooldown - 1f)))
         {
             dashBonus = 0.2f;
@@ -540,7 +540,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
         {
             float finalDamage = PlayerDamage * (1f + dashBonus) * (isBoost ? 2 : 1);
 
-            if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.DoubleAttack) > 0)
+            if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.DoubleAttack, true) > 0)
             {
                 if (isSlayerActive)
                 {
@@ -579,7 +579,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
             hit.GetComponent<IDamageable>()?.TakeDamage(finalDamage);
 
-            if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.Drive) > 0)
+            if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.Drive, true) > 0)
             {
                 driveHitCount++;
                 if (driveHitCount >= 5)
@@ -640,7 +640,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
         if (Inventory.Instance != null)
         {
-            if (Inventory.Instance.GetStackCount(ItemEffectType.MoveSpeedUp) > 0)
+            if (Inventory.Instance.GetStackCount(ItemEffectType.MoveSpeedUp, true) > 0)
             {
                 PlayerCurrentShield += PlayerCurrentHp * 0.2f;
                 StartCoroutine(ScreenFlash(Color.cyan));
@@ -806,7 +806,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
             PlayerCurrentHp -= finalDamage;
             StartCoroutine(ScreenFlash(Color.red));
             
-            if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.RecoveryUp) > 0)
+            if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.RecoveryUp, true) > 0)
             {
                 if (PlayerCurrentHp < PlayerMaxHp * 0.1f)
                 {
@@ -821,7 +821,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
         if (PlayerCurrentHp <= 0)
         {
-            bool hasBand = Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.Resurrection) > 0;
+            bool hasBand = Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.Resurrection, true) > 0;
             if (hasBand)
             {
                 PlayerCurrentHp = 1f; 
@@ -892,8 +892,8 @@ public class PlayerControler : MonoBehaviour, IDamageable
         if (Inventory.Instance != null)
         {
             // 1. 유리 글로브
-            if(Inventory.Instance.GetStackCount(ItemEffectType.GlassCannon) > 0) 
-                 extraHpPercent = -(0.2f * Inventory.Instance.GetStackCount(ItemEffectType.GlassCannon));
+            if(Inventory.Instance.GetStackCount(ItemEffectType.GlassCannon, true) > 0) 
+                 extraHpPercent = -(0.2f * Inventory.Instance.GetStackCount(ItemEffectType.GlassCannon, true));
             
             // 2. 강타자
             extraAtkPercent += Inventory.Instance.GetTotalStatBonus(ItemEffectType.AttackUp); 

@@ -119,7 +119,7 @@ public class InventoryUI : MonoBehaviour
             {
                 if (allItems[i] != null) // Null(빈칸)이 아니면 표시
                 {
-                    activeSlots[i].Setup(allItems[i], i);
+                    activeSlots[i].Setup(allItems[i], i, true);
                 }
                 else // Null(빈칸)이면 클리어 + 인덱스 설정
                 {
@@ -143,7 +143,7 @@ public class InventoryUI : MonoBehaviour
             {
                 if (allItems[dataIndex] != null)
                 {
-                    storageSlots[i].Setup(allItems[dataIndex], dataIndex);
+                    storageSlots[i].Setup(allItems[dataIndex], dataIndex, false);
                 }
                 else
                 {

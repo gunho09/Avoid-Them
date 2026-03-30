@@ -11,14 +11,16 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     private ItemData _itemData;
     public int slotIndex; // 자신의 인벤토리 인덱스
+    private bool _isActive = true; // [New] 현재 활성화된 슬롯인지 여부
 
     private Transform originalParent;
     private GameObject ghostIcon; // 드래그 시 따라다닐 아이콘
 
-    public void Setup(ItemSlot slot, int index)
+    public void Setup(ItemSlot slot, int index, bool isActive = true)
     {
         _itemData = slot.itemData;
         slotIndex = index;
+        _isActive = isActive;
 
         if (_itemData != null)
         {
@@ -26,6 +28,9 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             {
                 iconImage.sprite = _itemData.icon;
                 iconImage.enabled = true;
+                
+                // [New] 비활성 슬롯이면 아이콘을 어둡게 표시
+                iconImage.color = _isActive ? Color.white : new Color(0.3f, 0.3f, 0.3f, 0.8f);
             }
 
             if (stackText != null)
@@ -34,6 +39,8 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
                 {
                     stackText.text = slot.stackCount.ToString();
                     stackText.enabled = true;
+                    // 글자색도 같이 어둡게? (선택사항)
+                    stackText.color = _isActive ? Color.white : new Color(0.6f, 0.6f, 0.6f, 1f);
                 }
                 else
                 {
