@@ -139,6 +139,9 @@ public class MapManager : MonoBehaviour
 
     private IEnumerator EnterRoomRoutine(Vector3 doorPos, bool forceBoss)
     {
+        // [New] 방 이동 시 필드에 남아있는 임시 오브젝트(더미 등) 정리
+        ClearTemporaryObjects();
+
         PlayerControler pc = player != null ? player.GetComponent<PlayerControler>() : null;
         if (pc != null) pc.canMove = false;
 
@@ -265,6 +268,9 @@ public class MapManager : MonoBehaviour
 
     private IEnumerator ReturnToHallwayRoutine()
     {
+        // [New] 복도로 돌아갈 때도 더미 등 정리
+        ClearTemporaryObjects();
+
         PlayerControler pc = player != null ? player.GetComponent<PlayerControler>() : null;
         if (pc != null) pc.canMove = false;
 
@@ -415,5 +421,16 @@ public class MapManager : MonoBehaviour
                 }
             }
         }
+    }
+
+    // [New] 방/복도 이동 시 남아있는 소환물(더미 등)을 강제로 제거
+    private void ClearTemporaryObjects()
+    {
+        DummyItem[] dummies = FindObjectsByType<DummyItem>(FindObjectsSortMode.None);
+        foreach (var d in dummies)
+        {
+            if (d != null) Destroy(d.gameObject);
+        }
+        Debug.Log("[MapManager] Temporary objects cleared.");
     }
 }

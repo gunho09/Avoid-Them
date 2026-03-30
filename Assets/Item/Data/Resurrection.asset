@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Resurrection
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   itemName: "\uBC34\uB4DC"
-  description: "\uC0AC\uB9DD \uC2DC 1\uD68C \uC0DD\uC874\uD569\uB2C8\uB2E4 (\uC18C\uBAA8\uD488)."
+  description: "\uC8FD\uC744 \uB9CC\uD07C \uC138\uAC8C \uB9DE\uC544\uB3C4 \uD55C\uBC88
+    \uBC84\uD301\uB2C8\uB2E4 (\uC18C\uBAA8\uD488)."
   icon: {fileID: -8670353262987725957, guid: cc9857127ac824c49855116936ef59f8, type: 3}
   rarity: 0
   effectType: 12

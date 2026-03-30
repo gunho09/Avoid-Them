@@ -24,9 +24,21 @@ public class Inventory : MonoBehaviour
     public List<ItemSlot> slots = new List<ItemSlot>();
     
     // 현재까지 획득한 아이템 총 개수 (중첩 포함) - 획득 제한용
-    // (기획 변경으로 10개 제한이 '슬롯 10개'를 의미하는지, '먹은 횟수 10번'인지 확인 필요하나 
-    //  유저 요청 "먹는 건 10개" -> 획득 횟수로 유지)
-    public int MaxAcquisitionCount = 10;
+    // 인벤토리 슬롯 수와 맞추기 위해 15개로 변경
+    public int MaxAcquisitionCount = 15;
+
+    public int FilledSlotCount 
+    {
+        get 
+        {
+            int count = 0;
+            foreach (var slot in slots) 
+            {
+                if (slot != null) count++;
+            }
+            return count;
+        }
+    }
 
     public int TotalAcquiredCount 
     {
@@ -55,13 +67,13 @@ public class Inventory : MonoBehaviour
 
     public bool CanAcquire(ItemData newItem)
     {
-        // 1. 총 획득 횟수 제한 (10회)
-        if (TotalAcquiredCount >= MaxAcquisitionCount) return false;
-
-        // 2. 이미 있는 아이템이면? (Stack) -> 가능
+        // 1. 이미 있는 아이템이면? (Stack) -> 무조건 가능 (슬롯을 새로 차지하지 않음)
         if (HasItem(newItem)) return true;
 
-        // 3. 새로운 아이템이면? -> 빈 칸이 하나라도 있으면 가능
+        // 2. 새로운 아이템이면? -> 차지하고 있는 슬롯 수가 제한(15개) 미만이면 가능
+        if (FilledSlotCount >= MaxAcquisitionCount) return false;
+
+        // 3. 빈 칸(null)이 하나라도 있으면 가능
         return slots.Exists(s => s == null);
     }
 

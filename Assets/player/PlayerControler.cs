@@ -99,7 +99,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
     // --- [아이템 관련 변수] ---
     [Header("아이템/더미 설정")]
     public GameObject dummyPrefab; 
-    public GameObject magneticFieldVisual; // 자기장 이펙트 오브젝트 
+    public GameObject damageReductionVFX; // 자기장 이펙트 오브젝트 
 
     private float reflectCooldownTimer = 0f;
     private float reflectDurationTimer = 0f;
@@ -442,7 +442,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
         {
             if (isMagnetic)
             {
-                if (magneticFieldVisual != null) magneticFieldVisual.SetActive(true);
+                if (damageReductionVFX != null) damageReductionVFX.SetActive(true);
 
                 magneticDurationTimer -= dt;
                 if (magneticDurationTimer <= 0)
@@ -453,7 +453,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
             }
             else
             {
-                if (magneticFieldVisual != null) magneticFieldVisual.SetActive(false);
+                if (damageReductionVFX != null) damageReductionVFX.SetActive(false);
 
                 magneticCooldownTimer -= dt;
                 if (magneticCooldownTimer <= 0)
@@ -467,7 +467,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
         else
         {
             isMagnetic = false;
-            if (magneticFieldVisual != null) magneticFieldVisual.SetActive(false);
+            if (damageReductionVFX != null) damageReductionVFX.SetActive(false);
         }
 
         // 3. 충격파 (Active 슬롯 1~5번에서만 발동)

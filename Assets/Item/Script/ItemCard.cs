@@ -63,8 +63,8 @@ public class ItemCard : MonoBehaviour
                 lockOverlay.SetActive(true);
                 if (lockReasonText != null)
                 {
-                    if (Inventory.Instance.TotalAcquiredCount >= Inventory.Instance.MaxAcquisitionCount)
-                        lockReasonText.text = "최대 개수 도달\n(10/10)";
+                    if (Inventory.Instance.FilledSlotCount >= Inventory.Instance.MaxAcquisitionCount)
+                        lockReasonText.text = $"슬롯 가득 참\n({Inventory.Instance.FilledSlotCount}/{Inventory.Instance.MaxAcquisitionCount})";
                     else
                         lockReasonText.text = "슬롯 부족";
                 }
