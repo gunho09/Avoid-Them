@@ -410,6 +410,7 @@ MonoBehaviour:
   dodgeChance: 0
   expDrop: 150
   HpBar: {fileID: 7484947123773690858}
+  itemDropPrefab: {fileID: 1225989697395536146, guid: a12abaf9da31dc1468278edec17e79bc, type: 3}
   facePlayer: 1
   flipWhenPlayerOnLeft: 1
   flipFirePoint: 1

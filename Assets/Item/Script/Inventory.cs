@@ -84,6 +84,17 @@ public class Inventory : MonoBehaviour
     {
         if (!CanAcquire(newItem)) return false;
 
+        // [New] 아이템 교체 로직: 도플갱어를 먹으면 기존 더미(AggroDistribution)를 제거
+        if (newItem.effectType == ItemEffectType.Doppelganger)
+        {
+            int dummyIndex = slots.FindIndex(s => s != null && s.itemData.effectType == ItemEffectType.AggroDistribution);
+            if (dummyIndex != -1)
+            {
+                Debug.Log($"[Inventory] Replacing Dummy with Doppelganger at slot {dummyIndex}");
+                slots[dummyIndex] = null; // 기존 더미 제거
+            }
+        }
+
         // 1. 기존에 있는 아이템인지 확인 (Null이 아닌 것 중에서)
         ItemSlot existingSlot = slots.Find(s => s != null && s.itemData == newItem);
 

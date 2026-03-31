@@ -21,6 +21,25 @@ public class ItemCard : MonoBehaviour
         _data = data;
         _manager = manager;
         gameObject.SetActive(true);
+        // 모든 카드의 크기를 동일하게 강제 (1.0)
+        RectTransform rt = GetComponent<RectTransform>();
+        if (rt != null) 
+        {
+            rt.localScale = Vector3.one;
+            // 만약 특정 카드만 크다면, 그 카드의 가로세로를 강제로 고정해버립니다.
+            rt.sizeDelta = new Vector2(250f, 250f); 
+        }
+        else transform.localScale = Vector3.one;
+
+        // 레이아웃 그룹이 방해하지 못하도록 레이아웃 요소도 고정
+        LayoutElement le = GetComponent<LayoutElement>();
+        if (le != null)
+        {
+            le.preferredWidth = 250f;
+            le.preferredHeight = 250f;
+            le.minWidth = 250f;
+            le.minHeight = 250f;
+        }
 
         // UI 갱신
         if (iconImage != null) iconImage.sprite = data.icon;

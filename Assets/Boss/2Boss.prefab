@@ -183,6 +183,7 @@ MonoBehaviour:
   attackCooldown: 2
   expDrop: 80
   HpBar: {fileID: 3926393751570879126}
+  itemDropPrefab: {fileID: 1225989697395536146, guid: a12abaf9da31dc1468278edec17e79bc, type: 3}
   magneticDuration: 5
   damageReductionPercent: 0.5
   magneticCooldown: 12

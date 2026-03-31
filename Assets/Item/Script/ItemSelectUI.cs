@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ItemSelectUI : MonoBehaviour
 {
@@ -45,6 +46,9 @@ public class ItemSelectUI : MonoBehaviour
                 cards[i].gameObject.SetActive(false);
             }
         }
+
+        // [New] 레이아웃 강제 갱신으로 크기 꼬임 방지
+        LayoutRebuilder.ForceRebuildLayoutImmediate(panel.GetComponent<RectTransform>());
     }
 
     public void OnSelectItem(ItemData item)

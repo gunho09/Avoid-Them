@@ -29,6 +29,7 @@ public class Boss3 : MonoBehaviour, IDamageable
     
     [Header("UI")]
     public Slider HpBar;
+    public GameObject itemDropPrefab; // [New] 보상 아이템 프리팹
 
     private float currentHealth;
     [Header("Flip")]
@@ -238,7 +239,7 @@ public class Boss3 : MonoBehaviour, IDamageable
 
         // 0�̸� ���� ������ �ʰ�
         if (damage > 0f && playerController != null)
-            playerController.TakeDamage(damage);
+            playerController.TakeDamage(damage, this.gameObject);
 
         // �ĵ�
         yield return new WaitForSeconds(0.1f);

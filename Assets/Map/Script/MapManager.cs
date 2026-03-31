@@ -301,6 +301,9 @@ public class MapManager : MonoBehaviour
                 currentStageIsBoss = false; 
                 isBossDead = false;
 
+                // [New] 보스 처치 후 복도로 돌아올 때나 층 이동 시 풀피 회복
+                if (pc != null) pc.FullHeal();
+
                 if (currentFloor < maxFloors)
                 {
                     NextFloor();
@@ -370,6 +373,11 @@ public class MapManager : MonoBehaviour
         // 층 이동 시 복도로 돌아가는 로직 실행
         // 주의: ReturnToHallway를 직접 호출하면 위에서 currentStageIsBoss 체크 로직과 꼬일 수 있음.
         // 하지만 위에서 이미 currentStageIsBoss = false로 만들고 호출했으므로 괜찮음.
+        
+        // [New] 층 이동 시에도 혹시 모르니 한 번 더 풀피 회복
+        PlayerControler pc = player != null ? player.GetComponent<PlayerControler>() : null;
+        if (pc != null) pc.FullHeal();
+
         ReturnToHallway(); 
     }
 

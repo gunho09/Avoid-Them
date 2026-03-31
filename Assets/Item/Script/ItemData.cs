@@ -29,7 +29,13 @@ public enum ItemEffectType
     AttackUp,       // 18. 강타자 (기본 공증)
     AttackSpeedUp,  // 19. 가속
     RecoveryUp,      // 20. 비상식량 (회복량 증가)
-    Drive // 13. 드라이브 (이속 유틸) - MoveSpeedUp과 유사할 수 있음
+    Drive,           // 13. 드라이브 (이속 유틸) - MoveSpeedUp과 유사할 수 있음
+    Doppelganger,    // 21. 도플갱어 (분신)
+    Bulldozer,       // 22. 불도저 (강화 대시)
+    KnowHow,         // 23. 노하우 (킬 비례 공증)
+    Poison,          // 24. 독 (DOT)
+    OutofCombatRegen, // 25. 지속 회복 (전투 중 아닐 시)
+    Awakening        // 26. 각성 (깡 공증)
 }
 
 [CreateAssetMenu(fileName = "New Item", menuName = "Item/ItemData")]
@@ -43,4 +49,7 @@ public class ItemData : ScriptableObject
     
     [Tooltip("중첩당 증가하는 수치 (예: 10% -> 0.1, 공격력 +5 -> 5)")]
     public float valuePerStack; 
+
+    [Tooltip("보스 처치 보상으로만 등장하게 할지 여부")]
+    public bool isBossOnly;
 }

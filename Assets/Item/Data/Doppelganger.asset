@@ -10,12 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 962d83f169666e04885158290a69519f, type: 3}
-  m_Name: AggroDistribution
+  m_Name: Doppelganger
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  itemName: "\uB354\uBBF8"
-  description: "\uD53C\uACA9 \uC2DC \uD655\uB960\uC801\uC73C\uB85C \uB354\uBBF8\uB97C
-    \uC18C\uD658\uD569\uB2C8\uB2E4."
+  itemName: "\uB3C4\uD50C\uAC31\uC5B4"
+  description: "\uB354\uBBF8\uC758 \uCCB4\uB825\uC774 \uD50C\uB808\uC774\uC5B4\uC640
+    \uB3D9\uB4F1\uD574\uC9D1\uB2C8\uB2E4"
   icon: {fileID: -1030638412525562489, guid: 237d1959f3b511640aa68ecf947de4e0, type: 3}
   rarity: 2
-  effectType: 9
+  effectType: 21
   valuePerStack: 1
+  isBossOnly: 0

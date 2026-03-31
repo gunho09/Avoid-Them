@@ -16,6 +16,7 @@ public class SecondBoss : MonoBehaviour, IDamageable
     public int expDrop = 80;
 
     public Slider HpBar;
+    public GameObject itemDropPrefab; // [New] 보성 드랍 프리팹
 
     public float magneticDuration = 5.0f;
     public float damageReductionPercent = 0.5f;
@@ -224,6 +225,19 @@ public class SecondBoss : MonoBehaviour, IDamageable
 
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-11");
         GetComponent<Collider2D>().enabled = false;
+
+        // [New] 보스 전용 아이템 하나 드랍
+        if (ItemDatabase.Instance != null && itemDropPrefab != null)
+        {
+            ItemData bossItem = ItemDatabase.Instance.GetRandomBossItem();
+            if (bossItem != null)
+            {
+                GameObject drop = Instantiate(itemDropPrefab, transform.position, Quaternion.identity);
+                ItemPickup pickup = drop.GetComponent<ItemPickup>();
+                if (pickup != null) pickup.Setup(bossItem, null);
+            }
+        }
+
         yield return new WaitForSeconds(2.0f);
 
         if (MapManager.Instance != null)

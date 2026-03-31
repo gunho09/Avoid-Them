@@ -10,12 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 962d83f169666e04885158290a69519f, type: 3}
-  m_Name: AggroDistribution
+  m_Name: OutofCombatRegen
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  itemName: "\uB354\uBBF8"
-  description: "\uD53C\uACA9 \uC2DC \uD655\uB960\uC801\uC73C\uB85C \uB354\uBBF8\uB97C
-    \uC18C\uD658\uD569\uB2C8\uB2E4."
-  icon: {fileID: -1030638412525562489, guid: 237d1959f3b511640aa68ecf947de4e0, type: 3}
+  itemName: "\uC9C0\uC18D \uD68C\uBCF5"
+  description: "\uC804\uD22C \uC911\uC774 \uC544\uB2D0 \uB54C(3\uCD08 \uD6C4) \uCD08\uB2F9
+    \uCD5C\uB300 \uCCB4\uB825\uC758 1%\uC529 \uD68C\uBCF5"
+  icon: {fileID: 0}
   rarity: 2
-  effectType: 9
-  valuePerStack: 1
+  effectType: 25
+  valuePerStack: 0.01
+  isBossOnly: 0

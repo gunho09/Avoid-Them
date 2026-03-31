@@ -241,7 +241,11 @@ public class zombie : MonoBehaviour, IDamageable
         if (currentState == State.Dead) return;
         currentState = State.Dead;
 
-        if (playerCtrl != null) playerCtrl.TakeExp(expDrop);
+        if (playerCtrl != null) 
+        {
+            playerCtrl.TakeExp(expDrop);
+            playerCtrl.OnEnemyKilled(); // 노하우 아이템 등을 위해 알림
+        }
 
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-10"); // 좀비 사망
 

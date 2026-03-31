@@ -10,12 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 962d83f169666e04885158290a69519f, type: 3}
-  m_Name: AggroDistribution
+  m_Name: Bulldozer
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  itemName: "\uB354\uBBF8"
-  description: "\uD53C\uACA9 \uC2DC \uD655\uB960\uC801\uC73C\uB85C \uB354\uBBF8\uB97C
-    \uC18C\uD658\uD569\uB2C8\uB2E4."
-  icon: {fileID: -1030638412525562489, guid: 237d1959f3b511640aa68ecf947de4e0, type: 3}
+  itemName: "\uBD88\uB3C4\uC800"
+  description: "\uB300\uC2DC\uAC00 \uAC70\uB9AC\uAC00 \uB298\uC5B4\uB098\uACE0 \uC2DC\uC804
+    \uC2DC \uC8FC\uBCC0 \uC801\uC744 \uAE30\uC808\uC2DC\uD0B5\uB2C8\uB2E4. "
+  icon: {fileID: 4574539109389179932, guid: 307f5d009a3b97e4c94800db8523a80a, type: 3}
   rarity: 2
-  effectType: 9
-  valuePerStack: 1
+  effectType: 22
+  valuePerStack: 1.5
+  isBossOnly: 0

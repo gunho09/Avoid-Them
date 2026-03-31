@@ -5074,6 +5074,7 @@ MonoBehaviour:
   WindPunchPrefab: {fileID: 5852722680809201381, guid: 63f7661a80c02164c89d616b878acae4, type: 3}
   zonnahitParticle: {fileID: 3749097855682342551}
   bloodVFXPrefab: {fileID: 2136148702472388661, guid: 822961bdfc0f4a5499b711129c4374ca, type: 3}
+  itemDropPrefab: {fileID: 1225989697395536146, guid: a12abaf9da31dc1468278edec17e79bc, type: 3}
   HpBar: {fileID: 8311501701020116505}
   hitFlashDuration: 0.1
   hitFlashColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}

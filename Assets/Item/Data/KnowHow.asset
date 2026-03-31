@@ -10,12 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 962d83f169666e04885158290a69519f, type: 3}
-  m_Name: AggroDistribution
+  m_Name: KnowHow
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  itemName: "\uB354\uBBF8"
-  description: "\uD53C\uACA9 \uC2DC \uD655\uB960\uC801\uC73C\uB85C \uB354\uBBF8\uB97C
-    \uC18C\uD658\uD569\uB2C8\uB2E4."
-  icon: {fileID: -1030638412525562489, guid: 237d1959f3b511640aa68ecf947de4e0, type: 3}
+  itemName: "\uB178\uD558\uC6B0"
+  description: "\uC880\uBE44 8\uB9C8\uB9AC\uB97C \uCC98\uCE58\uD560 \uB54C\uB9C8\uB2E4
+    \uACF5\uACA9\uB825\uC774 5%\uC529 \uC601\uAD6C \uC0C1\uC2B9"
+  icon: {fileID: 7197701681392455091, guid: a907f18dc187fbe43a1d04688e2e4c04, type: 3}
   rarity: 2
-  effectType: 9
-  valuePerStack: 1
+  effectType: 23
+  valuePerStack: 0.05
+  isBossOnly: 0

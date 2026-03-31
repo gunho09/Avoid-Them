@@ -8,4 +8,14 @@ public class MenuButton : MonoBehaviour
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-12");
         UnityEngine.SceneManagement.SceneManager.LoadScene("MainUI");
     }
+
+    public void QuitGame()
+    {
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-12");
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
 }

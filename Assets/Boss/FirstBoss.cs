@@ -25,6 +25,7 @@ public class FirstBoss : MonoBehaviour, IDamageable
 
     private CameraFollow cameraFollow;
     public GameObject bloodVFXPrefab;
+    public GameObject itemDropPrefab; // [New] 보상 아이템 프리팹
     public Slider HpBar;
 
     private Rigidbody2D rb;
@@ -208,7 +209,7 @@ public class FirstBoss : MonoBehaviour, IDamageable
 
         if (hit != null && playerControler != null)
         {
-            playerControler.TakeDamage(damage);
+            playerControler.TakeDamage(damage, this.gameObject);
         }
 
         yield return new WaitForSeconds(1.0f);
@@ -256,7 +257,7 @@ public class FirstBoss : MonoBehaviour, IDamageable
 
             if (hit != null && playerControler != null)
             {
-                playerControler.TakeDamage(damage * 0.7f);
+                playerControler.TakeDamage(damage * 0.7f, this.gameObject);
             }
 
             cameraFollow?.Shake(0.1f, 0.1f);
@@ -316,6 +317,23 @@ public class FirstBoss : MonoBehaviour, IDamageable
         if(col != null) col.enabled = false;
 
         if (zonnahitParticle != null) zonnahitParticle.Stop();
+
+        // [New] 보스 전용 아이템 하나 드랍
+        if (ItemDatabase.Instance != null && itemDropPrefab != null)
+        {
+            ItemData bossItem = ItemDatabase.Instance.GetRandomBossItem();
+            if (bossItem != null)
+            {
+                GameObject drop = Instantiate(itemDropPrefab, transform.position, Quaternion.identity);
+                ItemPickup pickup = drop.GetComponent<ItemPickup>();
+                if (pickup != null)
+                {
+                    // 보스방은 RoomControl이 있더라도 바로 열리게 하거나 
+                    // Boss 전용 드랍은 RoomControl을 거치지 않고 독립적으로 셋업 (null 전달)
+                    pickup.Setup(bossItem, null);
+                }
+            }
+        }
 
         yield return new WaitForSeconds(2.0f);
         

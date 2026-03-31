@@ -109,6 +109,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
     private float magneticDurationTimer = 0f;
     private bool isMagnetic = false;
 
+    public float magneticRadius = 5f; // [New] 자기장 시각적 범위 (반지름)
     private float shockwaveTimer = 0f;
     
     private int attackHitCount = 0;
@@ -116,6 +117,11 @@ public class PlayerControler : MonoBehaviour, IDamageable
     private bool isSlayerActive = false;
     private float driveSpeedBonus = 0f;
     private float driveTimer = 0f;
+
+    [Header("신규 아이템 (Boss)")]
+    private float lastCombatTime = 0f;
+    private int knowHowKillCount = 0;
+    private float knowHowAtkMultiplier = 1f;
     // -------------------------
     private bool facingLeft = false;
     private bool lockFacing = false;
@@ -213,6 +219,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
         }
         // 3) 아이템 타이머
         UpdateItemTimers(dt);
+        UpdateCommonLogic(dt);
 
         // 4) 가드 (우클릭)
         if (Input.GetMouseButtonDown(1))
@@ -442,7 +449,12 @@ public class PlayerControler : MonoBehaviour, IDamageable
         {
             if (isMagnetic)
             {
-                if (damageReductionVFX != null) damageReductionVFX.SetActive(true);
+                if (damageReductionVFX != null) 
+                {
+                    damageReductionVFX.SetActive(true);
+                    // 반지름(radius)을 지름(scale)으로 변환 (Sprite 크기가 1인 경우 기준)
+                    damageReductionVFX.transform.localScale = new Vector3(magneticRadius * 2, magneticRadius * 2, 1);
+                }
 
                 magneticDurationTimer -= dt;
                 if (magneticDurationTimer <= 0)
@@ -489,6 +501,21 @@ public class PlayerControler : MonoBehaviour, IDamageable
             {
                 driveSpeedBonus = 0f;
                 driveHitCount = 0;
+            }
+        }
+    }
+
+    void UpdateCommonLogic(float dt)
+    {
+        // 지속 회복 (OutofCombatRegen)
+        if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.OutofCombatRegen, true) > 0)
+        {
+            if (Time.time - lastCombatTime > 3.0f)
+            {
+                var item = ItemDatabase.Instance.GetItemDataByEffect(ItemEffectType.OutofCombatRegen);
+                float rate = item != null ? item.valuePerStack : 0.01f;
+                // 초당 최대 체력의 % 회복 (프레임 단위 분할)
+                Heal(PlayerMaxHp * rate * dt);
             }
         }
     }
@@ -578,6 +605,18 @@ public class PlayerControler : MonoBehaviour, IDamageable
             }
 
             hit.GetComponent<IDamageable>()?.TakeDamage(finalDamage);
+            lastCombatTime = Time.time; // 전투 상태 갱신
+
+            // 독 (Poison) 효과
+            if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.Poison, true) > 0)
+            {
+                var poison = hit.gameObject.GetComponent<PoisonStatus>();
+                if (poison == null) poison = hit.gameObject.AddComponent<PoisonStatus>();
+                
+                var item = ItemDatabase.Instance.GetItemDataByEffect(ItemEffectType.Poison);
+                float rate = item != null ? item.valuePerStack : 0.05f;
+                poison.ApplyPoison(finalDamage * rate, 5);
+            }
 
             if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.Drive, true) > 0)
             {
@@ -622,12 +661,48 @@ public class PlayerControler : MonoBehaviour, IDamageable
             {
                 float finalDamage = PlayerDamage * 2f * (isBoost ? 2 : 1);
                 hit.GetComponent<IDamageable>()?.TakeDamage(finalDamage);
+                
+                // 독 (Poison) 효과
+                if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.Poison, true) > 0)
+                {
+                    var poison = hit.gameObject.GetComponent<PoisonStatus>();
+                    if (poison == null) poison = hit.gameObject.AddComponent<PoisonStatus>();
+                    
+                    var item = ItemDatabase.Instance.GetItemDataByEffect(ItemEffectType.Poison);
+                    float rate = item != null ? item.valuePerStack : 0.05f;
+                    poison.ApplyPoison(finalDamage * rate, 5);
+                }
             }
         }
+        lastCombatTime = Time.time; // 전투 시간 갱신
 
         isHook = true;
         hookTimer = hookDuration;
         cooldownTimerHook = hookCooldown * (1f - GetTotalCooldownReduction());
+    }
+
+    public void OnEnemyKilled()
+    {
+        // 노하우 (KnowHow)
+        if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.KnowHow, true) > 0)
+        {
+            knowHowKillCount++;
+            if (knowHowKillCount >= 8)
+            {
+                knowHowKillCount = 0;
+                var item = ItemDatabase.Instance.GetItemDataByEffect(ItemEffectType.KnowHow);
+                float bonus = item != null ? item.valuePerStack : 0.05f;
+                knowHowAtkMultiplier += bonus;
+                RecalculateStats();
+            }
+        }
+    }
+
+    public void FullHeal()
+    {
+        PlayerCurrentHp = PlayerMaxHp;
+        UpdateHpUI();
+        Debug.Log("[Player] Full Heal applied!");
     }
 
 
@@ -669,7 +744,17 @@ public class PlayerControler : MonoBehaviour, IDamageable
         dashDirection = direction.normalized;
 
         // [Fix] 벽 뚫기 방지: 대시 경로에 벽이 있는지 미리 체크
-        float dashDist = dashSpeed * dashDuration;
+        float currentDashSpeed = dashSpeed;
+
+        // 불도저 (Bulldozer)
+        if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.Bulldozer, true) > 0)
+        {
+            var item = ItemDatabase.Instance.GetItemDataByEffect(ItemEffectType.Bulldozer);
+            float multiplier = item != null ? item.valuePerStack : 1.5f;
+            currentDashSpeed *= multiplier;
+        }
+
+        float dashDist = currentDashSpeed * dashDuration;
         float playerRadius = 0.3f; // 콜라이더 반지름 대략치
         
         Collider2D col = GetComponent<Collider2D>();
@@ -681,7 +766,7 @@ public class PlayerControler : MonoBehaviour, IDamageable
         {
             // 벽이 있으면 거리 단축 (벽 바로 앞까지)
             float safeDist = Mathf.Max(0, hit.distance - 0.05f);
-            dashTimer = safeDist / dashSpeed;
+            dashTimer = safeDist / currentDashSpeed;
             Debug.Log($"[Dash] Wall detected. Shortening dash: {dashDist} -> {safeDist}");
         }
         else
@@ -689,7 +774,28 @@ public class PlayerControler : MonoBehaviour, IDamageable
             dashTimer = dashDuration;
         }
 
+        // [Bulldozer] 대시 시작 시 주변 밀치기 및 화면 흔들림
+        if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.Bulldozer, true) > 0)
+        {
+            cameraFollow?.Shake(0.1f, 0.08f); // 살짝 흔들림 추가
+            PushNearbyEnemies(4f, 15f); // 범위(3->4), 힘(10->15) 상향
+        }
+
         cooldownTimerDashDash = dashCooldown * (1f - GetTotalCooldownReduction()); 
+    }
+
+    public void PushNearbyEnemies(float radius, float force)
+    {
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, radius, enemy);
+        foreach (var h in hits)
+        {
+            var zb = h.GetComponent<zombie>();
+            if (zb != null)
+            {
+                Vector2 dir = (h.transform.position - transform.position).normalized;
+                zb.ApplyCcKnockback(dir * force);
+            }
+        }
     }
 
     float GetTotalCooldownReduction()
@@ -765,12 +871,26 @@ public class PlayerControler : MonoBehaviour, IDamageable
         }
 
         float reduction = 1f;
-        if (isMagnetic) reduction = 0.5f; 
-        float finalDamage = damage * Guard() * reduction;
 
-        if (finalDamage > 0 && Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.AggroDistribution, true) > 0)
+        // [New] 자기장이 켜져 있고 공격자가 원(magneticRadius) 안에 있을 때만 피해 감소 50% 적용
+        if (isMagnetic && attacker != null)
         {
-            if (Random.value < 0.1f)
+            float dist = Vector2.Distance(transform.position, attacker.transform.position);
+            if (dist <= magneticRadius)
+            {
+                reduction = 0.5f;
+            }
+        }
+
+        float finalDamage = damage * Guard() * reduction;
+        lastCombatTime = Time.time; // 피해를 입어도 전투 중으로 간주
+
+        // [Update] 더미(AggroDistribution) 혹은 도플갱어(Doppelganger)가 있으면 소환
+        if (finalDamage > 0 && Inventory.Instance != null && 
+            (Inventory.Instance.GetStackCount(ItemEffectType.AggroDistribution, true) > 0 || 
+             Inventory.Instance.GetStackCount(ItemEffectType.Doppelganger, true) > 0))
+        {
+            if (Random.value < 0.08f)
             {
                  // DummyItem 찾기
                  if (dummyPrefab != null && FindFirstObjectByType<DummyItem>() == null)
@@ -780,8 +900,18 @@ public class PlayerControler : MonoBehaviour, IDamageable
                      
                      if (dummyScript != null)
                      {
-                         // 플레이어 최대 체력의 50%로 설정
-                         dummyScript.Setup(PlayerMaxHp * 0.4f);
+                         // 기본 체력 (40%)
+                         float dummyHp = PlayerMaxHp * 0.4f;
+                         
+                         // 도플갱어 (Doppelganger) 효과: 현재 체력을 더미 체력으로 계승 (배율 적용)
+                         if (Inventory.Instance.GetStackCount(ItemEffectType.Doppelganger, true) > 0)
+                         {
+                             var item = ItemDatabase.Instance.GetItemDataByEffect(ItemEffectType.Doppelganger);
+                             float multiplier = item != null ? item.valuePerStack : 1.0f;
+                             dummyHp = PlayerCurrentHp * multiplier;
+                         }
+
+                         dummyScript.Setup(dummyHp);
                      }
                  }
             }
@@ -866,8 +996,15 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     public void Heal(float amount)
     {
+        // [New] 전환 방식 고려: 실제 체력이 찰 수 있는 최대치는 (전체 HP - 보호막 양)
+        float availableMaxHp = PlayerMaxHp - PlayerCurrentShield;
+        
         PlayerCurrentHp += amount;
-        if (PlayerCurrentHp > PlayerMaxHp) PlayerCurrentHp = PlayerMaxHp;
+        if (PlayerCurrentHp > availableMaxHp) 
+        {
+            PlayerCurrentHp = availableMaxHp;
+        }
+
         UpdateHpUI();
     }
 
@@ -918,24 +1055,20 @@ public class PlayerControler : MonoBehaviour, IDamageable
         
         if (PlayerMaxHp < 10f) PlayerMaxHp = 10f; 
 
-        // 4. 두꺼운 과잠
+        // 4. 두꺼운 과잠 (전환 방식: 체력의 일부를 보호막으로 할당)
         if (Inventory.Instance != null)
         {
             float shieldBonus = Inventory.Instance.GetTotalStatBonus(ItemEffectType.MaxHpShield);
             
-            // [Fix] 쉴드가 계속 차는 오류 수정
-            // 단순 재계산일 때는 쉴드를 채우지 않고, '쉴드 보너스 비율'이 늘어났을 때만 그만큼 추가해줍니다.
-            if (shieldBonus > lastShieldBonus)
+            // 전체 바의 길이는 MaxHp로 유지하고, 그 중 일부분을 '고정 보호막'으로 전환
+            float shieldAmount = PlayerMaxHp * shieldBonus;
+            PlayerCurrentShield = shieldAmount; 
+
+            // 실제 체력(HP)은 (MaxHp - 보호막양)보다 커질 수 없음
+            float maxBaseHp = PlayerMaxHp - shieldAmount;
+            if (PlayerCurrentHp > maxBaseHp)
             {
-                float diff = shieldBonus - lastShieldBonus;
-                PlayerCurrentShield += PlayerMaxHp * diff;
-            }
-            
-            // 보너스가 줄어들었거나(아이템 버림) 그대로면 쉴드량 유지 (단, 최대치 캡 적용)
-            float maxPossibleshield = PlayerMaxHp * shieldBonus;
-            if (PlayerCurrentShield > maxPossibleshield) 
-            {
-                PlayerCurrentShield = maxPossibleshield;
+                PlayerCurrentHp = maxBaseHp;
             }
             
             lastShieldBonus = shieldBonus;
@@ -949,6 +1082,19 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
         float baseDamage = plusPW + numPW + playerStartPw;
         PlayerDamage = baseDamage * (1f + extraAtkPercent);
+
+        // 각성 (Awakening) - 깡 공증
+        if (Inventory.Instance != null && Inventory.Instance.GetStackCount(ItemEffectType.Awakening, true) > 0)
+        {
+            var item = ItemDatabase.Instance.GetItemDataByEffect(ItemEffectType.Awakening);
+            float bonus = item != null ? item.valuePerStack : 0.5f;
+            float totalBonus = Inventory.Instance.GetStackCount(ItemEffectType.Awakening, true) * bonus;
+            PlayerDamage *= (1f + totalBonus);
+        }
+
+        // 노하우 보너스 적용
+        PlayerDamage *= knowHowAtkMultiplier;
+
         if (AttackDamageText != null) AttackDamageText.text = $"공격력 : {Mathf.Ceil(PlayerDamage)}";
         
         if (ExpSlider != null) ExpSlider.value = currentExp;
@@ -985,11 +1131,17 @@ public class PlayerControler : MonoBehaviour, IDamageable
 
     public void Quit() 
     { 
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-12");
         Time.timeScale = 1f; // 일시정지 해제 후 종료
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
         Application.Quit(); 
+#endif
     }
     public void GoMain() 
     { 
+        if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX("2-12");
         Time.timeScale = 1f; // 일시정지 해제 후 메인으로
         UnityEngine.SceneManagement.SceneManager.LoadScene("MainUI"); 
     }
