@@ -298,6 +298,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1986377223191823621, guid: 6416e8baff3a42c4ab0e68690ee1cc05, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5073513979072880153, guid: 6416e8baff3a42c4ab0e68690ee1cc05, type: 3}
       propertyPath: m_Name
       value: 1 BossRoom
