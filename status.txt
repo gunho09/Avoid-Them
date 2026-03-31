@@ -1,0 +1,22 @@
+On branch master
+Your branch is up to date with 'origin/master'.
+
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	modified:   Assets/Boss/1Boss.prefab
+	modified:   Assets/enemy/HitBox.cs
+	modified:   Assets/enemy/zombie.cs
+	modified:   Assets/enemy/zombieArt/ZombieAnim/Zombie_Walk_Front.anim
+	modified:   Assets/enemy/zombieArt/ZombieAnim/Zombie_Walk_Moon.anim
+	modified:   Assets/enemy/zombieArt/ZombieAnim/Zombie_Walk_left.anim
+	modified:   Assets/enemy/zombieArt/ZombieAnim/Zombie_Walk_right.anim
+
+Unmerged paths:
+  (use "git restore --staged <file>..." to unstage)
+  (use "git add/rm <file>..." as appropriate to mark resolution)
+	deleted by us:   Assets/Map/Circle.prefab
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	status.txt
+

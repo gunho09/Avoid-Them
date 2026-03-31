@@ -206,6 +206,10 @@ public class zombie : MonoBehaviour, IDamageable
 
     void AttackPlayer()
     {
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+        }
         if (Time.time - lastAttackTime >= atackSpeed)
         {
             if (playerCtrl != null)

@@ -1,19 +1,22 @@
 using UnityEngine;
-
+using System.Collections;
 public class HitBox : MonoBehaviour
 {
-    private zombie parentZombie;
+    private IDamageable parentObject;
 
         void Start()
         {
-            parentZombie = GetComponentInParent<zombie>();
+            parentObject = GetComponentInParent<IDamageable>();
         }
 
         public void TakeDamage(float damage)
         {
-            if (parentZombie != null)
+            Debug.Log($"[HitBox] 맞음! 데미지: {damage}");
+            if (parentObject != null)
             {
-                parentZombie.TakeDamage(damage);
+                parentObject.TakeDamage(damage);
+                Debug.Log("[HitBox] 부모에게 전달 완료!");
             }
         }
+
 }
