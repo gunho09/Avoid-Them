@@ -44,14 +44,20 @@ public class FirstBoss : MonoBehaviour, IDamageable
     private LineRenderer lineRenderer;
     public int segmentCount = 50;
     public float warningDuration = 1.0f;
+    private Color originalColor;
 
     void Start()
     {
         hp = maxHp;
         rb = GetComponent<Rigidbody2D>();
         hitSr = GetComponentInChildren<SpriteRenderer>();
+
+        if (hitSr != null)
+        {
+            originalColor = hitSr.color;
+        }
         
-        // 노란 줄(경고) 해결 및 중복 할당 제거
+
         cameraFollow = Object.FindAnyObjectByType<CameraFollow>();
 
         if (HpBar != null)
@@ -64,7 +70,7 @@ public class FirstBoss : MonoBehaviour, IDamageable
         {
             rb.gravityScale = 0;
             rb.freezeRotation = true;
-            // 클론 소환 시 물리 엔진이 잠드는 현상 방지
+
             rb.sleepMode = RigidbodySleepMode2D.NeverSleep; 
         }
 
@@ -98,8 +104,6 @@ public class FirstBoss : MonoBehaviour, IDamageable
 
         if (isDead) return;
 
-        // [핵심 해결 포인트]
-        // 클론 소환 시 플레이어를 아직 못 찾았더라도 애니메이션은 무조건 갱신되도록 순서를 바꿨습니다.
         UpdateAnimation(); 
 
         if (playerControler == null)
@@ -126,7 +130,7 @@ public class FirstBoss : MonoBehaviour, IDamageable
     {
         if (anim == null) return;
 
-        // 현재 상태가 Move 이거나, 물리적으로 밀리는 속도가 있으면 무조건 true
+
         bool isMovingState = (currentState == State.Move);
         bool isPhysicsMoving = (rb != null && rb.linearVelocity.magnitude > 0.1f);
 
@@ -354,7 +358,7 @@ public class FirstBoss : MonoBehaviour, IDamageable
 
         yield return new WaitForSeconds(hitFlashDuration);
 
-        if (hitSr != null) hitSr.color = origin;
+        if (hitSr != null) hitSr.color = originalColor;
     }
 
     private void OnDrawGizmosSelected()
